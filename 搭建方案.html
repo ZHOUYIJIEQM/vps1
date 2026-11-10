@@ -385,7 +385,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
   #scrim{display:block;pointer-events:none}
   body.menu-open #scrim{opacity:1;pointer-events:auto}
   body.menu-open{overflow:hidden}
-  #sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  #sidebar{top:44px;transform:translateX(-100%);transition:transform .22s ease}
   #sidebar.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
   /* 菜单展开时 ☰ 在侧栏左上角，给标题让位，免得压住 logo */
   #sidebar.open .side-head{padding-left:68px}
@@ -400,18 +400,76 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
   #toc{padding-bottom:10px}
   #toc .toggle{width:32px;height:32px;font-size:22px;border-radius:8px}
   #toc li.has-sub > a{padding-right:42px}
+  #docbar{
+    display:flex; position:fixed; top:0; left:0; right:0; height:44px; z-index:80;
+    background:var(--nav-bg); border-bottom:1px solid var(--line);
+    box-shadow:0 1px 6px rgba(0,0,0,.10);
+  }
+  #docbar a{
+    flex:1 1 0; min-width:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:600;
+    padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    border-bottom:3px solid transparent;
+    transition:color .12s,border-color .12s,background .12s;
+  }
+  #docbar a.cur{color:var(--accent); border-bottom-color:var(--accent); background:var(--accent-soft); pointer-events:none; cursor:default}
+  #docbar a:active{background:rgba(127,127,127,.16)}
+  /* 顶栏占位：☰ 与工具栏下移，正文让出空间 */
+  #menuBtn{top:52px}
+  #tools{top:50px}
+  #content{padding-top:104px}
 }
 @media print{
-  #sidebar,#tools,#totop,#menuBtn{display:none!important}
+  #sidebar,#docnav,#docbar,#tools,#totop,#menuBtn{display:none!important}
   #main{margin-left:0}
   #content{max-width:none;padding:0}
   details{break-inside:avoid}
   details>summary{list-style:none}
   a{color:var(--fg)}
 }
+
+/* ---------- 跨文档导航（相对路径互跳） ---------- */
+#docnav{
+  padding:9px 12px 10px; border-bottom:1px solid var(--line); flex:0 0 auto;
+  display:flex; flex-direction:column; gap:3px;
+}
+#docnav .dn-t{
+  font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  color:var(--muted); padding:1px 3px 5px; opacity:.85;
+}
+#docnav a{
+  display:flex; align-items:center; gap:8px;
+  padding:6px 9px; border-radius:6px; border:1px solid transparent;
+  color:var(--muted); text-decoration:none; font-size:13px; line-height:1.3;
+  transition:background .12s,color .12s,border-color .12s;
+}
+#docnav a:hover{background:rgba(127,127,127,.14); color:var(--fg)}
+#docnav a.cur{
+  color:var(--nav-active); font-weight:600; background:var(--accent-soft);
+  border-color:var(--accent); cursor:default;
+}
+#docnav a .dot{
+  width:6px; height:6px; border-radius:50%; background:currentColor;
+  opacity:.4; flex:0 0 auto;
+}
+#docnav a.cur .dot{opacity:1}
+#docnav a .dn-sub{
+  display:block; font-size:11px; font-weight:400; opacity:.72; margin-top:1px;
+}
+#docnav a.cur .dn-sub{opacity:.85}
+
+/* ---------- 移动端顶部页面切换条（桌面隐藏，用 min-width 断点避免顺序覆盖） ---------- */
+@media (min-width:1101px){#docbar{display:none}}
 </style>
 </head>
 <body>
+
+<nav id="docbar">
+  <a class="cur" href="搭建方案.html" aria-current="page">搭建方案</a>
+  <a href="各家VPS提供商的套餐.html">VPS 套餐</a>
+  <a href="工时评估.html">工时评估</a>
+</nav>
 
 <button id="menuBtn" title="目录">☰</button>
 
@@ -423,50 +481,42 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
     <div class="t">自建科学上网节点：VPS 选型 + 搭建方案 + 价格总表</div>
   </div>
   <div class="search"><input id="tocSearch" type="search" placeholder="搜索目录…" autocomplete="off"></div>
-  <div id="toc"><ul>
-<li class="lv1"><a href="#自建科学上网节点vps-选型-搭建方案-价格总表">自建科学上网节点：VPS 选型 + 搭建方案 + 价格总表</a><ul>
-<li class="lv2"><a href="#可选的购买方案">可选的购买方案</a></li>
-<li class="lv2"><a href="#七款vps">七款VPS</a></li>
-<li class="lv2"><a href="#自建节点">自建节点</a></li>
-<li class="lv2"><a href="#搭建方案对比">搭建方案对比</a><ul>
-<li class="lv3"><a href="#协议层选型">协议层选型</a></li>
-<li class="lv3"><a href="#搭建方案结论">搭建方案结论</a></li>
+  <div id="docnav">
+    <div class="dn-t">相关文档</div>
+    <a class="cur" href="搭建方案.html" aria-current="page"><span class="dot"></span><span>搭建方案<span class="dn-sub">选型 + 搭建 + 价格总表</span></span></a>
+    <a href="各家VPS提供商的套餐.html"><span class="dot"></span><span>VPS 套餐<span class="dn-sub">各家提供商对比</span></span></a>
+    <a href="工时评估.html"><span class="dot"></span><span>工时评估<span class="dn-sub">自建节点耗时拆解</span></span></a>
+  </div>
+  <div id="toc">
+<ul>
+<li class="lv1"><a href="#自建科学上网节点vps-选型-搭建方案-价格总表">自建科学上网节点：VPS 选型 + 搭建方案 + 价格总表</a>
+<ul>
+<li class="lv2"><a href="#可选的购买方案">可选的购买方案</a>
+</li>
+<li class="lv2"><a href="#七款vps">七款VPS</a>
+</li>
+<li class="lv2"><a href="#自建节点">自建节点</a>
+</li>
+<li class="lv2"><a href="#搭建方案对比">搭建方案对比</a>
+<ul>
+<li class="lv3"><a href="#协议层选型">协议层选型</a>
+</li>
+<li class="lv3"><a href="#搭建方案结论">搭建方案结论</a>
+</li>
 </ul>
 </li>
-<li class="lv2"><a href="#s-ui-详细搭建教程">S-UI 详细搭建教程</a><ul>
-<li class="lv3"><a href="#默认信息">默认信息</a></li>
-<li class="lv3"><a href="#安装debian-12-ubuntu-2204">安装（Debian 12 / Ubuntu 22.04+）</a></li>
-<li class="lv3"><a href="#首次登录与安全加固必做">首次登录与安全加固（必做）</a></li>
-<li class="lv3"><a href="#添加-vless-reality-入站主力">添加 VLESS + REALITY 入站（主力）</a></li>
-<li class="lv3"><a href="#添加-hysteria2-入站备用抗丢包">添加 Hysteria2 入站（备用，抗丢包）</a></li>
-<li class="lv3"><a href="#添加-tuic-v5-入站第二条-udp-腿">添加 TUIC v5 入站（第二条 UDP 腿）</a><ul>
-<li class="lv4"><a href="#s-ui-面板添加推荐">S-UI 面板添加（推荐）</a></li>
-<li class="lv4"><a href="#3x-ui-用户想加-tuic旁挂-sing-box">3X-UI 用户想加 TUIC（旁挂 sing-box）</a></li>
-<li class="lv4"><a href="#客户端配置sing-box-mihomo-shadowrocket-通用">客户端配置（sing-box / mihomo / Shadowrocket 通用）</a></li>
-<li class="lv4"><a href="#tuic-vs-hysteria2-到底选哪个">TUIC vs Hysteria2 到底选哪个</a></li>
 </ul>
 </li>
-<li class="lv3"><a href="#配-https-面板可选但建议">配 HTTPS 面板（可选但建议）</a></li>
-<li class="lv3"><a href="#常用运维命令">常用运维命令</a></li>
-<li class="lv3"><a href="#s-ui-vs-3x-ui-怎么选">S-UI vs 3X-UI 怎么选</a></li>
+<li class="lv2"><a href="#客户端推荐">客户端推荐</a>
+</li>
+<li class="lv2"><a href="#购买链接汇总">购买链接汇总</a>
+</li>
+<li class="lv2"><a href="#顺序">顺序</a>
+</li>
 </ul>
 </li>
-<li class="lv2"><a href="#3x-ui-搭建教程reality-主力方案">3X-UI 搭建教程（REALITY 主力方案）</a></li>
-<li class="lv2"><a href="#纯命令行-xray-reality无面板最稳">纯命令行 Xray + REALITY（无面板，最稳）</a></li>
-<li class="lv2"><a href="#系统层必做优化">系统层必做优化</a><ul>
-<li class="lv3"><a href="#开-bbr速度提升关键">开 BBR（速度提升关键）</a></li>
-<li class="lv3"><a href="#时间同步reality-对时间敏感误差-60s-直接失败">时间同步（REALITY 对时间敏感，误差 &gt;60s 直接失败）</a></li>
-<li class="lv3"><a href="#ssh-加固">SSH 加固</a></li>
-<li class="lv3"><a href="#防火墙">防火墙</a></li>
-<li class="lv3"><a href="#防止被扫">防止被扫</a></li>
 </ul>
-</li>
-<li class="lv2"><a href="#客户端推荐">客户端推荐</a></li>
-<li class="lv2"><a href="#购买链接汇总">购买链接汇总</a></li>
-<li class="lv2"><a href="#顺序">顺序</a></li>
-</ul>
-</li>
-</ul></div>
+</div>
 </nav>
 
 <div id="tools">
@@ -789,703 +839,7 @@ DMIT HKG.T1 是香港机房，物理距离最近所以延迟最低（30–60ms�
 <li>备用协议：<strong>Hysteria2（UDP 443 + 端口跳跃）</strong> —— 晚高峰丢包环境下速度碾压 TCP 系</li>
 <li><strong>第三条腿：TUIC v5（UDP 443 或独立端口）</strong> —— 同样是 QUIC 系，但多路复用和连接迁移比 hy2 强，hy2 被 QoS 时换它</li>
 <li>兜底方案：<strong>VLESS + WS + TLS + Cloudflare CDN</strong> —— IP 被墙了还能救回来</li>
-<li>面板：使用 <strong>S-UI（sing-box）</strong> 搭建，TUIC 只有 sing-box 系（S-UI / 纯 sing-box）能开</li>
 </ul>
-<h2 id="s-ui-详细搭建教程">S-UI 详细搭建教程</h2>
-<p>S-UI 是基于 <strong>sing-box</strong> 的 Web 面板（GitHub: <a href="https://github.com/alireza0/s-ui">alireza0/s-ui</a>），协议支持比 3X-UI 更广。</p>
-<h3 id="默认信息">默认信息</h3>
-<table>
-<thead>
-<tr>
-<th>项</th>
-<th>值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>面板端口</td>
-<td><code>2095</code></td>
-</tr>
-<tr>
-<td>面板路径</td>
-<td><code>/app/</code></td>
-</tr>
-<tr>
-<td>订阅端口</td>
-<td><code>2096</code></td>
-</tr>
-<tr>
-<td>订阅路径</td>
-<td><code>/sub/</code></td>
-</tr>
-<tr>
-<td>默认账号密码</td>
-<td><code>admin</code> / <code>admin</code>（<strong>装完立刻改</strong>）</td>
-</tr>
-<tr>
-<td>访问地址</td>
-<td><code>http://你的IP:2095/app/</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="安装debian-12-ubuntu-2204">安装（Debian 12 / Ubuntu 22.04+）</h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 基础环境</span>
-apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>sudo
-
-<span class="c1"># 2. 一键安装（中文安装器）</span>
-<span class="nv">SUI_LANG</span><span class="o">=</span>zhcn<span class="w"> </span>bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-Ls<span class="w"> </span>https://raw.githubusercontent.com/alireza0/s-ui/master/install.sh<span class="o">)</span>
-
-<span class="c1"># 3. 查看状态</span>
-systemctl<span class="w"> </span>status<span class="w"> </span>s-ui
-systemctl<span class="w"> </span>status<span class="w"> </span>sing-box
-</code></pre></div>
-
-<p>安装脚本会自动装好 <code>s-ui</code> 主程序 + <code>sing-box</code> 内核，并注册两个 systemd 服务。</p>
-<p><strong>Docker 方式（可选）：</strong></p>
-<div class="codehilite"><pre><span></span><code>mkdir<span class="w"> </span>s-ui<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>s-ui
-docker<span class="w"> </span>run<span class="w"> </span>-itd<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-p<span class="w"> </span><span class="m">2095</span>:2095<span class="w"> </span>-p<span class="w"> </span><span class="m">2096</span>:2096<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:443<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span><span class="nv">$PWD</span>/db/:/app/db/<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span><span class="nv">$PWD</span>/cert/:/root/cert/<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--name<span class="w"> </span>s-ui<span class="w"> </span>--restart<span class="o">=</span>unless-stopped<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>alireza7/s-ui:latest
-</code></pre></div>
-
-<h3 id="首次登录与安全加固必做">首次登录与安全加固（必做）</h3>
-<ol>
-<li>浏览器打开 <code>http://IP:2095/app/</code>，用 <code>admin/admin</code> 登录</li>
-<li><strong>立刻</strong>在「设置 → 管理员」改用户名 + 强密码（16 位以上）</li>
-<li>「设置 → 面板」改面板端口（比如 38471）和路径（比如 <code>/mysecret/</code>）</li>
-<li>云厂商安全组/防火墙只放行：SSH 端口、新面板端口、443、80</li>
-<li>强烈建议配域名 + HTTPS（见「配 HTTPS 面板」一节）</li>
-</ol>
-<h3 id="添加-vless-reality-入站主力">添加 VLESS + REALITY 入站（主力）</h3>
-<p>「入站列表 → 添加」：</p>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>备注</td>
-<td><code>vless-reality-443</code></td>
-</tr>
-<tr>
-<td>协议</td>
-<td><code>VLESS</code></td>
-</tr>
-<tr>
-<td>监听地址</td>
-<td><code>::</code> 或 <code>0.0.0.0</code></td>
-</tr>
-<tr>
-<td>端口</td>
-<td><code>443</code></td>
-</tr>
-<tr>
-<td>传输层</td>
-<td><code>tcp</code></td>
-</tr>
-<tr>
-<td>安全</td>
-<td><code>reality</code></td>
-</tr>
-<tr>
-<td>目标地址(dest)</td>
-<td><code>www.microsoft.com:443</code></td>
-</tr>
-<tr>
-<td>serverNames</td>
-<td><code>www.microsoft.com</code></td>
-</tr>
-<tr>
-<td>私钥(privateKey)</td>
-<td>点「生成」自动生成</td>
-</tr>
-<tr>
-<td>shortIds</td>
-<td>点「生成」，或填 <code>0123456789abcdef</code></td>
-</tr>
-<tr>
-<td>Flow</td>
-<td><code>xtls-rprx-vision</code></td>
-</tr>
-<tr>
-<td>客户端 UUID</td>
-<td>点「生成」</td>
-</tr>
-</tbody>
-</table>
-<p>保存后，「客户端」里会生成 <code>vless://</code> 链接和二维码，直接导入 v2rayN / Nekoray / Shadowrocket / sing-box 客户端。</p>
-<blockquote>
-<p><strong>dest 选择技巧</strong>：挑一个国内能直连、支持 TLS 1.3 + H2 的大站，如 <code>www.microsoft.com</code>、<code>www.apple.com</code>、<code>www.cloudflare.com</code>、<code>swdist.apple.com</code>。别用 <code>google.com</code>（国内连不上，会被探测）。</p>
-</blockquote>
-<h3 id="添加-hysteria2-入站备用抗丢包">添加 Hysteria2 入站（备用，抗丢包）</h3>
-<p>先自签证书（不需要域名）：</p>
-<div class="codehilite"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/root/cert<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/root/cert
-openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-nodes<span class="w"> </span>-newkey<span class="w"> </span>ec:&lt;<span class="o">(</span>openssl<span class="w"> </span>ecparam<span class="w"> </span>-name<span class="w"> </span>prime256v1<span class="o">)</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-keyout<span class="w"> </span>key.pem<span class="w"> </span>-out<span class="w"> </span>cert.pem<span class="w"> </span>-subj<span class="w"> </span><span class="s2">"/CN=www.bing.com"</span><span class="w"> </span>-days<span class="w"> </span><span class="m">36500</span>
-</code></pre></div>
-
-<p>「入站列表 → 添加」：</p>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>协议</td>
-<td><code>Hysteria2</code></td>
-</tr>
-<tr>
-<td>端口</td>
-<td><code>443</code>（UDP）</td>
-</tr>
-<tr>
-<td>证书路径</td>
-<td><code>/root/cert/cert.pem</code></td>
-</tr>
-<tr>
-<td>私钥路径</td>
-<td><code>/root/cert/key.pem</code></td>
-</tr>
-<tr>
-<td>密码</td>
-<td>自定义强密码</td>
-</tr>
-<tr>
-<td>混淆(Obfs)</td>
-<td><code>salamander</code> + 密码（可选，抗 QoS 有效）</td>
-</tr>
-</tbody>
-</table>
-<p>客户端配置需开 <code>insecure: true</code>（自签证书）或 <code>skip-cert-verify: true</code>。</p>
-<p><strong>端口跳跃（强烈建议，防 UDP QoS）：</strong></p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 把 20000-30000 的 UDP 流量全部重定向到 443</span>
-iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-N<span class="w"> </span>HY2
-iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>HY2<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-m<span class="w"> </span>multiport<span class="w"> </span>--dport<span class="w"> </span><span class="m">20000</span>:30000<span class="w"> </span>-j<span class="w"> </span>REDIRECT<span class="w"> </span>--to-ports<span class="w"> </span><span class="m">443</span>
-iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>PREROUTING<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-j<span class="w"> </span>HY2
-
-<span class="c1"># 持久化</span>
-apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>iptables-persistent<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>netfilter-persistent<span class="w"> </span>save
-</code></pre></div>
-
-<p>客户端服务器地址填：<code>你的IP:20000-30000</code></p>
-<h3 id="添加-tuic-v5-入站第二条-udp-腿">添加 TUIC v5 入站（第二条 UDP 腿）</h3>
-<p>TUIC 是<strong>只有 sing-box 系</strong>才支持的协议——3X-UI（Xray 内核）<strong>开不了</strong>，纯 Xray 也开不了。所以：
-- 用 <strong>S-UI</strong> → 面板里直接有 TUIC 入站，填表即可
-- 用 <strong>3X-UI</strong> → 想要 TUIC 就得在机器上另外跑一个 sing-box 进程（见「3X-UI 用户想加 TUIC」一节）</p>
-<h4 id="s-ui-面板添加推荐">S-UI 面板添加（推荐）</h4>
-<p>前置：证书直接复用 4.5 那份自签证书（<code>/root/cert/cert.pem</code> + <code>key.pem</code>），不用另外生成。</p>
-<p>「入站列表 → 添加」：</p>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>值</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>备注</td>
-<td><code>tuic-4433</code></td>
-<td></td>
-</tr>
-<tr>
-<td>协议</td>
-<td><code>TUIC</code></td>
-<td></td>
-</tr>
-<tr>
-<td>监听地址</td>
-<td><code>::</code> 或 <code>0.0.0.0</code></td>
-<td></td>
-</tr>
-<tr>
-<td>端口</td>
-<td><code>4433</code>（UDP）</td>
-<td><strong>别和 hy2 的 443 撞</strong>，hy2 已占 443/udp</td>
-</tr>
-<tr>
-<td>UUID</td>
-<td>点「生成」</td>
-<td></td>
-</tr>
-<tr>
-<td>密码</td>
-<td>自定义强密码</td>
-<td>和 UUID 一起构成双因子</td>
-</tr>
-<tr>
-<td>拥塞控制</td>
-<td><code>bbr</code></td>
-<td>默认 cubic，改 bbr 抢带宽更猛</td>
-</tr>
-<tr>
-<td>认证超时</td>
-<td><code>3s</code></td>
-<td>默认即可</td>
-</tr>
-<tr>
-<td>心跳</td>
-<td><code>10s</code></td>
-<td>默认即可</td>
-</tr>
-<tr>
-<td>0-RTT 握手</td>
-<td><strong>关闭</strong></td>
-<td>⚠️ sing-box 官方明确警告：0-RTT 有重放攻击风险（Attack of the clones），必须关</td>
-</tr>
-<tr>
-<td>TLS 证书</td>
-<td><code>/root/cert/cert.pem</code></td>
-<td></td>
-</tr>
-<tr>
-<td>TLS 私钥</td>
-<td><code>/root/cert/key.pem</code></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h4 id="3x-ui-用户想加-tuic旁挂-sing-box">3X-UI 用户想加 TUIC（旁挂 sing-box）</h4>
-<p>3X-UI 只管 Xray，TUIC 靠 sing-box 单独跑，两者端口不冲突可以共存：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 装 sing-box（官方脚本）</span>
-bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://sing-box.app/install.sh<span class="o">)</span>
-
-<span class="c1"># 2. 写服务端配置</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/sing-box
-cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/sing-box/config.json<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
-<span class="s">{</span>
-<span class="s">  "log": { "level": "warn", "timestamp": true },</span>
-<span class="s">  "inbounds": [</span>
-<span class="s">    {</span>
-<span class="s">      "type": "tuic",</span>
-<span class="s">      "tag": "tuic-in",</span>
-<span class="s">      "listen": "::",</span>
-<span class="s">      "listen_port": 4433,</span>
-<span class="s">      "users": [</span>
-<span class="s">        {</span>
-<span class="s">          "name": "me",</span>
-<span class="s">          "uuid": "把这里换成你自己生成的UUID",</span>
-<span class="s">          "password": "把这里换成强密码"</span>
-<span class="s">        }</span>
-<span class="s">      ],</span>
-<span class="s">      "congestion_control": "bbr",</span>
-<span class="s">      "auth_timeout": "3s",</span>
-<span class="s">      "zero_rtt_handshake": false,</span>
-<span class="s">      "heartbeat": "10s",</span>
-<span class="s">      "tls": {</span>
-<span class="s">        "enabled": true,</span>
-<span class="s">        "server_name": "www.bing.com",</span>
-<span class="s">        "certificate_path": "/root/cert/cert.pem",</span>
-<span class="s">        "key_path": "/root/cert/key.pem"</span>
-<span class="s">      }</span>
-<span class="s">    }</span>
-<span class="s">  ],</span>
-<span class="s">  "outbounds": [</span>
-<span class="s">    { "type": "direct", "tag": "direct" }</span>
-<span class="s">  ]</span>
-<span class="s">}</span>
-<span class="s">EOF</span>
-
-<span class="c1"># 3. 校验配置（必须过，不过别启动）</span>
-sing-box<span class="w"> </span>check<span class="w"> </span>-c<span class="w"> </span>/etc/sing-box/config.json
-
-<span class="c1"># 4. 启动并开机自启</span>
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>sing-box
-systemctl<span class="w"> </span>status<span class="w"> </span>sing-box<span class="w"> </span>--no-pager
-</code></pre></div>
-
-<blockquote>
-<p>UUID 生成：<code>cat /proc/sys/kernel/random/uuid</code> 或面板里点生成。
-端口 4433 记得在防火墙放行 UDP：<code>ufw allow 4433/udp</code>。</p>
-</blockquote>
-<h4 id="客户端配置sing-box-mihomo-shadowrocket-通用">客户端配置（sing-box / mihomo / Shadowrocket 通用）</h4>
-<div class="codehilite"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tuic"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"tag"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tuic-node"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"server"</span><span class="p">:</span><span class="w"> </span><span class="s2">"你的VPS_IP"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"server_port"</span><span class="p">:</span><span class="w"> </span><span class="mi">4433</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"uuid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"你的UUID"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"你的密码"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"congestion_control"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bbr"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"udp_relay_mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"native"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"zero_rtt_handshake"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"heartbeat"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10s"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"tls"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">"server_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"www.bing.com"</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">"insecure"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-
-<p><strong>关键字段解释：</strong></p>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>值</th>
-<th>为什么</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>udp_relay_mode</code></td>
-<td><code>native</code></td>
-<td>原生 UDP 转发，游戏/语音最流畅。备选 <code>quic</code>（封装进 QUIC 流，穿透性更好但多一层开销）</td>
-</tr>
-<tr>
-<td><code>congestion_control</code></td>
-<td><code>bbr</code></td>
-<td>服务端客户端都要设 bbr，否则退回 cubic 速度差一半</td>
-</tr>
-<tr>
-<td><code>zero_rtt_handshake</code></td>
-<td><code>false</code></td>
-<td>安全，防重放攻击</td>
-</tr>
-<tr>
-<td><code>insecure</code></td>
-<td><code>true</code></td>
-<td>因为用自签证书；有域名配了正式证书就改 <code>false</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>客户端支持情况</strong>（<a href="https://github.com/tuic-protocol/tuic">官方实现列表</a>）：</p>
-<table>
-<thead>
-<tr>
-<th>客户端</th>
-<th>平台</th>
-<th>支持</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>sing-box</strong></td>
-<td>全平台</td>
-<td>✅ 原生</td>
-</tr>
-<tr>
-<td><strong>mihomo（Clash Meta）</strong></td>
-<td>全平台</td>
-<td>✅ 原生</td>
-</tr>
-<tr>
-<td><strong>Shadowrocket</strong></td>
-<td>iPhone/iPad/Apple TV</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>Stash / Surge / Egern</strong></td>
-<td>Apple 平台</td>
-<td>✅（付费）</td>
-</tr>
-<tr>
-<td><strong>v2rayN</strong></td>
-<td>Windows</td>
-<td>⚠️ 需换 sing-box 内核，Xray 内核不支持</td>
-</tr>
-<tr>
-<td><strong>Clash Verge Rev</strong></td>
-<td>桌面</td>
-<td>✅（内置 mihomo）</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>注意</strong>：v2rayN 默认用 Xray 内核，<strong>不认 TUIC</strong>。要在 设置 → 内核管理 里切成 sing-box 内核才能用。</p>
-</blockquote>
-<h4 id="tuic-vs-hysteria2-到底选哪个">TUIC vs Hysteria2 到底选哪个</h4>
-<table>
-<thead>
-<tr>
-<th>维度</th>
-<th>Hysteria2</th>
-<th>TUIC v5</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>拥塞控制</td>
-<td>自定义 BBR，<strong>暴力抢带宽最强</strong></td>
-<td>标准 QUIC BBR，稍保守</td>
-</tr>
-<tr>
-<td>丢包环境（30% 丢包）</td>
-<td>★★★★★ 仍能跑满</td>
-<td>★★★★ 明显下降</td>
-</tr>
-<tr>
-<td>多路复用</td>
-<td>弱（每个请求一条流）</td>
-<td><strong>强</strong>（QUIC stream 复用）</td>
-</tr>
-<tr>
-<td>连接迁移</td>
-<td>❌ 切网要重连</td>
-<td>✅ <strong>切 WiFi/4G 不断线</strong></td>
-</tr>
-<tr>
-<td>0-RTT</td>
-<td>支持</td>
-<td>支持（但建议关，防重放）</td>
-</tr>
-<tr>
-<td>协议成熟度</td>
-<td>高（作者专职维护）</td>
-<td>中（2025 年重启维护，<a href="https://www.eaimty.com/2025/restart-developing-tuic-but-not-as-the-author">原作者说明</a>）</td>
-</tr>
-<tr>
-<td>服务端支持</td>
-<td>sing-box / 官方 hy2</td>
-<td><strong>仅 sing-box 系</strong>（Xray 不支持）</td>
-</tr>
-<tr>
-<td>抗 QoS</td>
-<td>中（可加 salamander 混淆）</td>
-<td>中（无官方混淆，靠端口跳跃）</td>
-</tr>
-</tbody>
-</table>
-<p><strong>结论</strong>：
-- <strong>只开一个</strong> → 选 <strong>Hysteria2</strong>（生态更成熟、丢包环境更强、有混淆）
-- <strong>两个都开</strong>（推荐，零额外成本）→ hy2 走 443/udp，TUIC 走 4433/udp，手机用 TUIC、家里用 hy2
-- <strong>必须用 3X-UI</strong> → TUIC 只能旁挂 sing-box，多一层维护成本，不如直接上 S-UI</p>
-<h3 id="配-https-面板可选但建议">配 HTTPS 面板（可选但建议）</h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 域名 A 记录指向 VPS IP，等生效</span>
-<span class="c1"># 2. 装 certbot</span>
-apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>certbot
-certbot<span class="w"> </span>certonly<span class="w"> </span>--standalone<span class="w"> </span>--register-unsafely-without-email<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--non-interactive<span class="w"> </span>--agree-tos<span class="w"> </span>-d<span class="w"> </span>panel.你的域名.com
-
-<span class="c1"># 3. 证书在 /etc/letsencrypt/live/panel.你的域名.com/</span>
-<span class="c1">#    S-UI 面板设置里填入 fullchain.pem 和 privkey.pem 路径</span>
-</code></pre></div>
-
-<h3 id="常用运维命令">常用运维命令</h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 服务管理</span>
-systemctl<span class="w"> </span>restart<span class="w"> </span>s-ui
-systemctl<span class="w"> </span>restart<span class="w"> </span>sing-box
-systemctl<span class="w"> </span>status<span class="w"> </span>s-ui
-
-<span class="c1"># 查看日志</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>s-ui<span class="w"> </span>-f
-journalctl<span class="w"> </span>-u<span class="w"> </span>sing-box<span class="w"> </span>-f
-
-<span class="c1"># 备份（面板配置 + 数据库）</span>
-tar<span class="w"> </span>czf<span class="w"> </span>~/sui-backup-<span class="k">$(</span>date<span class="w"> </span>+%F<span class="k">)</span>.tar.gz<span class="w"> </span>/usr/local/s-ui/db/
-
-<span class="c1"># 升级</span>
-bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-Ls<span class="w"> </span>https://raw.githubusercontent.com/alireza0/s-ui/master/install.sh<span class="o">)</span>
-
-<span class="c1"># 卸载</span>
-systemctl<span class="w"> </span>disable<span class="w"> </span>s-ui<span class="w"> </span>--now
-rm<span class="w"> </span>-f<span class="w"> </span>/etc/systemd/system/sing-box.service
-systemctl<span class="w"> </span>daemon-reload
-rm<span class="w"> </span>-fr<span class="w"> </span>/usr/local/s-ui<span class="w"> </span>/usr/bin/s-ui
-</code></pre></div>
-
-<h3 id="s-ui-vs-3x-ui-怎么选">S-UI vs 3X-UI 怎么选</h3>
-<table>
-<thead>
-<tr>
-<th>对比项</th>
-<th>S-UI</th>
-<th>3X-UI</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>内核</td>
-<td>sing-box</td>
-<td>Xray-core</td>
-</tr>
-<tr>
-<td>REALITY 成熟度</td>
-<td>可用</td>
-<td><strong>最成熟</strong>（XTLS Vision 原生）</td>
-</tr>
-<tr>
-<td>协议数量</td>
-<td><strong>更多</strong>（hy2/tuic/anytls/naive/shadowtls/wireguard）</td>
-<td>多（含 AmneziaWG）</td>
-</tr>
-<tr>
-<td><strong>TUIC 支持</strong></td>
-<td>✅ <strong>面板内直接开</strong></td>
-<td>❌ <strong>开不了</strong>（Xray 无 TUIC，只能旁挂 sing-box）</td>
-</tr>
-<tr>
-<td>订阅链接</td>
-<td>✅ 好用（link/json/clash + 信息）</td>
-<td>✅ 有</td>
-</tr>
-<tr>
-<td>流量限额/到期</td>
-<td>✅ 原生</td>
-<td>✅ 原生</td>
-</tr>
-<tr>
-<td>多节点管理</td>
-<td>一般</td>
-<td>✅ 强（可管多台）</td>
-</tr>
-<tr>
-<td>教程/社区</td>
-<td>较少</td>
-<td><strong>最多</strong></td>
-</tr>
-<tr>
-<td>界面</td>
-<td>现代、清爽</td>
-<td>功能密、略旧</td>
-</tr>
-</tbody>
-</table>
-<p><strong>建议：</strong>
-- 只要你一个人用 + 主要跑 REALITY → <strong>3X-UI</strong>（少一层维护）
-- <strong>要 TUIC，或者要 REALITY + Hysteria2 + TUIC 一个面板全管 + 给朋友发订阅 → S-UI</strong>（TUIC 是决定性因素）
-- 极致稳定不要面板 → <strong>纯 sing-box config.json</strong>（能同时跑 reality + hy2 + tuic）</p>
-<hr />
-<h2 id="3x-ui-搭建教程reality-主力方案">3X-UI 搭建教程（REALITY 主力方案）</h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 安装</span>
-bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-Ls<span class="w"> </span>https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh<span class="o">)</span>
-
-<span class="c1"># 装完会随机生成用户名/密码/访问路径，运行 x-ui 查看</span>
-x-ui
-</code></pre></div>
-
-<p><code>x-ui</code> 菜单里可以：启停服务、查看/重置登录信息、设置面板端口、申请 SSL 证书、管理 xray 配置。</p>
-<p><strong>添加 REALITY 入站：</strong>
-1. 面板 → 「入站列表」→「添加入站」
-2. 协议 <code>vless</code>，端口 <code>443</code>，传输 <code>tcp (raw)</code>
-3. 安全 <code>reality</code>
-4. <code>dest</code> 填 <code>www.microsoft.com:443</code>，<code>serverNames</code> 填 <code>www.microsoft.com</code>
-5. 点「Get New Cert」旁的钥匙图标生成私钥/公钥，shortIds 填随机 16 位 hex
-6. Flow 选 <code>xtls-rprx-vision</code>
-7. 保存 → 点「二维码」或复制 <code>vless://</code> 链接</p>
-<p><strong>非交互安装（cloud-init / 批量部署）：</strong></p>
-<div class="codehilite"><pre><span></span><code><span class="nv">XUI_NONINTERACTIVE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>bash<span class="w"> </span>&lt;<span class="o">(</span>curl<span class="w"> </span>-Ls<span class="w"> </span>https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh<span class="o">)</span>
-cat<span class="w"> </span>/etc/x-ui/install-result.env<span class="w">   </span><span class="c1"># 随机凭据写在这里</span>
-</code></pre></div>
-
-<hr />
-<h2 id="纯命令行-xray-reality无面板最稳">纯命令行 Xray + REALITY（无面板，最稳）</h2>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 安装 Xray</span>
-bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">"</span><span class="k">$(</span>curl<span class="w"> </span>-L<span class="w"> </span>https://github.com/XTLS/Xray-install/raw/main/install-release.sh<span class="k">)</span><span class="s2">"</span><span class="w"> </span>@<span class="w"> </span>install
-
-<span class="c1"># 2. 生成 UUID 和密钥对</span>
-xray<span class="w"> </span>uuid
-xray<span class="w"> </span>x25519<span class="w">     </span><span class="c1"># 输出 Private key / Public key</span>
-
-<span class="c1"># 3. 写配置</span>
-cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/etc/xray/config.json<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
-<span class="s">{</span>
-<span class="s">  "log": { "loglevel": "warning" },</span>
-<span class="s">  "inbounds": [{</span>
-<span class="s">    "listen": "0.0.0.0",</span>
-<span class="s">    "port": 443,</span>
-<span class="s">    "protocol": "vless",</span>
-<span class="s">    "settings": {</span>
-<span class="s">      "clients": [</span>
-<span class="s">        { "id": "在此填UUID", "flow": "xtls-rprx-vision" }</span>
-<span class="s">      ],</span>
-<span class="s">      "decryption": "none"</span>
-<span class="s">    },</span>
-<span class="s">    "streamSettings": {</span>
-<span class="s">      "network": "tcp",</span>
-<span class="s">      "security": "reality",</span>
-<span class="s">      "realitySettings": {</span>
-<span class="s">        "show": false,</span>
-<span class="s">        "dest": "www.microsoft.com:443",</span>
-<span class="s">        "xver": 0,</span>
-<span class="s">        "serverNames": ["www.microsoft.com"],</span>
-<span class="s">        "privateKey": "在此填私钥",</span>
-<span class="s">        "shortIds": ["0123456789abcdef"]</span>
-<span class="s">      }</span>
-<span class="s">    },</span>
-<span class="s">    "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic"] }</span>
-<span class="s">  }],</span>
-<span class="s">  "outbounds": [</span>
-<span class="s">    { "protocol": "freedom", "tag": "direct" },</span>
-<span class="s">    { "protocol": "blackhole", "tag": "block" }</span>
-<span class="s">  ],</span>
-<span class="s">  "routing": {</span>
-<span class="s">    "rules": [</span>
-<span class="s">      { "type": "field", "protocol": ["bittorrent"], "outboundTag": "block" }</span>
-<span class="s">    ]</span>
-<span class="s">  }</span>
-<span class="s">}</span>
-<span class="s">EOF</span>
-
-<span class="c1"># 4. 启动</span>
-systemctl<span class="w"> </span>restart<span class="w"> </span>xray
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>xray
-systemctl<span class="w"> </span>status<span class="w"> </span>xray
-</code></pre></div>
-
-<p>客户端链接格式：</p>
-<div class="codehilite"><pre><span></span><code>vless://UUID@你的IP:443?encryption=none&amp;flow=xtls-rprx-vision&amp;security=reality&amp;sni=www.microsoft.com&amp;fp=chrome&amp;pbk=公钥&amp;sid=0123456789abcdef&amp;type=tcp#节点名
-</code></pre></div>
-
-<hr />
-<h2 id="系统层必做优化">系统层必做优化</h2>
-<h3 id="开-bbr速度提升关键">开 BBR（速度提升关键）</h3>
-<div class="codehilite"><pre><span></span><code>cat<span class="w"> </span>&gt;&gt;<span class="w"> </span>/etc/sysctl.conf<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
-<span class="s">net.core.default_qdisc=fq</span>
-<span class="s">net.ipv4.tcp_congestion_control=bbr</span>
-<span class="s">net.ipv4.tcp_fastopen=3</span>
-<span class="s">net.core.rmem_max=16777216</span>
-<span class="s">net.core.wmem_max=16777216</span>
-<span class="s">EOF</span>
-sysctl<span class="w"> </span>-p
-lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bbr<span class="w">        </span><span class="c1"># 确认 bbr 已加载</span>
-</code></pre></div>
-
-<h3 id="时间同步reality-对时间敏感误差-60s-直接失败">时间同步（REALITY 对时间敏感，误差 &gt;60s 直接失败）</h3>
-<div class="codehilite"><pre><span></span><code>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>chrony
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>chrony<span class="w"> </span>--now
-chronyc<span class="w"> </span>tracking
-</code></pre></div>
-
-<h3 id="ssh-加固">SSH 加固</h3>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 本地生成密钥，上传公钥</span>
-<span class="c1"># 2. 编辑 /etc/ssh/sshd_config</span>
-PasswordAuthentication<span class="w"> </span>no
-PermitRootLogin<span class="w"> </span>prohibit-password
-Port<span class="w"> </span><span class="m">22222</span><span class="w">            </span><span class="c1"># 改成非 22</span>
-
-systemctl<span class="w"> </span>restart<span class="w"> </span>ssh
-</code></pre></div>
-
-<h3 id="防火墙">防火墙</h3>
-<div class="codehilite"><pre><span></span><code>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ufw
-ufw<span class="w"> </span>default<span class="w"> </span>deny<span class="w"> </span>incoming
-ufw<span class="w"> </span>default<span class="w"> </span>allow<span class="w"> </span>outgoing
-ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">22222</span>/tcp<span class="w">     </span><span class="c1"># SSH</span>
-ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">443</span>/tcp
-ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">443</span>/udp
-ufw<span class="w"> </span>allow<span class="w"> </span>面板端口/tcp
-ufw<span class="w"> </span><span class="nb">enable</span>
-</code></pre></div>
-
-<blockquote>
-<p>云厂商（阿里云/腾讯云/AWS）还要在<strong>控制台安全组</strong>里放行，两层都要开。</p>
-</blockquote>
-<h3 id="防止被扫">防止被扫</h3>
-<div class="codehilite"><pre><span></span><code>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>fail2ban
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>fail2ban<span class="w"> </span>--now
-</code></pre></div>
 
 <hr />
 <h2 id="客户端推荐">客户端推荐</h2>
@@ -1530,7 +884,7 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 最省事的选择：<strong>Windows 用 Clash Verge Rev、手机用 Shadowrocket / NekoBox</strong>，全协议通吃。</p>
 </blockquote>
 <hr />
-<h2 id="购买链接汇总">购买链接汇总</h2>
+<h2 id="购买链接汇总">购买链接与资料汇总</h2>
 <table>
 <thead>
 <tr>
@@ -1610,23 +964,7 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 </tbody>
 </table>
 <hr />
-<h2 id="顺序">顺序</h2>
-<div class="codehilite"><pre><span></span><code>1. 买 VPS（推荐 RackNerd 1GB 起步，或搬瓦工 DUBAI CN2-GIA）
-   → 系统选 Debian 12 x86_64
-2. SSH 登录，改端口 + 密钥登录 + 关密码
-3. 开 BBR + 装 chrony 时间同步
-4. 装 S-UI 面板（要开 TUIC 只能用 sing-box 系，3X-UI 开不了）
-5. 面板改端口 + 强密码 + 开 2FA
-6. 添加 VLESS + REALITY 入站（443/tcp，dest=www.microsoft.com:443）
-7. 添加 Hysteria2 入站（443/udp，自签证书 + 端口跳跃）
-8. 添加 TUIC v5 入站（4433/udp，复用同一份自签证书，拥塞控制 bbr，关 0-RTT）
-9. 客户端导入链接，三条腿分别测速：
-   - 家宽晚上测 REALITY 和 hy2
-   - 手机 4G 切 WiFi 测 TUIC（看是否不断线）
-10. 备份配置到本地（/usr/local/s-ui/db/）
-11. （可选）配 Cloudflare CDN 兜底 + 域名 HTTPS 面板
-</code></pre></div>
-  </div>
+</div>
 </main>
 
 <button id="totop" title="回到顶部">↑</button>
@@ -1635,6 +973,49 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 (function(){
   // ---- 目录树折叠 ----
   var toc=document.getElementById('toc');
+  /*TOCAUTOFIX*/
+  // ---- 目录自检：正文标题变了、目录没跟上时，按正文重建（无需重新生成 html）----
+  (function rebuildTocIfStale(){
+    var content=document.getElementById('content');
+    if(!toc||!content) return;
+    var heads=[];
+    [].slice.call(content.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(function(h){
+      if(!h.id) return;
+      heads.push({lv:parseInt(h.tagName.charAt(1),10), id:h.id,
+                  text:(h.textContent||'').replace(/\s+/g,' ').trim()});
+    });
+    var links=[].slice.call(toc.querySelectorAll('a[href^="#"]'));
+    var stale = links.length !== heads.length;
+    if(!stale){
+      for(var i=0;i<heads.length;i++){
+        var h=links[i].getAttribute('href').slice(1);
+        try{ h=decodeURIComponent(h); }catch(e){}
+        if(h !== heads[i].id){ stale=true; break; }
+      }
+    }
+    if(!stale) return;
+
+    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    var out=[], depth=[], prev=0;
+    heads.forEach(function(h){
+      var li='<li class="lv'+h.lv+'"><a href="#'+h.id+'">'+esc(h.text)+'</a>';
+      if(!depth.length){
+        out.push('<ul>'); depth.push(h.lv); out.push(li);
+      } else if(h.lv > prev){
+        for(var k=prev;k<h.lv;k++){ out.push('<ul>'); depth.push(h.lv); }
+        out.push(li);
+      } else if(h.lv === prev){
+        out.push('</li>'); out.push(li);
+      } else {
+        for(var k2=prev;k2>h.lv;k2--){ out.push('</li>'); out.push('</ul>'); depth.pop(); }
+        out.push('</li>'); out.push(li);
+      }
+      prev=h.lv;
+    });
+    while(depth.length){ out.push('</li>'); out.push('</ul>'); depth.pop(); }
+    toc.innerHTML = '\n' + out.join('\n') + '\n';
+    try{ console.log('[toc] 目录与正文不一致，已按正文重建：'+heads.length+' 条'); }catch(e){}
+  })();
   function setupTree(){
     var items=[].slice.call(toc.querySelectorAll('li'));
     items.forEach(function(li){

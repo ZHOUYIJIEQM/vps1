@@ -385,7 +385,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
   #scrim{display:block;pointer-events:none}
   body.menu-open #scrim{opacity:1;pointer-events:auto}
   body.menu-open{overflow:hidden}
-  #sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  #sidebar{top:44px;transform:translateX(-100%);transition:transform .22s ease}
   #sidebar.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
   /* 菜单展开时 ☰ 在侧栏左上角，给标题让位，免得压住 logo */
   #sidebar.open .side-head{padding-left:68px}
@@ -400,18 +400,76 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
   #toc{padding-bottom:10px}
   #toc .toggle{width:32px;height:32px;font-size:22px;border-radius:8px}
   #toc li.has-sub > a{padding-right:42px}
+  #docbar{
+    display:flex; position:fixed; top:0; left:0; right:0; height:44px; z-index:80;
+    background:var(--nav-bg); border-bottom:1px solid var(--line);
+    box-shadow:0 1px 6px rgba(0,0,0,.10);
+  }
+  #docbar a{
+    flex:1 1 0; min-width:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:600;
+    padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    border-bottom:3px solid transparent;
+    transition:color .12s,border-color .12s,background .12s;
+  }
+  #docbar a.cur{color:var(--accent); border-bottom-color:var(--accent); background:var(--accent-soft); pointer-events:none; cursor:default}
+  #docbar a:active{background:rgba(127,127,127,.16)}
+  /* 顶栏占位：☰ 与工具栏下移，正文让出空间 */
+  #menuBtn{top:52px}
+  #tools{top:50px}
+  #content{padding-top:104px}
 }
 @media print{
-  #sidebar,#tools,#totop,#menuBtn{display:none!important}
+  #sidebar,#docnav,#docbar,#tools,#totop,#menuBtn{display:none!important}
   #main{margin-left:0}
   #content{max-width:none;padding:0}
   details{break-inside:avoid}
   details>summary{list-style:none}
   a{color:var(--fg)}
 }
+
+/* ---------- 跨文档导航（相对路径互跳） ---------- */
+#docnav{
+  padding:9px 12px 10px; border-bottom:1px solid var(--line); flex:0 0 auto;
+  display:flex; flex-direction:column; gap:3px;
+}
+#docnav .dn-t{
+  font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  color:var(--muted); padding:1px 3px 5px; opacity:.85;
+}
+#docnav a{
+  display:flex; align-items:center; gap:8px;
+  padding:6px 9px; border-radius:6px; border:1px solid transparent;
+  color:var(--muted); text-decoration:none; font-size:13px; line-height:1.3;
+  transition:background .12s,color .12s,border-color .12s;
+}
+#docnav a:hover{background:rgba(127,127,127,.14); color:var(--fg)}
+#docnav a.cur{
+  color:var(--nav-active); font-weight:600; background:var(--accent-soft);
+  border-color:var(--accent); cursor:default;
+}
+#docnav a .dot{
+  width:6px; height:6px; border-radius:50%; background:currentColor;
+  opacity:.4; flex:0 0 auto;
+}
+#docnav a.cur .dot{opacity:1}
+#docnav a .dn-sub{
+  display:block; font-size:11px; font-weight:400; opacity:.72; margin-top:1px;
+}
+#docnav a.cur .dn-sub{opacity:.85}
+
+/* ---------- 移动端顶部页面切换条（桌面隐藏，用 min-width 断点避免顺序覆盖） ---------- */
+@media (min-width:1101px){#docbar{display:none}}
 </style>
 </head>
 <body>
+
+<nav id="docbar">
+  <a href="搭建方案.html">搭建方案</a>
+  <a class="cur" href="各家VPS提供商的套餐.html" aria-current="page">VPS 套餐</a>
+  <a href="工时评估.html">工时评估</a>
+</nav>
 
 <button id="menuBtn" title="目录">☰</button>
 
@@ -423,6 +481,12 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
     <div class="t">VPS 挑选</div>
   </div>
   <div class="search"><input id="tocSearch" type="search" placeholder="搜索目录…" autocomplete="off"></div>
+  <div id="docnav">
+    <div class="dn-t">相关文档</div>
+    <a href="搭建方案.html"><span class="dot"></span><span>搭建方案<span class="dn-sub">选型 + 搭建 + 价格总表</span></span></a>
+    <a class="cur" href="各家VPS提供商的套餐.html" aria-current="page"><span class="dot"></span><span>VPS 套餐<span class="dn-sub">各家提供商对比</span></span></a>
+    <a href="工时评估.html"><span class="dot"></span><span>工时评估<span class="dn-sub">自建节点耗时拆解</span></span></a>
+  </div>
   <div id="toc"><ul>
 <li class="lv1"><a href="#vps挑选">vps挑选</a><ul>
 <li class="lv2"><a href="#网络线路">网络线路</a></li>
@@ -500,9 +564,6 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <main id="main">
   <div id="content">
 <h1 id="vps挑选">vps挑选</h1>
-<blockquote>
-<p>这篇说明里面的数据从其他网站摘取，可能会发生变动，机器也可能已售空</p>
-</blockquote>
 <h2 id="网络线路">网络线路</h2>
 <p>从国内访问国外服务器，数据要经过「中国的出口」。vps的价格与线路是挂钩的。三家运营商各有各的出口，各修各的路：</p>
 <table>
@@ -4916,6 +4977,49 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 (function(){
   // ---- 目录树折叠 ----
   var toc=document.getElementById('toc');
+  /*TOCAUTOFIX*/
+  // ---- 目录自检：正文标题变了、目录没跟上时，按正文重建（无需重新生成 html）----
+  (function rebuildTocIfStale(){
+    var content=document.getElementById('content');
+    if(!toc||!content) return;
+    var heads=[];
+    [].slice.call(content.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(function(h){
+      if(!h.id) return;
+      heads.push({lv:parseInt(h.tagName.charAt(1),10), id:h.id,
+                  text:(h.textContent||'').replace(/\s+/g,' ').trim()});
+    });
+    var links=[].slice.call(toc.querySelectorAll('a[href^="#"]'));
+    var stale = links.length !== heads.length;
+    if(!stale){
+      for(var i=0;i<heads.length;i++){
+        var h=links[i].getAttribute('href').slice(1);
+        try{ h=decodeURIComponent(h); }catch(e){}
+        if(h !== heads[i].id){ stale=true; break; }
+      }
+    }
+    if(!stale) return;
+
+    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    var out=[], depth=[], prev=0;
+    heads.forEach(function(h){
+      var li='<li class="lv'+h.lv+'"><a href="#'+h.id+'">'+esc(h.text)+'</a>';
+      if(!depth.length){
+        out.push('<ul>'); depth.push(h.lv); out.push(li);
+      } else if(h.lv > prev){
+        for(var k=prev;k<h.lv;k++){ out.push('<ul>'); depth.push(h.lv); }
+        out.push(li);
+      } else if(h.lv === prev){
+        out.push('</li>'); out.push(li);
+      } else {
+        for(var k2=prev;k2>h.lv;k2--){ out.push('</li>'); out.push('</ul>'); depth.pop(); }
+        out.push('</li>'); out.push(li);
+      }
+      prev=h.lv;
+    });
+    while(depth.length){ out.push('</li>'); out.push('</ul>'); depth.pop(); }
+    toc.innerHTML = '\n' + out.join('\n') + '\n';
+    try{ console.log('[toc] 目录与正文不一致，已按正文重建：'+heads.length+' 条'); }catch(e){}
+  })();
   function setupTree(){
     var items=[].slice.call(toc.querySelectorAll('li'));
     items.forEach(function(li){

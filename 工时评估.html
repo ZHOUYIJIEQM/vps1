@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="zh-CN" data-theme="light">
 <head>
-<!-- md2html: md-sha=3c6c9c33c661 -->
+<!-- md2html: md-sha=de8075d24be3 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>自建节点 · 工时评估</title>
 <style>
+
 :root{
   --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d8dee4;
   --accent:#0969da; --accent-soft:#ddf4ff;
@@ -385,7 +386,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
   #scrim{display:block;pointer-events:none}
   body.menu-open #scrim{opacity:1;pointer-events:auto}
   body.menu-open{overflow:hidden}
-  #sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  #sidebar{top:44px;transform:translateX(-100%);transition:transform .22s ease}
   #sidebar.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
   /* 菜单展开时 ☰ 在侧栏左上角，给标题让位，免得压住 logo */
   #sidebar.open .side-head{padding-left:68px}
@@ -400,18 +401,77 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
   #toc{padding-bottom:10px}
   #toc .toggle{width:32px;height:32px;font-size:22px;border-radius:8px}
   #toc li.has-sub > a{padding-right:42px}
+  #docbar{
+    display:flex; position:fixed; top:0; left:0; right:0; height:44px; z-index:80;
+    background:var(--nav-bg); border-bottom:1px solid var(--line);
+    box-shadow:0 1px 6px rgba(0,0,0,.10);
+  }
+  #docbar a{
+    flex:1 1 0; min-width:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:600;
+    padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    border-bottom:3px solid transparent;
+    transition:color .12s,border-color .12s,background .12s;
+  }
+  #docbar a.cur{color:var(--accent); border-bottom-color:var(--accent); background:var(--accent-soft); pointer-events:none; cursor:default}
+  #docbar a:active{background:rgba(127,127,127,.16)}
+  /* 顶栏占位：☰ 与工具栏下移，正文让出空间 */
+  #menuBtn{top:52px}
+  #tools{top:50px}
+  #content{padding-top:104px}
 }
 @media print{
-  #sidebar,#tools,#totop,#menuBtn{display:none!important}
+  #sidebar,#docnav,#docbar,#tools,#totop,#menuBtn{display:none!important}
   #main{margin-left:0}
   #content{max-width:none;padding:0}
   details{break-inside:avoid}
   details>summary{list-style:none}
   a{color:var(--fg)}
 }
+
+
+/* ---------- 跨文档导航（相对路径互跳） ---------- */
+#docnav{
+  padding:9px 12px 10px; border-bottom:1px solid var(--line); flex:0 0 auto;
+  display:flex; flex-direction:column; gap:3px;
+}
+#docnav .dn-t{
+  font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  color:var(--muted); padding:1px 3px 5px; opacity:.85;
+}
+#docnav a{
+  display:flex; align-items:center; gap:8px;
+  padding:6px 9px; border-radius:6px; border:1px solid transparent;
+  color:var(--muted); text-decoration:none; font-size:13px; line-height:1.3;
+  transition:background .12s,color .12s,border-color .12s;
+}
+#docnav a:hover{background:rgba(127,127,127,.14); color:var(--fg)}
+#docnav a.cur{
+  color:var(--nav-active); font-weight:600; background:var(--accent-soft);
+  border-color:var(--accent); cursor:default;
+}
+#docnav a .dot{
+  width:6px; height:6px; border-radius:50%; background:currentColor;
+  opacity:.4; flex:0 0 auto;
+}
+#docnav a.cur .dot{opacity:1}
+#docnav a .dn-sub{
+  display:block; font-size:11px; font-weight:400; opacity:.72; margin-top:1px;
+}
+#docnav a.cur .dn-sub{opacity:.85}
+
+/* ---------- 移动端顶部页面切换条（桌面隐藏，用 min-width 断点避免顺序覆盖） ---------- */
+@media (min-width:1101px){#docbar{display:none}}
 </style>
 </head>
 <body>
+
+<nav id="docbar">
+  <a href="搭建方案.html">搭建方案</a>
+  <a href="各家VPS提供商的套餐.html">VPS 套餐</a>
+  <a class="cur" href="工时评估.html" aria-current="page">工时评估</a>
+</nav>
 
 <button id="menuBtn" title="目录">☰</button>
 
@@ -423,19 +483,30 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
     <div class="t">自建节点 · 工时评估</div>
   </div>
   <div class="search"><input id="tocSearch" type="search" placeholder="搜索目录…" autocomplete="off"></div>
-  <div id="toc"><ul>
+  <div id="docnav">
+    <div class="dn-t">相关文档</div>
+    <a href="搭建方案.html"><span class="dot"></span><span>搭建方案<span class="dn-sub">选型 + 搭建 + 价格总表</span></span></a>
+    <a href="各家VPS提供商的套餐.html"><span class="dot"></span><span>VPS 套餐<span class="dn-sub">各家提供商对比</span></span></a>
+    <a class="cur" href="工时评估.html" aria-current="page"><span class="dot"></span><span>工时评估<span class="dn-sub">自建节点耗时拆解</span></span></a>
+  </div>
+  <div id="toc">
+<ul>
 <li class="lv1"><a href="#自建节点-工时评估">自建节点 · 工时评估</a><ul>
 <li class="lv2"><a href="#总览">总览</a></li>
-<li class="lv2"><a href="#阶段-1-vps挑选已经完成参考vps挑选html">阶段 1 vps挑选已经完成，参考vps挑选.html</a></li>
+<li class="lv2"><a href="#阶段-1-vps-挑选">阶段 1 vps 挑选</a></li>
 <li class="lv2"><a href="#阶段-2-采购与开通">阶段 2 采购与开通</a></li>
 <li class="lv2"><a href="#阶段-3-系统加固">阶段 3 系统加固</a></li>
-<li class="lv2"><a href="#阶段-4-面板部署">阶段 4 面板部署</a></li>
-<li class="lv2"><a href="#阶段-5-协议部署">阶段 5 协议部署</a></li>
-<li class="lv2"><a href="#阶段-6-客户端部署">阶段 6 客户端部署</a></li>
-<li class="lv2"><a href="#阶段-7-测试与验收">阶段 7 测试与验收</a></li>
+<li class="lv2"><a href="#阶段-4-安装-xray-core">阶段 4 安装 Xray-core</a></li>
+<li class="lv2"><a href="#阶段-5-配置-vless-reality-入站">阶段 5 配置 VLESS + REALITY 入站</a></li>
+<li class="lv2"><a href="#阶段-6-配置-hysteria2-入站udp">阶段 6 配置 Hysteria2 入站（UDP）</a></li>
+<li class="lv2"><a href="#阶段-7-配置-tuic-v5-入站sing-box-手工">阶段 7 配置 TUIC v5 入站（sing-box 手工）</a></li>
+<li class="lv2"><a href="#阶段-8-部署可视化面板">阶段 8 部署可视化面板</a></li>
+<li class="lv2"><a href="#阶段-9-客户端部署">阶段 9 客户端部署</a></li>
+<li class="lv2"><a href="#阶段-10-测试与验收">阶段 10 测试与验收</a></li>
 </ul>
 </li>
-</ul></div>
+</ul>
+</div>
 </nav>
 
 <div id="tools">
@@ -459,7 +530,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tbody>
 <tr>
 <td>1</td>
-<td>vps选型（调研寻找便宜适用的vps）</td>
+<td>vps 选型（调研寻找便宜适用的 vps）</td>
 <td>4</td>
 </tr>
 <tr>
@@ -469,40 +540,55 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </tr>
 <tr>
 <td>3</td>
-<td>系统配置（Ubuntu 22.04 + bbr）</td>
+<td>系统加固（Ubuntu 22.04 + BBR）</td>
 <td>1</td>
 </tr>
 <tr>
 <td>4</td>
-<td>面板部署（S-UI后台）</td>
-<td>1</td>
+<td>安装 Xray-core</td>
+<td>2.5</td>
 </tr>
 <tr>
 <td>5</td>
-<td>协议部署（VLESS+REALITY, TUIC）</td>
+<td>配置 VLESS + REALITY 入站</td>
 <td>2</td>
 </tr>
 <tr>
 <td>6</td>
+<td>配置 Hysteria2 入站（UDP）</td>
+<td>2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>配置 TUIC v5 入站</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>8</td>
+<td>安装后台管理面板</td>
+<td>1</td>
+</tr>
+<tr>
+<td>9</td>
 <td>客户端部署</td>
 <td>0.5</td>
 </tr>
 <tr>
-<td>7</td>
+<td>10</td>
 <td>测试与验收</td>
 <td>0.5</td>
 </tr>
 <tr>
 <td></td>
 <td><strong>合计</strong></td>
-<td>10小时</td>
+<td><strong>16 小时</strong></td>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>时间包含查资料、读文档、试错、返工、跨端联调、写文档、沟通、验收陪测。</p>
-</blockquote>
-<h2 id="阶段-1-vps挑选已经完成参考vps挑选html">阶段 1　vps挑选已经完成，参考vps挑选.html</h2>
+<hr />
+<h2 id="阶段-1-vps-挑选">阶段 1　vps 挑选</h2>
+<p>已完成，参考 <code>各家VPS提供商的套餐.html</code>。此阶段 4 小时是比价与线路调研的实际耗时，本次不再重复。</p>
+<hr />
 <h2 id="阶段-2-采购与开通">阶段 2　采购与开通</h2>
 <table>
 <thead>
@@ -514,19 +600,27 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tbody>
 <tr>
 <td>注册核验</td>
-<td>注册账号、邮箱验证、KYC、绑定支付</td>
+<td>注册账号、邮箱验证、部分商家要手机号或 KYC、绑定支付方式</td>
 </tr>
 <tr>
 <td>下单支付</td>
-<td>按 pid 下单、应用优惠码、处理 3DS / PayPal / 支付宝</td>
+<td>按 pid 直接下单、试优惠码是否生效、处理 3DS 验证 / PayPal 跳转 / 支付宝扫码</td>
+</tr>
+<tr>
+<td>等待开机</td>
+<td>记录开机邮件、拿到 IP / root 密码 / SSH 端口，有的商家要等人工审核几十分钟</td>
 </tr>
 <tr>
 <td>连通性验证</td>
-<td>IP 纯净度、三网 ping / mtr、去回程路由、实测带宽是否达标</td>
+<td><code>ping</code> 与 <code>mtr</code> 看三网去程、<code>besttrace</code> 看回程、<code>curl -o /dev/null -w '%{speed_download}'</code> 测带宽是否达标</td>
+</tr>
+<tr>
+<td>IP 纯净度</td>
+<td>查 IP 是否在常见黑名单、是否被流媒体识别为机房 IP、是否已被墙（换 IP 政策此时就要问清）</td>
 </tr>
 <tr>
 <td>重装系统</td>
-<td>Ubuntu 22.04，确认架构与内核</td>
+<td>后台重装 Ubuntu 22.04，确认是 x86_64 还是 ARM、内核版本、磁盘分区</td>
 </tr>
 <tr>
 <td>有问题时工单沟通</td>
@@ -545,33 +639,53 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </thead>
 <tbody>
 <tr>
-<td>基础环境</td>
-<td>时区、locale、换源、全量升级、装常用工具</td>
+<td>首次登录</td>
+<td>改 root 密码、确认 <code>who</code> 里没有陌生会话、<code>lastb</code> 看有没有人在爆破</td>
+</tr>
+<tr>
+<td>时区与 locale</td>
+<td><code>timedatectl set-timezone Asia/Shanghai</code>、<code>locale-gen en_US.UTF-8</code>、避免后面日志时间对不上</td>
+</tr>
+<tr>
+<td>更新</td>
+<td><code>apt update &amp;&amp; apt full-upgrade -y</code>，重启一次确认内核已更新</td>
+</tr>
+<tr>
+<td>装基础工具</td>
+<td>curl、wget、unzip、vim、htop、mtr、tcpdump、jq、socat、ca-certificates、net-tools</td>
 </tr>
 <tr>
 <td>SSH 加固</td>
-<td>ed25519 密钥、改远程端口、登录密码</td>
+<td>本地 <code>ssh-keygen -t ed25519</code> 生成密钥、<code>ssh-copy-id</code> 上传、<code>/etc/ssh/sshd_config</code> 关 <code>PasswordAuthentication</code>、改端口、<code>systemctl reload ssh</code>，先开新窗口验证能登再关旧窗口</td>
 </tr>
 <tr>
 <td>防火墙</td>
-<td>ufw + 云安全组<strong>两层</strong>都开，逐条验证放行</td>
+<td><code>ufw default deny incoming</code>、<code>ufw allow 端口</code> 逐条放行，<strong>云厂商安全组是另一层，两边都要开</strong>，放行后逐个用 <code>telnet</code> 或 <code>nc -vz</code> 从外网验证</td>
 </tr>
 <tr>
 <td>内核调优</td>
-<td>BBR + fq、文件句柄、conntrack、TCP 缓冲区、Fast Open，调优前后对比</td>
+<td>写 <code>/etc/sysctl.d/99-net.conf</code>：<code>net.core.default_qdisc=fq</code>、<code>net.ipv4.tcp_congestion_control=bbr</code>、<code>net.ipv4.tcp_fastopen=3</code>、<code>net.core.rmem_max</code> / <code>wmem_max</code>、<code>net.ipv4.ip_forward=1</code>、<code>fs.file-max</code>；<code>sysctl --system</code> 后用 <code>sysctl net.ipv4.tcp_congestion_control</code> 确认是 bbr</td>
 </tr>
 <tr>
 <td>时间同步</td>
-<td>chrony 配就近 NTP，偏移压到 100ms 内（REALITY 误差 &gt;60s 直接失败）</td>
+<td><code>apt install chrony</code>、配就近 NTP、<code>chronyc sources -v</code> 看偏移，压到 100ms 内（REALITY 对时间敏感，误差超 60s 直接握手失败）</td>
 </tr>
 <tr>
-<td>监控日志</td>
-<td>netdata、logrotate、journald 上限、磁盘告警</td>
+<td>连接数上限</td>
+<td>写 <code>/etc/security/limits.d/99-nofile.conf</code>，<code>nofile 1048576</code>，因为后面 systemd 单元要设 <code>LimitNOFILE</code></td>
+</tr>
+<tr>
+<td>快照</td>
+<td>在商家后台打一个干净系统快照，后面配错了能一键回滚，省掉重装的时间</td>
+</tr>
+<tr>
+<td>日志与监控</td>
+<td>装 netdata 或用 <code>vnstat</code> 看流量、<code>logrotate</code> 限制日志体积、<code>journalctl --vacuum-size=200M</code> 防止日志撑爆小硬盘</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="阶段-4-面板部署">阶段 4　面板部署</h2>
+<h2 id="阶段-4-安装-xray-core">阶段 4　安装 Xray-core</h2>
 <table>
 <thead>
 <tr>
@@ -581,8 +695,232 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </thead>
 <tbody>
 <tr>
-<td>安装 S-UI</td>
-<td>中文安装器，确认 s-ui 与 sing-box 两个服务都 running</td>
+<td>确认架构</td>
+<td><code>uname -m</code> 判断 amd64 还是 arm64，决定下哪个 release 包</td>
+</tr>
+<tr>
+<td>装官方脚本</td>
+<td><code>bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install</code>，脚本会建 <code>/usr/local/bin/xray</code>、<code>/usr/local/etc/xray/</code>、<code>/etc/systemd/system/xray.service</code>、<code>/var/log/xray/</code></td>
+</tr>
+<tr>
+<td>手动装（备选）</td>
+<td>脚本被墙时改用手动：从 release 页下 <code>Xray-linux-64.zip</code>、<code>unzip</code> 解出 <code>xray</code> 二进制、<code>install -m 755 xray /usr/local/bin/</code>、自己写 systemd 单元</td>
+</tr>
+<tr>
+<td>校验版本</td>
+<td><code>xray version</code>、确认是 1.8.x 以上（REALITY 与 Vision 需要新版本）</td>
+</tr>
+<tr>
+<td>目录规划</td>
+<td>配置放 <code>/usr/local/etc/xray/config.json</code>、证书放 <code>/usr/local/etc/xray/cert/</code>、日志放 <code>/var/log/xray/</code>，权限 <code>chmod 644</code> 配置文件、<code>600</code> 私钥</td>
+</tr>
+<tr>
+<td>写配置骨架</td>
+<td>手写 config.json 的五大块：<code>log</code>（loglevel warning、access 与 error 分开）、<code>dns</code>（1.1.1.1 / 8.8.8.8 与 <code>localhost</code> 的 domains 分流）、<code>inbounds</code>（先留空）、<code>outbounds</code>（freedom + blackhole）、<code>routing</code>（<code>geoip:private</code> 与 <code>geosite:cn</code> 走 direct）</td>
+</tr>
+<tr>
+<td>下载 geo 数据</td>
+<td><code>xray</code> 首次启动会自动下 <code>geoip.dat</code> / <code>geosite.dat</code>，也可以手动 <code>curl -L -o /usr/local/share/xray/geoip.dat</code> 提前放好，避免开机时联网失败</td>
+</tr>
+<tr>
+<td>语法校验</td>
+<td><code>xray run -test -c /usr/local/etc/xray/config.json</code>，必须输出 <code>Configuration OK</code> 才继续</td>
+</tr>
+<tr>
+<td>调 systemd 单元</td>
+<td><code>systemctl cat xray</code> 看官方单元内容、补 <code>LimitNOFILE=1048576</code>、<code>Restart=on-failure</code>、<code>RestartSec=3</code></td>
+</tr>
+<tr>
+<td>启停与自启</td>
+<td><code>systemctl enable --now xray</code>、<code>systemctl status xray</code> 确认 active、<code>journalctl -u xray -n 50 --no-pager</code> 看有没有报错</td>
+</tr>
+<tr>
+<td>日志观察</td>
+<td>临时把 loglevel 调成 info，<code>tail -f /var/log/xray/error.log</code> 边改边看，稳定后再调回 warning</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-5-配置-vless-reality-入站">阶段 5　配置 VLESS + REALITY 入站</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>生成密钥对</td>
+<td><code>xray x25519</code> 输出 Private key 与 Public key，私钥写进服务端配置，公钥留给客户端，抄错一位就连不上</td>
+</tr>
+<tr>
+<td>生成 UUID</td>
+<td><code>xray uuid</code> 生成客户端 ID，一个用户一个 UUID，方便日后单独停用</td>
+</tr>
+<tr>
+<td>挑伪装目标</td>
+<td>要求同时满足：支持 TLS 1.3、支持 HTTP/2、不是国内站、不是 Cloudflare 代理的站、不是自己这台机器。候选如 <code>www.microsoft.com</code>、<code>swdist.apple.com</code>、<code>www.lovelive-anime.jp</code></td>
+</tr>
+<tr>
+<td>验证伪装目标</td>
+<td><code>curl -I --tlsv1.3 --http2 https://目标域名</code> 看返回是不是 200、<code>openssl s_client -connect 目标:443 -tls1_3</code> 看证书链与 ALPN 是否有 h2</td>
+</tr>
+<tr>
+<td>生成 shortId</td>
+<td><code>openssl rand -hex 8</code>，可以配多个 shortId 给不同客户端，留空字符串也允许</td>
+</tr>
+<tr>
+<td>写 inbound</td>
+<td><code>protocol: vless</code>、<code>port: 443</code>、<code>listen: 0.0.0.0</code>、<code>decryption: none</code>、<code>clients</code> 里填 UUID 与 <code>flow: xtls-rprx-vision</code>、<code>streamSettings.security: reality</code>、<code>realitySettings</code> 里填 <code>dest</code>（目标:443）、<code>serverNames</code>、<code>privateKey</code>、<code>shortIds</code>、<code>spiderX: /</code></td>
+</tr>
+<tr>
+<td>补 sniffing</td>
+<td><code>sniffing: {enabled: true, destOverride: ["http","tls","quic"]}</code>，让分流能按域名判断</td>
+</tr>
+<tr>
+<td>校验与重启</td>
+<td>先 <code>xray run -test</code>，再 <code>systemctl restart xray</code>，<code>ss -tlnp\| grep 443</code></td>
+</tr>
+<tr>
+<td>放行端口</td>
+<td><code>ufw allow 443/tcp</code> + 云安全组放行，从外网 <code>nc -vz IP 443</code> 验证</td>
+</tr>
+<tr>
+<td>生成客户端链接</td>
+<td>手拼 <code>vless://UUID@IP:443?encryption=none&amp;flow=xtls-rprx-vision&amp;security=reality&amp;sni=目标域名&amp;fp=chrome&amp;pbk=公钥&amp;sid=shortId&amp;type=tcp#备注</code></td>
+</tr>
+<tr>
+<td>主动探测模拟</td>
+<td>用浏览器直接访问 <code>https://IP:443</code>，看是否返回伪装目标的证书与页面；再用 <code>xray</code> 自带的 <code>tls ping</code> 或第三方探针确认没有明显特征</td>
+</tr>
+<tr>
+<td>排错</td>
+<td>连不上先看三处：<code>journalctl -u xray</code> 有没有 handshake 报错、服务器时间对不对、客户端 <code>pbk</code> 与 <code>sid</code> 有没有抄错</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-6-配置-hysteria2-入站udp">阶段 6　配置 Hysteria2 入站（UDP）</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下二进制</td>
+<td>从 GitHub release 下 <code>hysteria-linux-amd64</code>，<code>install -m 755</code> 到 <code>/usr/local/bin/hysteria</code>，<code>hysteria version</code> 确认能跑</td>
+</tr>
+<tr>
+<td>准备证书</td>
+<td>两种方案：<code>openssl req -x509 -nodes -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -keyout key.pem -out cert.pem -subj "/CN=bing.com" -days 3650</code> 自签；或用 acme.sh 申请真证书（要域名）。自签就得在客户端开 <code>insecure</code></td>
+</tr>
+<tr>
+<td>写配置</td>
+<td><code>/etc/hysteria/config.yaml</code>：<code>listen: :443</code>、<code>tls</code> 段填 cert 与 key、<code>auth.type: password</code> 与 <code>auth.password</code>、<code>bandwidth.up</code> / <code>down</code> 按机器实际带宽的 80% 填（填太高会自己把线路打死）、<code>masquerade</code> 填一个正常网站做伪装、<code>obfs.type: salamander</code> 与 <code>obfs.password</code></td>
+</tr>
+<tr>
+<td>写 systemd 单元</td>
+<td>官方没给通用单元，自己写 <code>/etc/systemd/system/hysteria-server.service</code>：<code>ExecStart=/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml</code>、<code>Restart=on-failure</code>、<code>LimitNOFILE=1048576</code>、<code>User=nobody</code>（配好证书读权限）</td>
+</tr>
+<tr>
+<td>启停</td>
+<td><code>systemctl daemon-reload</code>、<code>enable --now hysteria-server</code>、<code>journalctl -u hysteria-server -n 50</code> 看有没有证书读不到</td>
+</tr>
+<tr>
+<td>端口跳跃</td>
+<td>需求是客户端连一个端口段、服务端自动落到 443。服务端写 nftables 或 iptables 规则把 <code>20000-30000</code> 的 UDP 全部 DNAT 到 443，再用 <code>netfilter-persistent</code> 或 <code>nft</code> 规则文件持久化，重启后要还在</td>
+</tr>
+<tr>
+<td>验证跳跃</td>
+<td><code>ss -ulnp</code> 看 443 在监听、<code>nft list ruleset</code> 看 DNAT 规则在、从客户端连 <code>IP:20001</code> 试能不能通</td>
+</tr>
+<tr>
+<td>放行端口</td>
+<td><code>ufw allow 443/udp</code>、<code>ufw allow 20000:30000/udp</code>，云安全组同样两条</td>
+</tr>
+<tr>
+<td>抗丢包测试</td>
+<td>服务端 <code>tc qdisc add dev eth0 root netem loss 30%</code> 模拟 30% 丢包，看还能不能看视频，测完 <code>tc qdisc del dev eth0 root</code> 删掉</td>
+</tr>
+<tr>
+<td>生成客户端链接</td>
+<td><code>hysteria2://密码@IP:443/?sni=bing.com&amp;insecure=1&amp;obfs=salamander&amp;obfs-password=xxx#备注</code>，端口跳跃写法是 <code>IP:20000-30000</code></td>
+</tr>
+<tr>
+<td>排错</td>
+<td>UDP 不通的常见原因：云安全组只放行了 TCP、运营商封 UDP、<code>bandwidth</code> 填太满、自签证书 CN 与 <code>sni</code> 不一致</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-7-配置-tuic-v5-入站sing-box-手工">阶段 7　配置 TUIC v5 入站（sing-box 手工）</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下二进制</td>
+<td>从 GitHub release 下 <code>sing-box-*-linux-amd64.tar.gz</code>，解出 <code>sing-box</code>，<code>install -m 755</code> 到 <code>/usr/local/bin/</code>，<code>sing-box version</code> 确认</td>
+</tr>
+<tr>
+<td>复用证书</td>
+<td>TUIC 走 QUIC，必须有 TLS。直接复用 Hysteria2 那套 <code>cert.pem</code> / <code>key.pem</code>，省一次签发</td>
+</tr>
+<tr>
+<td>写配置</td>
+<td><code>/etc/sing-box/config.json</code>：<code>log</code> 段、<code>inbounds</code> 里加 <code>type: tuic</code>、<code>listen: ::</code>、<code>listen_port: 4433</code>、<code>users</code> 填 <code>uuid</code> 与 <code>password</code>、<code>congestion_control: bbr</code>、<strong><code>zero_rtt_handshake: false</code></strong>（官方明确警告开 0-RTT 会被重放攻击 "Attack of the clones"）、<code>tls</code> 段填 <code>enabled: true</code> 与证书路径</td>
+</tr>
+<tr>
+<td>端口冲突检查</td>
+<td>TUIC 和 Hysteria2 都吃 UDP，<code>ss -ulnp</code> 确认 4433 没被占、443 已经是 hy2 的，两个必须分开</td>
+</tr>
+<tr>
+<td>语法校验</td>
+<td><code>sing-box check -c /etc/sing-box/config.json</code>，再用 <code>sing-box format -c ... -w</code> 统一格式</td>
+</tr>
+<tr>
+<td>写 systemd 单元</td>
+<td>官方有 <code>sing-box.service</code> 模板，<code>systemctl enable --now sing-box</code>，<code>journalctl -u sing-box -n 50</code> 看有没有 TLS 加载失败</td>
+</tr>
+<tr>
+<td>放行端口</td>
+<td><code>ufw allow 4433/udp</code> + 云安全组，<code>nc -vzu IP 4433</code> 验证</td>
+</tr>
+<tr>
+<td>客户端配置</td>
+<td>sing-box / mihomo / Shadowrocket 都能吃：<code>type: tuic</code>、<code>server_port: 4433</code>、<code>uuid</code>、<code>password</code>、<code>congestion_control: bbr</code>、<code>udp_relay_mode: native</code>、<code>alpn: ["h3"]</code>、自签证书要开 <code>insecure</code> 或 <code>disable_sni</code></td>
+</tr>
+<tr>
+<td>切网测试</td>
+<td>手机在 WiFi 与 4G 之间来回切，看连接是否自动迁移不断线——这是 TUIC 相对 hy2 的核心优势，值得单独验一遍</td>
+</tr>
+<tr>
+<td>排错</td>
+<td>连上但打不开网页多半是 <code>udp_relay_mode</code> 不对；握手失败看 <code>alpn</code> 与服务端证书是否匹配</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-8-部署可视化面板">阶段 8　部署可视化面板</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安装面板</td>
+<td>安装后台管理可视化面板</td>
 </tr>
 <tr>
 <td>面板加固</td>
@@ -595,35 +933,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </tbody>
 </table>
 <hr />
-<h2 id="阶段-5-协议部署">阶段 5　协议部署</h2>
-<table>
-<thead>
-<tr>
-<th>工作项</th>
-<th>做什么</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VLESS + REALITY</td>
-<td>选伪装目标（需 TLS1.3 + H2、非国内、非 CF）、生成密钥对、配 Vision 流控、<strong>主动探测模拟验证无特征</strong></td>
-</tr>
-<tr>
-<td>Hysteria2</td>
-<td>自签证书、带宽参数按实际 80%、salamander 混淆、端口跳跃 DNAT 并持久化、<code>tc netem</code> 模拟 30% 丢包测试</td>
-</tr>
-<tr>
-<td>TUIC v5</td>
-<td>复用证书、拥塞控制 bbr、<strong>显式关 0-RTT</strong>（官方警告重放攻击）、确认与 hy2 端口不冲突、切网测试</td>
-</tr>
-<tr>
-<td>分流策略</td>
-<td>国内直连 / 国外代理 / AI 服务走指定节点，定切换逻辑</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="阶段-6-客户端部署">阶段 6　客户端部署</h2>
+<h2 id="阶段-9-客户端部署">阶段 9　客户端部署</h2>
 <table>
 <thead>
 <tr>
@@ -634,38 +944,124 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tbody>
 <tr>
 <td>Windows</td>
-<td>v2rayN 、Clash Verge Rev，TUN 模式 + 开机自启</td>
+<td>v2rayN 或 Clash Verge Rev，导入三条链接、开 TUN 模式、设开机自启、确认系统代理与 TUN 不冲突</td>
 </tr>
 <tr>
 <td>macOS</td>
-<td>处理 Gatekeeper 放行，TUN 模式，四协议逐个验证</td>
+<td>处理 Gatekeeper 首次放行、开 TUN、四协议逐个验证，注意 Clash 系要装系统扩展</td>
 </tr>
 <tr>
 <td>Android</td>
-<td>NekoBox / Hiddify</td>
+<td>NekoBox 或 Hiddify，导入链接、开 VPN 模式、省电白名单要加进去否则后台被杀</td>
 </tr>
 <tr>
 <td>iOS</td>
-<td>Shadowrocket（需非国区 ID），规则与全局模式</td>
+<td>Shadowrocket（需非国区 Apple ID），配规则与全局两种模式，注意 TUIC 需要较新版本</td>
 </tr>
 <tr>
-<td>OpenWrt</td>
-<td>PassWall / ShellCrash，透明代理 + DNS 防污染，排查 DNS 泄漏与 MTU</td>
+<td>分流规则</td>
+<td>定一套规则：国内直连、国外走代理、AI 服务固定走某一条线路，客户端和服务端各配一份并保持一致</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="阶段-7-测试与验收">阶段 7　测试与验收</h2>
-<p>确认能上网、确认走的是节点、确认重启后能用</p>
+<h2 id="阶段-10-测试与验收">阶段 10　测试与验收</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务状态</td>
+<td><code>systemctl status xray hysteria-server sing-box --no-pager</code> 三个都 active</td>
+</tr>
+<tr>
+<td>端口监听</td>
+<td><code>ss -tlnp</code> 看 443/tcp、<code>ss -ulnp</code> 看 443/udp 与 4433/udp，三条都在</td>
+</tr>
+<tr>
+<td>出口 IP</td>
+<td>客户端连上后访问 <code>https://ip.sb</code>，确认变成 VPS 的 IP（唯一不能省的一步）</td>
+</tr>
+<tr>
+<td>分流正确</td>
+<td>访问国内站看是否直连、访问国外站看是否走代理，两条都验</td>
+</tr>
+<tr>
+<td>速度</td>
+<td><code>fast.com</code> 与 <code>speedtest</code> 各测一次，记录与裸连的差距</td>
+</tr>
+<tr>
+<td>三条腿对比</td>
+<td>REALITY、Hysteria2、TUIC 各测一轮，记下哪条最快、哪条在晚高峰最稳</td>
+</tr>
+<tr>
+<td>切网与重启</td>
+<td>手机 WiFi 与 4G 互切；服务器 <code>reboot</code> 后确认三个服务都自启、客户端不用改配置就能连</td>
+</tr>
+<tr>
+<td>交付</td>
+<td>把配置、客户端链接、运维命令整理成一份文档，交接给别人也能维护</td>
+</tr>
+</tbody>
+</table>
+<hr />
   </div>
 </main>
 
 <button id="totop" title="回到顶部">↑</button>
 
 <script>
+
 (function(){
   // ---- 目录树折叠 ----
   var toc=document.getElementById('toc');
+  /*TOCAUTOFIX*/
+  // ---- 目录自检：正文标题变了、目录没跟上时，按正文重建（无需重新生成 html）----
+  (function rebuildTocIfStale(){
+    var content=document.getElementById('content');
+    if(!toc||!content) return;
+    var heads=[];
+    [].slice.call(content.querySelectorAll('h1,h2,h3,h4,h5,h6')).forEach(function(h){
+      if(!h.id) return;
+      heads.push({lv:parseInt(h.tagName.charAt(1),10), id:h.id,
+                  text:(h.textContent||'').replace(/\s+/g,' ').trim()});
+    });
+    var links=[].slice.call(toc.querySelectorAll('a[href^="#"]'));
+    var stale = links.length !== heads.length;
+    if(!stale){
+      for(var i=0;i<heads.length;i++){
+        var h=links[i].getAttribute('href').slice(1);
+        try{ h=decodeURIComponent(h); }catch(e){}
+        if(h !== heads[i].id){ stale=true; break; }
+      }
+    }
+    if(!stale) return;
+
+    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    var out=[], depth=[], prev=0;
+    heads.forEach(function(h){
+      var li='<li class="lv'+h.lv+'"><a href="#'+h.id+'">'+esc(h.text)+'</a>';
+      if(!depth.length){
+        out.push('<ul>'); depth.push(h.lv); out.push(li);
+      } else if(h.lv > prev){
+        for(var k=prev;k<h.lv;k++){ out.push('<ul>'); depth.push(h.lv); }
+        out.push(li);
+      } else if(h.lv === prev){
+        out.push('</li>'); out.push(li);
+      } else {
+        for(var k2=prev;k2>h.lv;k2--){ out.push('</li>'); out.push('</ul>'); depth.pop(); }
+        out.push('</li>'); out.push(li);
+      }
+      prev=h.lv;
+    });
+    while(depth.length){ out.push('</li>'); out.push('</ul>'); depth.pop(); }
+    toc.innerHTML = '\n' + out.join('\n') + '\n';
+    try{ console.log('[toc] 目录与正文不一致，已按正文重建：'+heads.length+' 条'); }catch(e){}
+  })();
   function setupTree(){
     var items=[].slice.call(toc.querySelectorAll('li'));
     items.forEach(function(li){
@@ -886,6 +1282,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
     if(el){ openAncestors(el); setTimeout(function(){ el.scrollIntoView(); },60); }
   }
 })();
+
 </script>
 </body>
 </html>
