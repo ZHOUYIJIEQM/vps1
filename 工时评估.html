@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<!-- md2html: md-sha=3c6c9c33c661 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>自建节点 · 工时评估</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d8dee4;
+  --accent:#0969da; --accent-soft:#ddf4ff;
+  --thead:#1f4e79; --thead-fg:#ffffff;
+  --row-alt:#f6f8fa; --code-bg:#f6f8fa; --quote-bg:#fff8e6; --quote-line:#e3b341;
+  --nav-bg:#f6f8fa; --nav-active:#0969da; --shadow:0 1px 3px rgba(0,0,0,.08);
+  --warn:#cf222e;
+  --sidebar-w:310px;
+}
+html[data-theme="dark"]{
+  --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --line:#30363d;
+  --accent:#58a6ff; --accent-soft:#132339;
+  --thead:#1f4e79; --thead-fg:#ffffff;
+  --row-alt:#161b22; --code-bg:#161b22; --quote-bg:#2a2313; --quote-line:#bb8009;
+  --nav-bg:#010409; --nav-active:#58a6ff; --shadow:0 1px 3px rgba(0,0,0,.5);
+  --warn:#ff7b72;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,sans-serif;
+  font-size:15.5px; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- 侧边目录 ---------- */
+#sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+  background:var(--nav-bg); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; z-index:50;
+}
+#sidebar .side-head{
+  padding:16px 18px 12px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:10px; flex:0 0 auto;
+}
+#sidebar .side-head .logo{
+  width:26px;height:26px;border-radius:7px;background:var(--accent);
+  color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto;
+}
+#sidebar .side-head .t{
+  font-size:14px;font-weight:600;line-height:1.3;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+#sidebar .search{padding:10px 14px;border-bottom:1px solid var(--line);flex:0 0 auto}
+#sidebar .search input{
+  width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;
+  background:var(--bg);color:var(--fg);font-size:13px;outline:none;
+}
+#sidebar .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#toc{overflow-y:auto;padding:10px 8px 96px;flex:1 1 auto;scrollbar-width:thin}
+#toc::-webkit-scrollbar{width:9px}
+#toc::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+#toc ul{list-style:none;margin:0;padding:0}
+#toc li{margin:0}
+#toc a{
+  display:block; padding:4px 10px; border-radius:5px; color:var(--muted);
+  text-decoration:none; font-size:13.2px; line-height:1.45;
+  border-left:2px solid transparent; transition:background .12s,color .12s;
+}
+#toc a:hover{background:rgba(127,127,127,.12); color:var(--fg)}
+#toc a.active{color:var(--nav-active); font-weight:600; background:var(--accent-soft); border-left-color:var(--accent)}
+#toc .lv1 > a{font-weight:600;color:var(--fg);font-size:14px;padding-top:7px}
+#toc .lv2 > a{font-weight:600;color:var(--fg);padding-left:16px;font-size:13.6px}
+#toc .lv3 > a{padding-left:30px}
+#toc .lv4 > a{padding-left:44px;font-size:12.6px}
+#toc .lv5 > a{padding-left:58px;font-size:12.2px}
+#toc .lv6 > a{padding-left:70px;font-size:12px}
+/* 折叠状态挂在 li 上：任何层级都能展开/收起，不再只认 lv4-6 */
+#toc li.collapsed > ul{display:none}
+/* 展开/收起按钮挂在 <a> 里，所以定位锚点是 <a> 本身 */
+#toc li > a{position:relative}
+/* 展开/收起按钮：做得明显一点，方便手指点 */
+#toc .toggle{
+  position:absolute;right:2px;top:50%;transform:translateY(-50%);z-index:1;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);border-radius:6px;background:var(--bg);
+  font-size:19px;font-weight:700;line-height:1;color:var(--fg);
+  cursor:pointer;user-select:none;transition:all .12s;
+}
+#toc .toggle:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+/* 有按钮的行，右边留出位置免得文字压到按钮（叶子节点不加） */
+#toc li.has-sub > a{padding-right:34px}
+
+/* ---------- 正文 ---------- */
+#main{margin-left:var(--sidebar-w); padding:0 0 120px}
+#content{max-width:1080px;margin:0 auto;padding:34px 46px 40px}
+h1,h2,h3,h4,h5,h6{line-height:1.35;margin:1.6em 0 .6em;scroll-margin-top:20px;font-weight:600}
+h1{font-size:27px;margin-top:0;padding-bottom:.35em;border-bottom:2px solid var(--line)}
+h2{font-size:21px;padding-bottom:.3em;border-bottom:1px solid var(--line);margin-top:2.1em}
+h3{font-size:17.5px;color:var(--accent)}
+h4{font-size:15.5px}
+h5{font-size:14.5px;color:var(--muted)}
+h6{font-size:13.8px;color:var(--muted)}
+p{margin:.75em 0}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{font-weight:600}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+ul,ol{padding-left:1.9em;margin:.7em 0}
+li{margin:.28em 0}
+li>p{margin:.3em 0}
+img{max-width:100%}
+
+/* 引用块 */
+blockquote{
+  margin:1em 0;padding:.7em 1.1em;background:var(--quote-bg);
+  border-left:4px solid var(--quote-line);border-radius:0 6px 6px 0;color:var(--fg);
+}
+blockquote p{margin:.3em 0}
+blockquote blockquote{margin:.4em 0;background:transparent;border-left-color:var(--line)}
+/* 引用块里的重点提示：<span class="hl">…</span> 标红加粗 */
+.hl{color:var(--warn);font-weight:700}
+
+/* 代码 */
+code{
+  font-family:"Cascadia Code",Consolas,"Courier New",monospace;
+  font-size:.88em;background:var(--code-bg);padding:.15em .42em;
+  border-radius:4px;border:1px solid var(--line);
+}
+pre{
+  background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;margin:1em 0;line-height:1.6;
+}
+pre code{background:none;border:0;padding:0;font-size:13.2px}
+.hljs{background:var(--code-bg)!important}
+
+/* 表格 */
+.table-wrap{position:relative;overflow-x:auto;margin:1.1em 0;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
+.table-wrap::-webkit-scrollbar{height:10px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+.table-wrap::-webkit-scrollbar-track{background:transparent}
+/* 超宽表格右侧渐隐，暗示还能往右滚 */
+.table-wrap.scrollable::after{
+  content:"";position:sticky;right:0;top:0;float:right;
+  width:26px;height:100%;margin-left:-26px;pointer-events:none;
+  background:linear-gradient(to right,transparent,var(--bg));
+}
+.table-hint{font-size:12px;color:var(--muted);margin:-.5em 0 .9em;display:none}
+.table-hint.show{display:block}
+/* width:max-content + min-width:100% —— 列宽按内容自然展开，超宽时容器横向滚动；
+   用 width:100% 会把 12 列硬压进容器，导致「已下架」被拆成三行 */
+table{border-collapse:collapse;width:max-content;min-width:100%;font-size:13.4px;background:var(--bg)}
+/* 列数少的表格撑满容器更好看（由 JS 打 .narrow 标记） */
+table.narrow{width:100%}
+thead th{
+  background:var(--thead);color:var(--thead-fg);font-weight:600;
+  padding:9px 11px;text-align:left;white-space:nowrap;
+  border-right:1px solid rgba(255,255,255,.14);
+}
+thead th:last-child{border-right:0}
+tbody td{
+  padding:8px 11px;border-top:1px solid var(--line);vertical-align:top;
+  max-width:340px;              /* 长说明列到这个宽度才换行 */
+}
+tbody tr:nth-child(even){background:var(--row-alt)}
+tbody tr:hover{background:var(--accent-soft)}
+td a{word-break:break-all}
+
+/* 折叠块 */
+details{
+  margin:1.1em 0;border:1px solid var(--line);border-radius:8px;
+  background:var(--row-alt);
+}
+details>summary{
+  padding:11px 15px;cursor:pointer;font-size:14.5px;font-weight:600;
+  user-select:none;list-style:none;border-radius:7px;
+}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▶";font-size:9px;color:var(--accent);display:inline-block;transition:transform .15s;margin-right:7px}
+details[open]>summary::before{transform:rotate(90deg)}
+details>summary:hover{background:var(--accent-soft)}
+details[open]>summary{border-bottom:1px solid var(--line);border-radius:7px 7px 0 0}
+/* details 内所有块级内容左右留白（不能用 wrapper div，会破坏 md_in_html 解析） */
+details>*:not(summary){margin-left:16px;margin-right:16px}
+details>*:not(summary):first-of-type{margin-top:14px}
+details[open]{padding-bottom:16px}
+
+/* 右上角工具 */
+#tools{
+  position:fixed;left:12px;bottom:12px;width:calc(var(--sidebar-w) - 24px);
+  display:flex;gap:6px;flex-wrap:wrap;z-index:60;
+  padding:8px;border-radius:9px;background:var(--bg);
+  box-shadow:0 2px 10px rgba(0,0,0,.12);border:1px solid var(--line);
+}
+#tools button{
+  flex:1 1 auto;white-space:nowrap;
+  background:var(--bg);border:1px solid var(--line);color:var(--muted);
+  border-radius:6px;padding:5px 8px;font-size:12px;cursor:pointer;
+  transition:all .12s;
+}
+#tools button:hover{color:var(--accent);border-color:var(--accent)}
+#tools button.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+
+/* 返回顶部 */
+#totop{
+  position:fixed;right:22px;bottom:24px;width:42px;height:42px;border-radius:50%;
+  background:var(--accent);color:#fff;border:0;cursor:pointer;font-size:17px;
+  box-shadow:0 3px 10px rgba(0,0,0,.22);display:none;z-index:60;
+}
+#totop.show{display:block}
+
+/* ---------- 代码高亮（Pygments friendly / monokai）---------- */
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: transparent; }
+.codehilite .c { color: #60A0B0; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #007020; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #60A0B0; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #60A0B0; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #007020 } /* Comment.Preproc */
+.codehilite .cpf { color: #60A0B0; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #60A0B0; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #60A0B0; background-color: #FFF0F0 } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #F00 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #00A000 } /* Generic.Inserted */
+.codehilite .go { color: #888 } /* Generic.Output */
+.codehilite .gp { color: #C65D09; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #007020 } /* Keyword.Pseudo */
+.codehilite .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #902000 } /* Keyword.Type */
+.codehilite .m { color: #40A070 } /* Literal.Number */
+.codehilite .s { color: #4070A0 } /* Literal.String */
+.codehilite .na { color: #4070A0 } /* Name.Attribute */
+.codehilite .nb { color: #007020 } /* Name.Builtin */
+.codehilite .nc { color: #0E84B5; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #60ADD5 } /* Name.Constant */
+.codehilite .nd { color: #555; font-weight: bold } /* Name.Decorator */
+.codehilite .ni { color: #D55537; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #007020 } /* Name.Exception */
+.codehilite .nf { color: #06287E } /* Name.Function */
+.codehilite .nl { color: #002070; font-weight: bold } /* Name.Label */
+.codehilite .nn { color: #0E84B5; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #BB60D5 } /* Name.Variable */
+.codehilite .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #40A070 } /* Literal.Number.Bin */
+.codehilite .mf { color: #40A070 } /* Literal.Number.Float */
+.codehilite .mh { color: #40A070 } /* Literal.Number.Hex */
+.codehilite .mi { color: #40A070 } /* Literal.Number.Integer */
+.codehilite .mo { color: #40A070 } /* Literal.Number.Oct */
+.codehilite .sa { color: #4070A0 } /* Literal.String.Affix */
+.codehilite .sb { color: #4070A0 } /* Literal.String.Backtick */
+.codehilite .sc { color: #4070A0 } /* Literal.String.Char */
+.codehilite .dl { color: #4070A0 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #4070A0; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #4070A0 } /* Literal.String.Double */
+.codehilite .se { color: #4070A0; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #4070A0 } /* Literal.String.Heredoc */
+.codehilite .si { color: #70A0D0; font-style: italic } /* Literal.String.Interpol */
+.codehilite .sx { color: #C65D09 } /* Literal.String.Other */
+.codehilite .sr { color: #235388 } /* Literal.String.Regex */
+.codehilite .s1 { color: #4070A0 } /* Literal.String.Single */
+.codehilite .ss { color: #517918 } /* Literal.String.Symbol */
+.codehilite .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #06287E } /* Name.Function.Magic */
+.codehilite .vc { color: #BB60D5 } /* Name.Variable.Class */
+.codehilite .vg { color: #BB60D5 } /* Name.Variable.Global */
+.codehilite .vi { color: #BB60D5 } /* Name.Variable.Instance */
+.codehilite .vm { color: #BB60D5 } /* Name.Variable.Magic */
+.codehilite .il { color: #40A070 } /* Literal.Number.Integer.Long */
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+html[data-theme="dark"] .codehilite .hll { background-color: #49483e }
+html[data-theme="dark"] .codehilite { background: transparent; color: #F8F8F2 }
+html[data-theme="dark"] .codehilite .c { color: #959077 } /* Comment */
+html[data-theme="dark"] .codehilite .err { color: #ED007E; background-color: #1E0010 } /* Error */
+html[data-theme="dark"] .codehilite .esc { color: #F8F8F2 } /* Escape */
+html[data-theme="dark"] .codehilite .g { color: #F8F8F2 } /* Generic */
+html[data-theme="dark"] .codehilite .k { color: #66D9EF } /* Keyword */
+html[data-theme="dark"] .codehilite .l { color: #AE81FF } /* Literal */
+html[data-theme="dark"] .codehilite .n { color: #F8F8F2 } /* Name */
+html[data-theme="dark"] .codehilite .o { color: #FF4689 } /* Operator */
+html[data-theme="dark"] .codehilite .x { color: #F8F8F2 } /* Other */
+html[data-theme="dark"] .codehilite .p { color: #F8F8F2 } /* Punctuation */
+html[data-theme="dark"] .codehilite .ch { color: #959077 } /* Comment.Hashbang */
+html[data-theme="dark"] .codehilite .cm { color: #959077 } /* Comment.Multiline */
+html[data-theme="dark"] .codehilite .cp { color: #959077 } /* Comment.Preproc */
+html[data-theme="dark"] .codehilite .cpf { color: #959077 } /* Comment.PreprocFile */
+html[data-theme="dark"] .codehilite .c1 { color: #959077 } /* Comment.Single */
+html[data-theme="dark"] .codehilite .cs { color: #959077 } /* Comment.Special */
+html[data-theme="dark"] .codehilite .gd { color: #FF4689 } /* Generic.Deleted */
+html[data-theme="dark"] .codehilite .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+html[data-theme="dark"] .codehilite .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+html[data-theme="dark"] .codehilite .gr { color: #FF4689 } /* Generic.Error */
+html[data-theme="dark"] .codehilite .gh { color: #F8F8F2 } /* Generic.Heading */
+html[data-theme="dark"] .codehilite .gi { color: #A6E22E } /* Generic.Inserted */
+html[data-theme="dark"] .codehilite .go { color: #66D9EF } /* Generic.Output */
+html[data-theme="dark"] .codehilite .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+html[data-theme="dark"] .codehilite .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+html[data-theme="dark"] .codehilite .gu { color: #959077 } /* Generic.Subheading */
+html[data-theme="dark"] .codehilite .gt { color: #66D9EF } /* Generic.Traceback */
+html[data-theme="dark"] .codehilite .kc { color: #66D9EF } /* Keyword.Constant */
+html[data-theme="dark"] .codehilite .kd { color: #66D9EF } /* Keyword.Declaration */
+html[data-theme="dark"] .codehilite .kn { color: #FF4689 } /* Keyword.Namespace */
+html[data-theme="dark"] .codehilite .kp { color: #66D9EF } /* Keyword.Pseudo */
+html[data-theme="dark"] .codehilite .kr { color: #66D9EF } /* Keyword.Reserved */
+html[data-theme="dark"] .codehilite .kt { color: #66D9EF } /* Keyword.Type */
+html[data-theme="dark"] .codehilite .ld { color: #E6DB74 } /* Literal.Date */
+html[data-theme="dark"] .codehilite .m { color: #AE81FF } /* Literal.Number */
+html[data-theme="dark"] .codehilite .s { color: #E6DB74 } /* Literal.String */
+html[data-theme="dark"] .codehilite .na { color: #A6E22E } /* Name.Attribute */
+html[data-theme="dark"] .codehilite .nb { color: #A6E22E } /* Name.Builtin */
+html[data-theme="dark"] .codehilite .nc { color: #A6E22E } /* Name.Class */
+html[data-theme="dark"] .codehilite .no { color: #66D9EF } /* Name.Constant */
+html[data-theme="dark"] .codehilite .nd { color: #A6E22E } /* Name.Decorator */
+html[data-theme="dark"] .codehilite .ni { color: #F8F8F2 } /* Name.Entity */
+html[data-theme="dark"] .codehilite .ne { color: #A6E22E } /* Name.Exception */
+html[data-theme="dark"] .codehilite .nf { color: #A6E22E } /* Name.Function */
+html[data-theme="dark"] .codehilite .nl { color: #F8F8F2 } /* Name.Label */
+html[data-theme="dark"] .codehilite .nn { color: #F8F8F2 } /* Name.Namespace */
+html[data-theme="dark"] .codehilite .nx { color: #A6E22E } /* Name.Other */
+html[data-theme="dark"] .codehilite .py { color: #F8F8F2 } /* Name.Property */
+html[data-theme="dark"] .codehilite .nt { color: #FF4689 } /* Name.Tag */
+html[data-theme="dark"] .codehilite .nv { color: #F8F8F2 } /* Name.Variable */
+html[data-theme="dark"] .codehilite .ow { color: #FF4689 } /* Operator.Word */
+html[data-theme="dark"] .codehilite .pm { color: #F8F8F2 } /* Punctuation.Marker */
+html[data-theme="dark"] .codehilite .w { color: #F8F8F2 } /* Text.Whitespace */
+html[data-theme="dark"] .codehilite .mb { color: #AE81FF } /* Literal.Number.Bin */
+html[data-theme="dark"] .codehilite .mf { color: #AE81FF } /* Literal.Number.Float */
+html[data-theme="dark"] .codehilite .mh { color: #AE81FF } /* Literal.Number.Hex */
+html[data-theme="dark"] .codehilite .mi { color: #AE81FF } /* Literal.Number.Integer */
+html[data-theme="dark"] .codehilite .mo { color: #AE81FF } /* Literal.Number.Oct */
+html[data-theme="dark"] .codehilite .sa { color: #E6DB74 } /* Literal.String.Affix */
+html[data-theme="dark"] .codehilite .sb { color: #E6DB74 } /* Literal.String.Backtick */
+html[data-theme="dark"] .codehilite .sc { color: #E6DB74 } /* Literal.String.Char */
+html[data-theme="dark"] .codehilite .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+html[data-theme="dark"] .codehilite .sd { color: #E6DB74 } /* Literal.String.Doc */
+html[data-theme="dark"] .codehilite .s2 { color: #E6DB74 } /* Literal.String.Double */
+html[data-theme="dark"] .codehilite .se { color: #AE81FF } /* Literal.String.Escape */
+html[data-theme="dark"] .codehilite .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+html[data-theme="dark"] .codehilite .si { color: #E6DB74 } /* Literal.String.Interpol */
+html[data-theme="dark"] .codehilite .sx { color: #E6DB74 } /* Literal.String.Other */
+html[data-theme="dark"] .codehilite .sr { color: #E6DB74 } /* Literal.String.Regex */
+html[data-theme="dark"] .codehilite .s1 { color: #E6DB74 } /* Literal.String.Single */
+html[data-theme="dark"] .codehilite .ss { color: #E6DB74 } /* Literal.String.Symbol */
+html[data-theme="dark"] .codehilite .bp { color: #A6E22E } /* Name.Builtin.Pseudo */
+html[data-theme="dark"] .codehilite .fm { color: #A6E22E } /* Name.Function.Magic */
+html[data-theme="dark"] .codehilite .vc { color: #F8F8F2 } /* Name.Variable.Class */
+html[data-theme="dark"] .codehilite .vg { color: #F8F8F2 } /* Name.Variable.Global */
+html[data-theme="dark"] .codehilite .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+html[data-theme="dark"] .codehilite .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+
+/* 移动端 */
+#menuBtn{
+  display:none;position:fixed;top:14px;left:14px;z-index:70;width:40px;height:40px;
+  border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);
+  font-size:18px;cursor:pointer;box-shadow:var(--shadow);
+}
+/* 移动端侧栏遮罩：点它 = 收起菜单 */
+#scrim{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.38);z-index:45;
+  opacity:0;transition:opacity .22s ease;
+}
+@media (max-width:1100px){
+  #scrim{display:block;pointer-events:none}
+  body.menu-open #scrim{opacity:1;pointer-events:auto}
+  body.menu-open{overflow:hidden}
+  #sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  #sidebar.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  /* 菜单展开时 ☰ 在侧栏左上角，给标题让位，免得压住 logo */
+  #sidebar.open .side-head{padding-left:68px}
+  #main{margin-left:0}
+  #content{padding:60px 20px 40px}
+  #menuBtn{display:block}
+  #tools{left:auto;right:12px;bottom:auto;top:12px;width:auto;max-width:calc(100vw - 24px);
+    padding:6px;gap:5px;transition:opacity .18s ease}
+  #tools button{padding:4px 7px;font-size:11.5px}
+  /* 侧栏展开时收起工具栏，否则会压住侧栏标题 */
+  body.menu-open #tools{opacity:0;pointer-events:none}
+  #toc{padding-bottom:10px}
+  #toc .toggle{width:32px;height:32px;font-size:22px;border-radius:8px}
+  #toc li.has-sub > a{padding-right:42px}
+}
+@media print{
+  #sidebar,#tools,#totop,#menuBtn{display:none!important}
+  #main{margin-left:0}
+  #content{max-width:none;padding:0}
+  details{break-inside:avoid}
+  details>summary{list-style:none}
+  a{color:var(--fg)}
+}
+</style>
+</head>
+<body>
+
+<button id="menuBtn" title="目录">☰</button>
+
+<div id="scrim"></div>
+
+<nav id="sidebar">
+  <div class="side-head">
+    <div class="logo">V</div>
+    <div class="t">自建节点 · 工时评估</div>
+  </div>
+  <div class="search"><input id="tocSearch" type="search" placeholder="搜索目录…" autocomplete="off"></div>
+  <div id="toc"><ul>
+<li class="lv1"><a href="#自建节点-工时评估">自建节点 · 工时评估</a><ul>
+<li class="lv2"><a href="#总览">总览</a></li>
+<li class="lv2"><a href="#阶段-1-vps挑选已经完成参考vps挑选html">阶段 1 vps挑选已经完成，参考vps挑选.html</a></li>
+<li class="lv2"><a href="#阶段-2-采购与开通">阶段 2 采购与开通</a></li>
+<li class="lv2"><a href="#阶段-3-系统加固">阶段 3 系统加固</a></li>
+<li class="lv2"><a href="#阶段-4-面板部署">阶段 4 面板部署</a></li>
+<li class="lv2"><a href="#阶段-5-协议部署">阶段 5 协议部署</a></li>
+<li class="lv2"><a href="#阶段-6-客户端部署">阶段 6 客户端部署</a></li>
+<li class="lv2"><a href="#阶段-7-测试与验收">阶段 7 测试与验收</a></li>
+</ul>
+</li>
+</ul></div>
+</nav>
+
+<div id="tools">
+  <button id="btnFold">展开折叠块</button>
+  <button id="btnTheme">🌙 暗色</button>
+  <button id="btnPrint">打印 / PDF</button>
+</div>
+
+<main id="main">
+  <div id="content">
+<h1 id="自建节点-工时评估">自建节点 · 工时评估</h1>
+<h2 id="总览">总览</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>名称</th>
+<th>时长/小时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>vps选型（调研寻找便宜适用的vps）</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>采购与开通</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>系统配置（Ubuntu 22.04 + bbr）</td>
+<td>1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>面板部署（S-UI后台）</td>
+<td>1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>协议部署（VLESS+REALITY, TUIC）</td>
+<td>2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>客户端部署</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>7</td>
+<td>测试与验收</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>合计</strong></td>
+<td>10小时</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>时间包含查资料、读文档、试错、返工、跨端联调、写文档、沟通、验收陪测。</p>
+</blockquote>
+<h2 id="阶段-1-vps挑选已经完成参考vps挑选html">阶段 1　vps挑选已经完成，参考vps挑选.html</h2>
+<h2 id="阶段-2-采购与开通">阶段 2　采购与开通</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>注册核验</td>
+<td>注册账号、邮箱验证、KYC、绑定支付</td>
+</tr>
+<tr>
+<td>下单支付</td>
+<td>按 pid 下单、应用优惠码、处理 3DS / PayPal / 支付宝</td>
+</tr>
+<tr>
+<td>连通性验证</td>
+<td>IP 纯净度、三网 ping / mtr、去回程路由、实测带宽是否达标</td>
+</tr>
+<tr>
+<td>重装系统</td>
+<td>Ubuntu 22.04，确认架构与内核</td>
+</tr>
+<tr>
+<td>有问题时工单沟通</td>
+<td>问清流量口径、换 IP 流程、超量处理，记录响应时效</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-3-系统加固">阶段 3　系统加固</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基础环境</td>
+<td>时区、locale、换源、全量升级、装常用工具</td>
+</tr>
+<tr>
+<td>SSH 加固</td>
+<td>ed25519 密钥、改远程端口、登录密码</td>
+</tr>
+<tr>
+<td>防火墙</td>
+<td>ufw + 云安全组<strong>两层</strong>都开，逐条验证放行</td>
+</tr>
+<tr>
+<td>内核调优</td>
+<td>BBR + fq、文件句柄、conntrack、TCP 缓冲区、Fast Open，调优前后对比</td>
+</tr>
+<tr>
+<td>时间同步</td>
+<td>chrony 配就近 NTP，偏移压到 100ms 内（REALITY 误差 &gt;60s 直接失败）</td>
+</tr>
+<tr>
+<td>监控日志</td>
+<td>netdata、logrotate、journald 上限、磁盘告警</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-4-面板部署">阶段 4　面板部署</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安装 S-UI</td>
+<td>中文安装器，确认 s-ui 与 sing-box 两个服务都 running</td>
+</tr>
+<tr>
+<td>面板加固</td>
+<td>改端口、改路径、强密码、2FA、IP 白名单</td>
+</tr>
+<tr>
+<td>筛选伪装域名</td>
+<td>查找搭建节点需要借用流量特征的选伪装目标</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-5-协议部署">阶段 5　协议部署</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VLESS + REALITY</td>
+<td>选伪装目标（需 TLS1.3 + H2、非国内、非 CF）、生成密钥对、配 Vision 流控、<strong>主动探测模拟验证无特征</strong></td>
+</tr>
+<tr>
+<td>Hysteria2</td>
+<td>自签证书、带宽参数按实际 80%、salamander 混淆、端口跳跃 DNAT 并持久化、<code>tc netem</code> 模拟 30% 丢包测试</td>
+</tr>
+<tr>
+<td>TUIC v5</td>
+<td>复用证书、拥塞控制 bbr、<strong>显式关 0-RTT</strong>（官方警告重放攻击）、确认与 hy2 端口不冲突、切网测试</td>
+</tr>
+<tr>
+<td>分流策略</td>
+<td>国内直连 / 国外代理 / AI 服务走指定节点，定切换逻辑</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-6-客户端部署">阶段 6　客户端部署</h2>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td>v2rayN 、Clash Verge Rev，TUN 模式 + 开机自启</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>处理 Gatekeeper 放行，TUN 模式，四协议逐个验证</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>NekoBox / Hiddify</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>Shadowrocket（需非国区 ID），规则与全局模式</td>
+</tr>
+<tr>
+<td>OpenWrt</td>
+<td>PassWall / ShellCrash，透明代理 + DNS 防污染，排查 DNS 泄漏与 MTU</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="阶段-7-测试与验收">阶段 7　测试与验收</h2>
+<p>确认能上网、确认走的是节点、确认重启后能用</p>
+  </div>
+</main>
+
+<button id="totop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  // ---- 目录树折叠 ----
+  var toc=document.getElementById('toc');
+  function setupTree(){
+    var items=[].slice.call(toc.querySelectorAll('li'));
+    items.forEach(function(li){
+      var a=li.querySelector('a'); if(!a) return;
+      var lv=parseInt((li.className.match(/lv(\d)/)||[0,0])[1],10);
+      // 若本项有子列表，加折叠按钮
+      var sub=li.querySelector('ul');
+      if(sub){
+        li.classList.add('has-sub');
+        // 初始：lv1 / lv2 展开，lv3 及更深折叠（等价于原来"默认展开到 lv3"）
+        if(lv>=3) li.classList.add('collapsed');
+        var btn=document.createElement('span');
+        btn.className='toggle';
+        btn.textContent = li.classList.contains('collapsed') ? '+' : '−';
+        btn.title='展开/收起';
+        btn.onclick=function(e){
+          e.preventDefault(); e.stopPropagation();
+          // 折叠状态只挂在当前这一层，子孙各自保持原样
+          var collapsed = li.classList.toggle('collapsed');
+          li.classList.toggle('open', !collapsed);
+          btn.textContent = collapsed ? '+' : '−';
+        };
+        a.appendChild(btn);
+      }
+    });
+  }
+  setupTree();
+
+  // ---- 滚动高亮 ----
+  var links=[].slice.call(toc.querySelectorAll('a[href^="#"]'));
+  var map={};
+  links.forEach(function(a){ map[decodeURIComponent(a.getAttribute('href').slice(1))]=a; });
+  var heads=[].slice.call(document.querySelectorAll('#content h1,#content h2,#content h3,#content h4,#content h5,#content h6'));
+  var current=null;
+  function onScroll(){
+    var top=window.scrollY+110, found=null;
+    for(var i=0;i<heads.length;i++){
+      if(heads[i].offsetTop<=top) found=heads[i]; else break;
+    }
+    if(!found) found=heads[0];
+    if(!found) return;
+    var a=map[found.id];
+    if(a===current) return;
+    if(current) current.classList.remove('active');
+    current=a;
+    if(a){
+      a.classList.add('active');
+      // 展开所有祖先（同时清掉 collapsed，并让 +/− 图标跟着变）
+      var li=a.parentElement;
+      while(li && li!==toc){
+        if(li.tagName==='LI'){
+          li.classList.add('open');
+          li.classList.remove('collapsed');
+          var tg=li.querySelector(':scope > a > .toggle');
+          if(tg) tg.textContent='−';
+        }
+        li=li.parentElement;
+      }
+      // 让高亮项可见
+      var r=a.getBoundingClientRect(), sr=toc.getBoundingClientRect();
+      if(r.top<sr.top+8 || r.bottom>sr.bottom-8){
+        a.scrollIntoView({block:'nearest'});
+      }
+    }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+
+  // ---- 搜索过滤 ----
+  var box=document.getElementById('tocSearch');
+  if(box){
+    box.addEventListener('input',function(){
+      var q=box.value.trim().toLowerCase();
+      var lis=[].slice.call(toc.querySelectorAll('li'));
+      if(!q){
+        lis.forEach(function(li){
+          li.style.display='';
+          var lv=parseInt((li.className.match(/lv(\d)/)||[0,0])[1],10);
+          // 恢复默认视图：lv1/lv2 展开，lv3 及更深折叠
+          if(lv>=3){
+            li.classList.add('collapsed'); li.classList.remove('open');
+          }else{
+            li.classList.remove('collapsed'); li.classList.add('open');
+          }
+          var tg=li.querySelector(':scope > a > .toggle');
+          if(tg) tg.textContent = li.classList.contains('collapsed') ? '+' : '−';
+        });
+        onScroll(); return;
+      }
+      // 用数组下标做 key（不能用 li 当对象属性名，会被统一转成 "[object HTMLLIElement]"）
+      var hit=[];
+      lis.forEach(function(li,idx){
+        var a=li.querySelector('a');
+        var t='';
+        if(a){
+          // 只取 <a> 自身的直接文本节点，排除折叠按钮的 +/- 字符
+          for(var n=a.firstChild;n;n=n.nextSibling){
+            if(n.nodeType===3) t+=n.nodeValue;
+          }
+        }
+        hit[idx] = t.toLowerCase().indexOf(q)>=0;
+      });
+      // 自底向上：子孙命中则祖先也保留
+      for(var i=lis.length-1;i>=0;i--){
+        if(hit[i]) continue;
+        var sub=lis[i].querySelectorAll('li');
+        for(var j=0;j<sub.length;j++){
+          var k=lis.indexOf(sub[j]);
+          if(k>=0 && hit[k]){ hit[i]=true; break; }
+        }
+      }
+      lis.forEach(function(li,idx){
+        var show=!!hit[idx];
+        li.style.display = show ? '' : 'none';
+        if(show){
+          li.classList.add('open'); li.classList.remove('collapsed');
+          var tg=li.querySelector(':scope > a > .toggle');
+          if(tg) tg.textContent='−';
+        }
+      });
+    });
+  }
+
+  // ---- 表格包一层，便于横向滚动；列数少的撑满宽度 ----
+  [].forEach.call(document.querySelectorAll('#content table'),function(t){
+    var cols = t.querySelectorAll('thead th').length || (t.rows[0]?t.rows[0].cells.length:0);
+    if(cols && cols<=5) t.classList.add('narrow');
+    if(t.parentElement.classList.contains('table-wrap')) return;
+    var w=document.createElement('div'); w.className='table-wrap';
+    t.parentNode.insertBefore(w,t); w.appendChild(t);
+    // 实际超宽时给个渐隐 + 提示
+    setTimeout(function(){
+      if(w.scrollWidth > w.clientWidth+4){
+        w.classList.add('scrollable');
+        var hint=document.createElement('div');
+        hint.className='table-hint show';
+        hint.textContent='← 这张表比较宽，可以左右拖动查看完整列 →';
+        w.parentNode.insertBefore(hint,w);
+      }
+    },80);
+  });
+
+  // ---- 主题切换 ----
+  var btnTheme=document.getElementById('btnTheme');
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem('mdhtml-theme',t);}catch(e){}
+    if(btnTheme) btnTheme.textContent = t==='dark' ? '☀ 亮色' : '🌙 暗色';
+  }
+  var saved='light';
+  try{ saved=localStorage.getItem('mdhtml-theme')||'light'; }catch(e){}
+  applyTheme(saved);
+  if(btnTheme) btnTheme.onclick=function(){
+    applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+  };
+
+  // ---- 全部展开 / 收起折叠块 ----
+  var btnFold=document.getElementById('btnFold');
+  var allOpen=false;
+  if(btnFold) btnFold.onclick=function(){
+    allOpen=!allOpen;
+    [].forEach.call(document.querySelectorAll('#content details'),function(d){ d.open=allOpen; });
+    btnFold.textContent = allOpen ? '收起折叠块' : '展开折叠块';
+    btnFold.classList.toggle('on',allOpen);
+  };
+
+  // ---- 打印 ----
+  var btnPrint=document.getElementById('btnPrint');
+  if(btnPrint) btnPrint.onclick=function(){ window.print(); };
+
+  // ---- 返回顶部 ----
+  var totop=document.getElementById('totop');
+  window.addEventListener('scroll',function(){
+    totop.classList.toggle('show',window.scrollY>500);
+  },{passive:true});
+  totop.onclick=function(){ window.scrollTo({top:0,behavior:'smooth'}); };
+
+  // ---- 移动端菜单 ----
+  var mb=document.getElementById('menuBtn'), sb=document.getElementById('sidebar'),
+      scrim=document.getElementById('scrim');
+  function setMenu(open){
+    if(open){ sb.classList.add('open'); document.body.classList.add('menu-open'); }
+    else{ sb.classList.remove('open'); document.body.classList.remove('menu-open'); }
+  }
+  if(mb) mb.onclick=function(e){ e.stopPropagation(); setMenu(!sb.classList.contains('open')); };
+  // 点侧栏以外的区域（遮罩）收起
+  if(scrim) scrim.onclick=function(){ setMenu(false); };
+  // 点正文区也收起（遮罩已覆盖，双保险）
+  var mainEl=document.getElementById('main');
+  if(mainEl) mainEl.addEventListener('click',function(){ if(window.innerWidth<=1100) setMenu(false); });
+  // Esc 收起
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'||e.keyCode===27) setMenu(false); });
+  // 窗口变宽自动复位
+  window.addEventListener('resize',function(){ if(window.innerWidth>1100) setMenu(false); });
+  [].forEach.call(toc.querySelectorAll('a'),function(a){
+    a.addEventListener('click',function(){ if(window.innerWidth<=1100) setMenu(false); });
+  });
+
+  // ---- 锚点定位（URL 带 #hash 时） ----
+  function openAncestors(el){
+    var p=el.parentElement;
+    while(p){
+      if(p.tagName==='DETAILS') p.open=true;
+      p=p.parentElement;
+    }
+  }
+  // 点目录里指向折叠块内部的锚点时，先展开祖先 <details>，否则跳过去是一片空白
+  [].forEach.call(toc.querySelectorAll('a[href^="#"]'),function(a){
+    a.addEventListener('click',function(){
+      var id=decodeURIComponent(a.getAttribute('href').slice(1));
+      var el=document.getElementById(id);
+      if(el) openAncestors(el);
+    });
+  });
+  if(location.hash){
+    var id=decodeURIComponent(location.hash.slice(1));
+    var el=document.getElementById(id);
+    if(el){ openAncestors(el); setTimeout(function(){ el.scrollIntoView(); },60); }
+  }
+})();
+</script>
+</body>
+</html>

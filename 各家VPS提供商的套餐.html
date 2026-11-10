@@ -1,0 +1,5141 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<!-- md2html: md-sha=5bed2221f810 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VPS 挑选</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d8dee4;
+  --accent:#0969da; --accent-soft:#ddf4ff;
+  --thead:#1f4e79; --thead-fg:#ffffff;
+  --row-alt:#f6f8fa; --code-bg:#f6f8fa; --quote-bg:#fff8e6; --quote-line:#e3b341;
+  --nav-bg:#f6f8fa; --nav-active:#0969da; --shadow:0 1px 3px rgba(0,0,0,.08);
+  --warn:#cf222e;
+  --sidebar-w:310px;
+}
+html[data-theme="dark"]{
+  --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --line:#30363d;
+  --accent:#58a6ff; --accent-soft:#132339;
+  --thead:#1f4e79; --thead-fg:#ffffff;
+  --row-alt:#161b22; --code-bg:#161b22; --quote-bg:#2a2313; --quote-line:#bb8009;
+  --nav-bg:#010409; --nav-active:#58a6ff; --shadow:0 1px 3px rgba(0,0,0,.5);
+  --warn:#ff7b72;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,sans-serif;
+  font-size:15.5px; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- 侧边目录 ---------- */
+#sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+  background:var(--nav-bg); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; z-index:50;
+}
+#sidebar .side-head{
+  padding:16px 18px 12px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:10px; flex:0 0 auto;
+}
+#sidebar .side-head .logo{
+  width:26px;height:26px;border-radius:7px;background:var(--accent);
+  color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto;
+}
+#sidebar .side-head .t{
+  font-size:14px;font-weight:600;line-height:1.3;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+#sidebar .search{padding:10px 14px;border-bottom:1px solid var(--line);flex:0 0 auto}
+#sidebar .search input{
+  width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;
+  background:var(--bg);color:var(--fg);font-size:13px;outline:none;
+}
+#sidebar .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#toc{overflow-y:auto;padding:10px 8px 96px;flex:1 1 auto;scrollbar-width:thin}
+#toc::-webkit-scrollbar{width:9px}
+#toc::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+#toc ul{list-style:none;margin:0;padding:0}
+#toc li{margin:0}
+#toc a{
+  display:block; padding:4px 10px; border-radius:5px; color:var(--muted);
+  text-decoration:none; font-size:13.2px; line-height:1.45;
+  border-left:2px solid transparent; transition:background .12s,color .12s;
+}
+#toc a:hover{background:rgba(127,127,127,.12); color:var(--fg)}
+#toc a.active{color:var(--nav-active); font-weight:600; background:var(--accent-soft); border-left-color:var(--accent)}
+#toc .lv1 > a{font-weight:600;color:var(--fg);font-size:14px;padding-top:7px}
+#toc .lv2 > a{font-weight:600;color:var(--fg);padding-left:16px;font-size:13.6px}
+#toc .lv3 > a{padding-left:30px}
+#toc .lv4 > a{padding-left:44px;font-size:12.6px}
+#toc .lv5 > a{padding-left:58px;font-size:12.2px}
+#toc .lv6 > a{padding-left:70px;font-size:12px}
+/* 折叠状态挂在 li 上：任何层级都能展开/收起，不再只认 lv4-6 */
+#toc li.collapsed > ul{display:none}
+/* 展开/收起按钮挂在 <a> 里，所以定位锚点是 <a> 本身 */
+#toc li > a{position:relative}
+/* 展开/收起按钮：做得明显一点，方便手指点 */
+#toc .toggle{
+  position:absolute;right:2px;top:50%;transform:translateY(-50%);z-index:1;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);border-radius:6px;background:var(--bg);
+  font-size:19px;font-weight:700;line-height:1;color:var(--fg);
+  cursor:pointer;user-select:none;transition:all .12s;
+}
+#toc .toggle:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+/* 有按钮的行，右边留出位置免得文字压到按钮（叶子节点不加） */
+#toc li.has-sub > a{padding-right:34px}
+
+/* ---------- 正文 ---------- */
+#main{margin-left:var(--sidebar-w); padding:0 0 120px}
+#content{max-width:1080px;margin:0 auto;padding:34px 46px 40px}
+h1,h2,h3,h4,h5,h6{line-height:1.35;margin:1.6em 0 .6em;scroll-margin-top:20px;font-weight:600}
+h1{font-size:27px;margin-top:0;padding-bottom:.35em;border-bottom:2px solid var(--line)}
+h2{font-size:21px;padding-bottom:.3em;border-bottom:1px solid var(--line);margin-top:2.1em}
+h3{font-size:17.5px;color:var(--accent)}
+h4{font-size:15.5px}
+h5{font-size:14.5px;color:var(--muted)}
+h6{font-size:13.8px;color:var(--muted)}
+p{margin:.75em 0}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+strong{font-weight:600}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+ul,ol{padding-left:1.9em;margin:.7em 0}
+li{margin:.28em 0}
+li>p{margin:.3em 0}
+img{max-width:100%}
+
+/* 引用块 */
+blockquote{
+  margin:1em 0;padding:.7em 1.1em;background:var(--quote-bg);
+  border-left:4px solid var(--quote-line);border-radius:0 6px 6px 0;color:var(--fg);
+}
+blockquote p{margin:.3em 0}
+blockquote blockquote{margin:.4em 0;background:transparent;border-left-color:var(--line)}
+/* 引用块里的重点提示：<span class="hl">…</span> 标红加粗 */
+.hl{color:var(--warn);font-weight:700}
+
+/* 代码 */
+code{
+  font-family:"Cascadia Code",Consolas,"Courier New",monospace;
+  font-size:.88em;background:var(--code-bg);padding:.15em .42em;
+  border-radius:4px;border:1px solid var(--line);
+}
+pre{
+  background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;margin:1em 0;line-height:1.6;
+}
+pre code{background:none;border:0;padding:0;font-size:13.2px}
+.hljs{background:var(--code-bg)!important}
+
+/* 表格 */
+.table-wrap{position:relative;overflow-x:auto;margin:1.1em 0;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
+.table-wrap::-webkit-scrollbar{height:10px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+.table-wrap::-webkit-scrollbar-track{background:transparent}
+/* 超宽表格右侧渐隐，暗示还能往右滚 */
+.table-wrap.scrollable::after{
+  content:"";position:sticky;right:0;top:0;float:right;
+  width:26px;height:100%;margin-left:-26px;pointer-events:none;
+  background:linear-gradient(to right,transparent,var(--bg));
+}
+.table-hint{font-size:12px;color:var(--muted);margin:-.5em 0 .9em;display:none}
+.table-hint.show{display:block}
+/* width:max-content + min-width:100% —— 列宽按内容自然展开，超宽时容器横向滚动；
+   用 width:100% 会把 12 列硬压进容器，导致「已下架」被拆成三行 */
+table{border-collapse:collapse;width:max-content;min-width:100%;font-size:13.4px;background:var(--bg)}
+/* 列数少的表格撑满容器更好看（由 JS 打 .narrow 标记） */
+table.narrow{width:100%}
+thead th{
+  background:var(--thead);color:var(--thead-fg);font-weight:600;
+  padding:9px 11px;text-align:left;white-space:nowrap;
+  border-right:1px solid rgba(255,255,255,.14);
+}
+thead th:last-child{border-right:0}
+tbody td{
+  padding:8px 11px;border-top:1px solid var(--line);vertical-align:top;
+  max-width:340px;              /* 长说明列到这个宽度才换行 */
+}
+tbody tr:nth-child(even){background:var(--row-alt)}
+tbody tr:hover{background:var(--accent-soft)}
+td a{word-break:break-all}
+
+/* 折叠块 */
+details{
+  margin:1.1em 0;border:1px solid var(--line);border-radius:8px;
+  background:var(--row-alt);
+}
+details>summary{
+  padding:11px 15px;cursor:pointer;font-size:14.5px;font-weight:600;
+  user-select:none;list-style:none;border-radius:7px;
+}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▶";font-size:9px;color:var(--accent);display:inline-block;transition:transform .15s;margin-right:7px}
+details[open]>summary::before{transform:rotate(90deg)}
+details>summary:hover{background:var(--accent-soft)}
+details[open]>summary{border-bottom:1px solid var(--line);border-radius:7px 7px 0 0}
+/* details 内所有块级内容左右留白（不能用 wrapper div，会破坏 md_in_html 解析） */
+details>*:not(summary){margin-left:16px;margin-right:16px}
+details>*:not(summary):first-of-type{margin-top:14px}
+details[open]{padding-bottom:16px}
+
+/* 右上角工具 */
+#tools{
+  position:fixed;left:12px;bottom:12px;width:calc(var(--sidebar-w) - 24px);
+  display:flex;gap:6px;flex-wrap:wrap;z-index:60;
+  padding:8px;border-radius:9px;background:var(--bg);
+  box-shadow:0 2px 10px rgba(0,0,0,.12);border:1px solid var(--line);
+}
+#tools button{
+  flex:1 1 auto;white-space:nowrap;
+  background:var(--bg);border:1px solid var(--line);color:var(--muted);
+  border-radius:6px;padding:5px 8px;font-size:12px;cursor:pointer;
+  transition:all .12s;
+}
+#tools button:hover{color:var(--accent);border-color:var(--accent)}
+#tools button.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+
+/* 返回顶部 */
+#totop{
+  position:fixed;right:22px;bottom:24px;width:42px;height:42px;border-radius:50%;
+  background:var(--accent);color:#fff;border:0;cursor:pointer;font-size:17px;
+  box-shadow:0 3px 10px rgba(0,0,0,.22);display:none;z-index:60;
+}
+#totop.show{display:block}
+
+/* ---------- 代码高亮（Pygments friendly / monokai）---------- */
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: transparent; }
+.codehilite .c { color: #60A0B0; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #007020; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #60A0B0; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #60A0B0; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #007020 } /* Comment.Preproc */
+.codehilite .cpf { color: #60A0B0; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #60A0B0; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #60A0B0; background-color: #FFF0F0 } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #F00 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #00A000 } /* Generic.Inserted */
+.codehilite .go { color: #888 } /* Generic.Output */
+.codehilite .gp { color: #C65D09; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #007020 } /* Keyword.Pseudo */
+.codehilite .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #902000 } /* Keyword.Type */
+.codehilite .m { color: #40A070 } /* Literal.Number */
+.codehilite .s { color: #4070A0 } /* Literal.String */
+.codehilite .na { color: #4070A0 } /* Name.Attribute */
+.codehilite .nb { color: #007020 } /* Name.Builtin */
+.codehilite .nc { color: #0E84B5; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #60ADD5 } /* Name.Constant */
+.codehilite .nd { color: #555; font-weight: bold } /* Name.Decorator */
+.codehilite .ni { color: #D55537; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #007020 } /* Name.Exception */
+.codehilite .nf { color: #06287E } /* Name.Function */
+.codehilite .nl { color: #002070; font-weight: bold } /* Name.Label */
+.codehilite .nn { color: #0E84B5; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #BB60D5 } /* Name.Variable */
+.codehilite .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #40A070 } /* Literal.Number.Bin */
+.codehilite .mf { color: #40A070 } /* Literal.Number.Float */
+.codehilite .mh { color: #40A070 } /* Literal.Number.Hex */
+.codehilite .mi { color: #40A070 } /* Literal.Number.Integer */
+.codehilite .mo { color: #40A070 } /* Literal.Number.Oct */
+.codehilite .sa { color: #4070A0 } /* Literal.String.Affix */
+.codehilite .sb { color: #4070A0 } /* Literal.String.Backtick */
+.codehilite .sc { color: #4070A0 } /* Literal.String.Char */
+.codehilite .dl { color: #4070A0 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #4070A0; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #4070A0 } /* Literal.String.Double */
+.codehilite .se { color: #4070A0; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #4070A0 } /* Literal.String.Heredoc */
+.codehilite .si { color: #70A0D0; font-style: italic } /* Literal.String.Interpol */
+.codehilite .sx { color: #C65D09 } /* Literal.String.Other */
+.codehilite .sr { color: #235388 } /* Literal.String.Regex */
+.codehilite .s1 { color: #4070A0 } /* Literal.String.Single */
+.codehilite .ss { color: #517918 } /* Literal.String.Symbol */
+.codehilite .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #06287E } /* Name.Function.Magic */
+.codehilite .vc { color: #BB60D5 } /* Name.Variable.Class */
+.codehilite .vg { color: #BB60D5 } /* Name.Variable.Global */
+.codehilite .vi { color: #BB60D5 } /* Name.Variable.Instance */
+.codehilite .vm { color: #BB60D5 } /* Name.Variable.Magic */
+.codehilite .il { color: #40A070 } /* Literal.Number.Integer.Long */
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+html[data-theme="dark"] .codehilite .hll { background-color: #49483e }
+html[data-theme="dark"] .codehilite { background: transparent; color: #F8F8F2 }
+html[data-theme="dark"] .codehilite .c { color: #959077 } /* Comment */
+html[data-theme="dark"] .codehilite .err { color: #ED007E; background-color: #1E0010 } /* Error */
+html[data-theme="dark"] .codehilite .esc { color: #F8F8F2 } /* Escape */
+html[data-theme="dark"] .codehilite .g { color: #F8F8F2 } /* Generic */
+html[data-theme="dark"] .codehilite .k { color: #66D9EF } /* Keyword */
+html[data-theme="dark"] .codehilite .l { color: #AE81FF } /* Literal */
+html[data-theme="dark"] .codehilite .n { color: #F8F8F2 } /* Name */
+html[data-theme="dark"] .codehilite .o { color: #FF4689 } /* Operator */
+html[data-theme="dark"] .codehilite .x { color: #F8F8F2 } /* Other */
+html[data-theme="dark"] .codehilite .p { color: #F8F8F2 } /* Punctuation */
+html[data-theme="dark"] .codehilite .ch { color: #959077 } /* Comment.Hashbang */
+html[data-theme="dark"] .codehilite .cm { color: #959077 } /* Comment.Multiline */
+html[data-theme="dark"] .codehilite .cp { color: #959077 } /* Comment.Preproc */
+html[data-theme="dark"] .codehilite .cpf { color: #959077 } /* Comment.PreprocFile */
+html[data-theme="dark"] .codehilite .c1 { color: #959077 } /* Comment.Single */
+html[data-theme="dark"] .codehilite .cs { color: #959077 } /* Comment.Special */
+html[data-theme="dark"] .codehilite .gd { color: #FF4689 } /* Generic.Deleted */
+html[data-theme="dark"] .codehilite .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+html[data-theme="dark"] .codehilite .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+html[data-theme="dark"] .codehilite .gr { color: #FF4689 } /* Generic.Error */
+html[data-theme="dark"] .codehilite .gh { color: #F8F8F2 } /* Generic.Heading */
+html[data-theme="dark"] .codehilite .gi { color: #A6E22E } /* Generic.Inserted */
+html[data-theme="dark"] .codehilite .go { color: #66D9EF } /* Generic.Output */
+html[data-theme="dark"] .codehilite .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+html[data-theme="dark"] .codehilite .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+html[data-theme="dark"] .codehilite .gu { color: #959077 } /* Generic.Subheading */
+html[data-theme="dark"] .codehilite .gt { color: #66D9EF } /* Generic.Traceback */
+html[data-theme="dark"] .codehilite .kc { color: #66D9EF } /* Keyword.Constant */
+html[data-theme="dark"] .codehilite .kd { color: #66D9EF } /* Keyword.Declaration */
+html[data-theme="dark"] .codehilite .kn { color: #FF4689 } /* Keyword.Namespace */
+html[data-theme="dark"] .codehilite .kp { color: #66D9EF } /* Keyword.Pseudo */
+html[data-theme="dark"] .codehilite .kr { color: #66D9EF } /* Keyword.Reserved */
+html[data-theme="dark"] .codehilite .kt { color: #66D9EF } /* Keyword.Type */
+html[data-theme="dark"] .codehilite .ld { color: #E6DB74 } /* Literal.Date */
+html[data-theme="dark"] .codehilite .m { color: #AE81FF } /* Literal.Number */
+html[data-theme="dark"] .codehilite .s { color: #E6DB74 } /* Literal.String */
+html[data-theme="dark"] .codehilite .na { color: #A6E22E } /* Name.Attribute */
+html[data-theme="dark"] .codehilite .nb { color: #A6E22E } /* Name.Builtin */
+html[data-theme="dark"] .codehilite .nc { color: #A6E22E } /* Name.Class */
+html[data-theme="dark"] .codehilite .no { color: #66D9EF } /* Name.Constant */
+html[data-theme="dark"] .codehilite .nd { color: #A6E22E } /* Name.Decorator */
+html[data-theme="dark"] .codehilite .ni { color: #F8F8F2 } /* Name.Entity */
+html[data-theme="dark"] .codehilite .ne { color: #A6E22E } /* Name.Exception */
+html[data-theme="dark"] .codehilite .nf { color: #A6E22E } /* Name.Function */
+html[data-theme="dark"] .codehilite .nl { color: #F8F8F2 } /* Name.Label */
+html[data-theme="dark"] .codehilite .nn { color: #F8F8F2 } /* Name.Namespace */
+html[data-theme="dark"] .codehilite .nx { color: #A6E22E } /* Name.Other */
+html[data-theme="dark"] .codehilite .py { color: #F8F8F2 } /* Name.Property */
+html[data-theme="dark"] .codehilite .nt { color: #FF4689 } /* Name.Tag */
+html[data-theme="dark"] .codehilite .nv { color: #F8F8F2 } /* Name.Variable */
+html[data-theme="dark"] .codehilite .ow { color: #FF4689 } /* Operator.Word */
+html[data-theme="dark"] .codehilite .pm { color: #F8F8F2 } /* Punctuation.Marker */
+html[data-theme="dark"] .codehilite .w { color: #F8F8F2 } /* Text.Whitespace */
+html[data-theme="dark"] .codehilite .mb { color: #AE81FF } /* Literal.Number.Bin */
+html[data-theme="dark"] .codehilite .mf { color: #AE81FF } /* Literal.Number.Float */
+html[data-theme="dark"] .codehilite .mh { color: #AE81FF } /* Literal.Number.Hex */
+html[data-theme="dark"] .codehilite .mi { color: #AE81FF } /* Literal.Number.Integer */
+html[data-theme="dark"] .codehilite .mo { color: #AE81FF } /* Literal.Number.Oct */
+html[data-theme="dark"] .codehilite .sa { color: #E6DB74 } /* Literal.String.Affix */
+html[data-theme="dark"] .codehilite .sb { color: #E6DB74 } /* Literal.String.Backtick */
+html[data-theme="dark"] .codehilite .sc { color: #E6DB74 } /* Literal.String.Char */
+html[data-theme="dark"] .codehilite .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+html[data-theme="dark"] .codehilite .sd { color: #E6DB74 } /* Literal.String.Doc */
+html[data-theme="dark"] .codehilite .s2 { color: #E6DB74 } /* Literal.String.Double */
+html[data-theme="dark"] .codehilite .se { color: #AE81FF } /* Literal.String.Escape */
+html[data-theme="dark"] .codehilite .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+html[data-theme="dark"] .codehilite .si { color: #E6DB74 } /* Literal.String.Interpol */
+html[data-theme="dark"] .codehilite .sx { color: #E6DB74 } /* Literal.String.Other */
+html[data-theme="dark"] .codehilite .sr { color: #E6DB74 } /* Literal.String.Regex */
+html[data-theme="dark"] .codehilite .s1 { color: #E6DB74 } /* Literal.String.Single */
+html[data-theme="dark"] .codehilite .ss { color: #E6DB74 } /* Literal.String.Symbol */
+html[data-theme="dark"] .codehilite .bp { color: #A6E22E } /* Name.Builtin.Pseudo */
+html[data-theme="dark"] .codehilite .fm { color: #A6E22E } /* Name.Function.Magic */
+html[data-theme="dark"] .codehilite .vc { color: #F8F8F2 } /* Name.Variable.Class */
+html[data-theme="dark"] .codehilite .vg { color: #F8F8F2 } /* Name.Variable.Global */
+html[data-theme="dark"] .codehilite .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+html[data-theme="dark"] .codehilite .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+
+/* 移动端 */
+#menuBtn{
+  display:none;position:fixed;top:14px;left:14px;z-index:70;width:40px;height:40px;
+  border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);
+  font-size:18px;cursor:pointer;box-shadow:var(--shadow);
+}
+/* 移动端侧栏遮罩：点它 = 收起菜单 */
+#scrim{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.38);z-index:45;
+  opacity:0;transition:opacity .22s ease;
+}
+@media (max-width:1100px){
+  #scrim{display:block;pointer-events:none}
+  body.menu-open #scrim{opacity:1;pointer-events:auto}
+  body.menu-open{overflow:hidden}
+  #sidebar{transform:translateX(-100%);transition:transform .22s ease}
+  #sidebar.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  /* 菜单展开时 ☰ 在侧栏左上角，给标题让位，免得压住 logo */
+  #sidebar.open .side-head{padding-left:68px}
+  #main{margin-left:0}
+  #content{padding:60px 20px 40px}
+  #menuBtn{display:block}
+  #tools{left:auto;right:12px;bottom:auto;top:12px;width:auto;max-width:calc(100vw - 24px);
+    padding:6px;gap:5px;transition:opacity .18s ease}
+  #tools button{padding:4px 7px;font-size:11.5px}
+  /* 侧栏展开时收起工具栏，否则会压住侧栏标题 */
+  body.menu-open #tools{opacity:0;pointer-events:none}
+  #toc{padding-bottom:10px}
+  #toc .toggle{width:32px;height:32px;font-size:22px;border-radius:8px}
+  #toc li.has-sub > a{padding-right:42px}
+}
+@media print{
+  #sidebar,#tools,#totop,#menuBtn{display:none!important}
+  #main{margin-left:0}
+  #content{max-width:none;padding:0}
+  details{break-inside:avoid}
+  details>summary{list-style:none}
+  a{color:var(--fg)}
+}
+</style>
+</head>
+<body>
+
+<button id="menuBtn" title="目录">☰</button>
+
+<div id="scrim"></div>
+
+<nav id="sidebar">
+  <div class="side-head">
+    <div class="logo">V</div>
+    <div class="t">VPS 挑选</div>
+  </div>
+  <div class="search"><input id="tocSearch" type="search" placeholder="搜索目录…" autocomplete="off"></div>
+  <div id="toc"><ul>
+<li class="lv1"><a href="#vps挑选">vps挑选</a><ul>
+<li class="lv2"><a href="#网络线路">网络线路</a></li>
+<li class="lv2"><a href="#vps-服务商">vps 服务商</a><ul>
+<li class="lv3"><a href="#cloudcone-普通线路便宜晚高峰大概率会很卡">Cloudcone 普通线路，便宜，晚高峰大概率会很卡</a></li>
+<li class="lv3"><a href="#racknerd-普通线路便宜晚高峰大概率会很卡">RackNerd 普通线路，便宜，晚高峰大概率会很卡</a><ul>
+<li class="lv4"><a href="#cloudcone-和-racknerd-对比链接">Cloudcone 和 RackNerd 对比链接：</a></li>
+</ul>
+</li>
+<li class="lv3"><a href="#vultr">Vultr</a></li>
+<li class="lv3"><a href="#dmit-性价比高有便宜套餐时推荐但现在只剩高价套餐-便宜的已经售空了排除">dmit 性价比高，有便宜套餐时推荐，但现在只剩高价套餐, 便宜的已经售空了，排除</a><ul>
+<li class="lv4"><a href="#dmit-全套餐价格表三大机房完整版">DMIT 全套餐价格表（三大机房完整版）</a><ul>
+<li class="lv5"><a href="#洛杉矶-premium-networkcn2-gia-旗舰线路">洛杉矶 Premium Network（CN2 GIA 旗舰线路）</a></li>
+<li class="lv5"><a href="#洛杉矶-eyeball-networkcmin2-性价比线路">洛杉矶 Eyeball Network（CMIN2 性价比线路）</a></li>
+<li class="lv5"><a href="#洛杉矶-tier-1-network大流量国际线路">洛杉矶 Tier 1 Network（大流量国际线路）</a></li>
+<li class="lv5"><a href="#香港机房套餐">香港机房套餐</a></li>
+<li class="lv5"><a href="#东京机房套餐">东京机房套餐</a></li>
+<li class="lv5"><a href="#当前可用优惠码整理">当前可用优惠码整理</a></li>
+</ul>
+</li>
+<li class="lv4"><a href="#dmit-vps-套餐排序表网络-性价比综合-含实时库存">DMIT VPS 套餐排序表（网络 + 性价比综合 · 含实时库存）</a><ul>
+<li class="lv5"><a href="#库存状态说明">库存状态说明</a><ul>
+<li class="lv6"><a href="#两个必须先知道的变化">⚠️ 两个必须先知道的变化</a></li>
+<li class="lv6"><a href="#三条硬结论">三条硬结论</a></li>
+</ul>
+</li>
+<li class="lv5"><a href="#排序方法说明">排序方法说明</a></li>
+<li class="lv5"><a href="#一综合排序总表65-款由高到低">一、综合排序总表（65 款，由高到低）</a></li>
+<li class="lv5"><a href="#二-现货速查-现在就能下单的-20-款">二、🟢 现货速查 —— 现在就能下单的 20 款</a></li>
+<li class="lv5"><a href="#三-缺货15-款">三、🔴 缺货（15 款）</a></li>
+<li class="lv5"><a href="#四-已下架30-款">四、⚫ 已下架（30 款）</a></li>
+<li class="lv5"><a href="#五分项榜-a纯网络质量-top-20">五、分项榜 A：纯网络质量 Top 20</a></li>
+<li class="lv5"><a href="#六分项榜-b纯性价比-top-20">六、分项榜 B：纯性价比 Top 20</a></li>
+<li class="lv5"><a href="#七结论速览按今天能不能买到重排">七、结论速览（按「今天能不能买到」重排）</a><ul>
+<li class="lv6"><a href="#现货里最能打的-5-款">现货里最能打的 5 款</a></li>
+<li class="lv6"><a href="#按需求直接选只列能下单的">按需求直接选（只列能下单的）</a></li>
+<li class="lv6"><a href="#排序里几个反直觉的点">排序里几个反直觉的点</a></li>
+</ul>
+</li>
+<li class="lv5"><a href="#八必须知道的坑">八、必须知道的坑</a></li>
+<li class="lv5"><a href="#附测试-ip">附：测试 IP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="lv3"><a href="#搬瓦工推荐稳定且有cn2-gia线路的服务商但目前的套餐也涨价了">搬瓦工，推荐，稳定且有cn2-gia线路的服务商，但目前的套餐也涨价了</a><ul>
+<li class="lv4"><a href="#搬瓦工-cn2-gia-高速优化线路套餐表36-款">搬瓦工 CN2 GIA 高速优化线路套餐表（36 款）</a><ul>
+<li class="lv5"><a href="#全部-36-款一览">全部 36 款一览</a></li>
+<li class="lv5"><a href="#按系列看含适用场景">按系列看（含适用场景）</a><ul>
+<li class="lv6"><a href="#cn2-gia-e6-款">CN2 GIA-E（6 款）</a></li>
+<li class="lv6"><a href="#dubai7-款">DUBAI（7 款）</a></li>
+<li class="lv6"><a href="#osaka-cn2-gia6-款">OSAKA CN2 GIA（6 款）</a></li>
+<li class="lv6"><a href="#tokyo-cn2-gia6-款">TOKYO CN2 GIA（6 款）</a></li>
+<li class="lv6"><a href="#hk-cn2-gia6-款">HK CN2 GIA（6 款）</a></li>
+<li class="lv6"><a href="#kvm5-款">KVM（5 款）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul></div>
+</nav>
+
+<div id="tools">
+  <button id="btnFold">展开折叠块</button>
+  <button id="btnTheme">🌙 暗色</button>
+  <button id="btnPrint">打印 / PDF</button>
+</div>
+
+<main id="main">
+  <div id="content">
+<h1 id="vps挑选">vps挑选</h1>
+<blockquote>
+<p>这篇说明里面的数据从其他网站摘取，可能会发生变动，机器也可能已售空</p>
+</blockquote>
+<h2 id="网络线路">网络线路</h2>
+<p>从国内访问国外服务器，数据要经过「中国的出口」。vps的价格与线路是挂钩的。三家运营商各有各的出口，各修各的路：</p>
+<table>
+<thead>
+<tr>
+<th>你家宽带</th>
+<th>走哪条路最顺</th>
+<th>买机器时要认的标记</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>电信</strong></td>
+<td>电信修的 CN2 GIA 专线</td>
+<td><code>CN2 GIA</code> / <code>GIA</code></td>
+</tr>
+<tr>
+<td><strong>联通</strong></td>
+<td>联通修的 9929 高速</td>
+<td><code>9929</code> / <code>CU Premium</code></td>
+</tr>
+<tr>
+<td><strong>移动</strong></td>
+<td>移动修的 CMIN2 / CMI 高速</td>
+<td><code>CMIN2</code> / <code>CMI</code></td>
+</tr>
+<tr>
+<td><strong>不确定 / 全家混用</strong></td>
+<td>三线全有的机器最保险</td>
+<td><code>三网优化</code> / <code>CN2 GIA + 9929 + CMIN2</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>BGP / 三网 —— 不是一条具体的路，而是「自动挑最快的那条走」，听着好听，实际要看它背后接的是 GIA 还是 163。</p>
+</blockquote>
+<p>同样是从中国到美国，走的路不一样，价格差十倍。先把结论摆出来——<strong>从优到差的总排序</strong>：</p>
+<blockquote>
+<p><strong>IEPL / IPLC 专线 &gt; 电信 CN2 GIA ≈ 联通 AS9929 &gt; 移动 CMIN2 &gt; 电信 CN2 GT &gt; 联通 AS4837 &gt; 移动 CMI &gt; 电信 163 骨干网</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>线路</th>
+<th>打比方</th>
+<th>晚高峰体感</th>
+<th>价格档</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>IEPL / IPLC 专线</strong><br>商家单独租的物理专线</td>
+<td>不跟公网挤，自己修的一条封闭高速</td>
+<td>😄 与公网拥堵无关，全天一条直线</td>
+<td>¥¥¥¥¥</td>
+</tr>
+<tr>
+<td>2（并列）</td>
+<td><strong>CN2 GIA</strong><br>电信</td>
+<td>机场高速专线，只给少数车走</td>
+<td>😄 全天稳定 130–160ms，几乎不丢包</td>
+<td>¥¥¥¥</td>
+</tr>
+<tr>
+<td>2（并列）</td>
+<td><strong>AS9929</strong><br>联通</td>
+<td>联通自己修的高速</td>
+<td>😄 联通用户全天稳定</td>
+<td>¥¥¥</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>CMIN2</strong><br>移动（AS58807）</td>
+<td>移动的精品高速</td>
+<td>😄 移动用户全天稳定</td>
+<td>¥¥¥</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>CN2 GT</strong><br>电信</td>
+<td>国道旁边的一条辅路</td>
+<td>😐 比国道好一点，晚高峰还是堵</td>
+<td>¥¥</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>AS4837</strong><br>联通</td>
+<td>联通版的国道</td>
+<td>😖 便宜，晚高峰一般</td>
+<td>¥</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>CMI</strong><br>移动（AS58453）</td>
+<td>移动的普通出口</td>
+<td>😐 比 163 略好，晚高峰也会慢</td>
+<td>¥</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>163</strong>（普通线路）<br>电信</td>
+<td>国道，所有车都能上</td>
+<td>😖 晚上 8–11 点堵到 200ms+，丢包</td>
+<td>¥</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>三点容易搞混的：
+<strong>① CMIN2 和 CMI 不是一回事。</strong> CMIN2 是移动的精品网（AS58807），CMI 是移动的普通国际出口（AS58453）。名字只差一个「N2」，实际差一个档，报价也差不少。
+<strong>② CN2 GIA 和 AS9929 基本同档，但各管各家。</strong> 你家用电信，买 GIA 最顺；家里是联通，买 9929 才吃满。一台机器两个都有（三网优化），谁都不用挑。
+<strong>③ IEPL / IPLC 是另一类东西。</strong> 它不是「优化线路」，是商家直接向运营商租的物理专线，流量根本不走公网，所以晚高峰也不受影响。代价是价格通常是 GIA 的数倍，且多数按带宽（Mbps）而不是按流量卖。<strong>个人自用一般不必上到这一档。</strong></p>
+</blockquote>
+<h2 id="vps-服务商">vps 服务商</h2>
+<blockquote>
+<p>各个服务商提供的vps五花八门，不太好做比较，单纯用于科学上网不需要高的配置，尽量挑选网络线路好的和流量大的机器</p>
+</blockquote>
+<h3 id="cloudcone-普通线路便宜晚高峰大概率会很卡"><a href="https://p3terx.com/archives/cheap-vps-cloudcone.html">Cloudcone</a> 普通线路，便宜，晚高峰大概率会很卡</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">内存</th>
+<th style="text-align: left;">CPU</th>
+<th style="text-align: left;">硬盘</th>
+<th style="text-align: left;">流量</th>
+<th style="text-align: left;">带宽</th>
+<th style="text-align: left;">价格(续费同价)</th>
+<th style="text-align: left;">购买链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">1G</td>
+<td style="text-align: left;">1核</td>
+<td style="text-align: left;">25G</td>
+<td style="text-align: left;">4T/月</td>
+<td style="text-align: left;">1Gbps</td>
+<td style="text-align: left;">$18.28/年</td>
+<td style="text-align: left;"><a href="https://p3terx.com/go/aHR0cHM6Ly9hcHAuY2xvdWRjb25lLmNvbS5jbi92cHMvNTIyL2NyZWF0ZT90b2tlbj1iZGF5MjYtdnBzLTEmcmVmPTIzMjE">点此购买</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">2G</td>
+<td style="text-align: left;">3核</td>
+<td style="text-align: left;">40G</td>
+<td style="text-align: left;">7T/月</td>
+<td style="text-align: left;">1Gbps</td>
+<td style="text-align: left;">$32.99/年</td>
+<td style="text-align: left;"><a href="https://p3terx.com/go/aHR0cHM6Ly9hcHAuY2xvdWRjb25lLmNvbS5jbi92cHMvNTIzL2NyZWF0ZT90b2tlbj1iZGF5MjYtdnBzLTImcmVmPTIzMjE">点此购买</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">4G</td>
+<td style="text-align: left;">7核</td>
+<td style="text-align: left;">80G</td>
+<td style="text-align: left;">10T/月</td>
+<td style="text-align: left;">1Gbps</td>
+<td style="text-align: left;">$56.99/年</td>
+<td style="text-align: left;"><a href="https://p3terx.com/go/aHR0cHM6Ly9hcHAuY2xvdWRjb25lLmNvbS5jbi92cHMvNTI0L2NyZWF0ZT90b2tlbj1iZGF5MjYtdnBzLTMmcmVmPTIzMjE">点此购买</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">8G</td>
+<td style="text-align: left;">10核</td>
+<td style="text-align: left;">170G</td>
+<td style="text-align: left;">15T/月</td>
+<td style="text-align: left;">1Gbps</td>
+<td style="text-align: left;">$116.99/年</td>
+<td style="text-align: left;"><a href="https://p3terx.com/go/aHR0cHM6Ly9hcHAuY2xvdWRjb25lLmNvbS5jbi92cHMvNTI1L2NyZWF0ZT90b2tlbj1iZGF5MjYtdnBzLTQmcmVmPTIzMjE">点此购买</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">16G</td>
+<td style="text-align: left;">12核</td>
+<td style="text-align: left;">320G</td>
+<td style="text-align: left;">25T/月</td>
+<td style="text-align: left;">1Gbps</td>
+<td style="text-align: left;">$229.99/年</td>
+<td style="text-align: left;"><a href="https://p3terx.com/go/aHR0cHM6Ly9hcHAuY2xvdWRjb25lLmNvbS5jbi92cHMvNTI2L2NyZWF0ZT90b2tlbj1iZGF5MjYtdnBzLTUmcmVmPTIzMjE">点此购买</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">32G</td>
+<td style="text-align: left;">18核</td>
+<td style="text-align: left;">640G</td>
+<td style="text-align: left;">40T/月</td>
+<td style="text-align: left;">1Gbps</td>
+<td style="text-align: left;">$449.99/年</td>
+<td style="text-align: left;"><a href="https://p3terx.com/go/aHR0cHM6Ly9hcHAuY2xvdWRjb25lLmNvbS5jbi92cHMvNTI3L2NyZWF0ZT90b2tlbj1iZGF5MjYtdnBzLTYmcmVmPTIzMjE">点此购买</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>优点是便宜，除了便宜全是缺点，我以前用过一个cloudcone的vps，有时候傍晚5点就开始不停断续，甚至出现连不上的情况，晚高峰极不稳定</p>
+</blockquote>
+<p><br></p>
+<h3 id="racknerd-普通线路便宜晚高峰大概率会很卡"><a href="https://p3terx.com/archives/cheap-vps-racknerd.html">RackNerd</a> 普通线路，便宜，晚高峰大概率会很卡</h3>
+<table>
+<thead>
+<tr>
+<th>内存</th>
+<th>CPU</th>
+<th>SSD</th>
+<th>流量</th>
+<th>带宽</th>
+<th>价格(续费同价)</th>
+<th>购买链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1G</td>
+<td>1核</td>
+<td>20G</td>
+<td>3T/月</td>
+<td>1Gbps</td>
+<td>$21.99/年</td>
+<td><a href="https://p3terx.com/go/aHR0cHM6Ly9teS5yYWNrbmVyZC5jb20vYWZmLnBocD9hZmY9MTk1NSZwaWQ9OTUy">点此购买</a></td>
+</tr>
+<tr>
+<td>2G</td>
+<td>2核</td>
+<td>35G</td>
+<td>5T/月</td>
+<td>1Gbps</td>
+<td>$35.99/年</td>
+<td><a href="https://p3terx.com/go/aHR0cHM6Ly9teS5yYWNrbmVyZC5jb20vYWZmLnBocD9hZmY9MTk1NSZwaWQ9OTUz">点此购买</a></td>
+</tr>
+<tr>
+<td>4G</td>
+<td>3核</td>
+<td>60G</td>
+<td>7T/月</td>
+<td>1Gbps</td>
+<td>$59.99/年</td>
+<td><a href="https://p3terx.com/go/aHR0cHM6Ly9teS5yYWNrbmVyZC5jb20vYWZmLnBocD9hZmY9MTk1NSZwaWQ9OTU0">点此购买</a></td>
+</tr>
+<tr>
+<td>6G</td>
+<td>6核</td>
+<td>100G</td>
+<td>12T/月</td>
+<td>1Gbps</td>
+<td>$89.99/年</td>
+<td><a href="https://p3terx.com/go/aHR0cHM6Ly9teS5yYWNrbmVyZC5jb20vYWZmLnBocD9hZmY9MTk1NSZwaWQ9OTU1">点此购买</a></td>
+</tr>
+<tr>
+<td>8G</td>
+<td>7核</td>
+<td>150G</td>
+<td>20T/月</td>
+<td>1Gbps</td>
+<td>$119.99/年</td>
+<td><a href="https://p3terx.com/go/aHR0cHM6Ly9teS5yYWNrbmVyZC5jb20vYWZmLnBocD9hZmY9MTk1NSZwaWQ9OTU2">点此购买</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>这个和 Cloudcone 差不多，可能会稍好一点</p>
+</blockquote>
+<h4 id="cloudcone-和-racknerd-对比链接"><a href="https://www.vpstop.cn/zatan/2023-06-23/446.html">Cloudcone 和 RackNerd 对比链接</a>：</h4>
+<ol>
+<li>
+<p>机房数量
+    CloudCone的机房只有2个，都位于美国洛杉矶。  </p>
+<p>RackNerd的机房迄今为止共有美国的圣何塞、西雅图、洛杉矶（4个机房）、达拉斯、新泽西、纽约、芝加哥、亚特兰大、阿什本、坦帕、犹他州、迈阿密，加拿大的蒙特利尔，欧洲的英国伦敦、荷兰阿姆斯特丹、德国法兰克福、法国斯特拉斯堡，亚洲的新加坡等数据中心。不过目前只有美国的9个机房是主营，其他机房均为缺货不可选择。</p>
+</li>
+<li>
+<p>网络速度
+    RackNerd的部分机房针对中国大陆有优化，如果你的业务主要面向大陆，那么推荐选择RackNerd的洛杉矶、圣何塞、西雅图这几个机房，其他机房不推荐。</p>
+</li>
+<li>
+<p>可以直接ping 对应ip,测试延迟情况
+    <details markdown="1">
+    <summary><b><span style="color: red;">点击展开</span>：VPS 测速地址汇总（RackNerd &amp; CloudCone）</b></summary>
+    <br>
+    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+    <thead>
+        <tr style="background-color: #f2f2f2;">
+        <th>服务商</th>
+        <th>机房分类 / 名称</th>
+        <th>演示站 / Looking Glass URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>圣何塞机房</td>
+        <td><a href="http://107.174.176.108/" rel="noopener nofollow noreferrer" target="_blank">http://107.174.176.108/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>西雅图机房</td>
+        <td><a href="http://75.127.13.175/" rel="noopener nofollow noreferrer" target="_blank">http://75.127.13.175/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>洛杉矶 DC-02 机房</td>
+        <td><a href="http://74.48.179.42/" rel="noopener nofollow noreferrer" target="_blank">http://74.48.179.42/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>达拉斯机房</td>
+        <td><a href="http://23.94.103.172/" rel="noopener nofollow noreferrer" target="_blank">http://23.94.103.172/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>新泽西机房</td>
+        <td><a href="http://107.174.67.5/" rel="noopener nofollow noreferrer" target="_blank">http://107.174.67.5/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>纽约机房</td>
+        <td><a href="http://23.95.14.147/" rel="noopener nofollow noreferrer" target="_blank">http://23.95.14.147/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>芝加哥机房</td>
+        <td><a href="http://23.94.198.254/" rel="noopener nofollow noreferrer" target="_blank">http://23.94.198.254/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>亚特兰大机房</td>
+        <td><a href="http://107.173.210.142/" rel="noopener nofollow noreferrer" target="_blank">http://107.173.210.142/</a></td>
+        </tr>
+        <tr>
+        <td><b>RackNerd</b></td>
+        <td>阿什本机房</td>
+        <td><a href="http://192.3.254.154/" rel="noopener nofollow noreferrer" target="_blank">http://192.3.254.154/</a></td>
+        </tr>
+        <tr>
+        <td><b>CloudCone</b></td>
+        <td>DC1 机房</td>
+        <td><a href="http://148.135.46.16/" rel="noopener nofollow noreferrer" target="_blank">http://148.135.46.16/</a></td>
+        </tr>
+        <tr>
+        <td><b>CloudCone</b></td>
+        <td>DC2 机房</td>
+        <td><a href="http://148.135.73.149/" rel="noopener nofollow noreferrer" target="_blank">http://148.135.73.149/</a></td>
+        </tr>
+        <tr>
+        <td><b>CloudCone</b></td>
+        <td>SC2 云服务器</td>
+        <td><a href="http://74.48.45.81/" rel="noopener nofollow noreferrer" target="_blank">http://74.48.45.81/</a></td>
+        </tr>
+    </tbody>
+    </table>
+    </details></p>
+</li>
+</ol>
+<h3 id="vultr"><a href="https://www.vultr.com/">Vultr</a></h3>
+<blockquote>
+<p>这家我用过，他是只有普通线路，晚高峰会卡，但比 CloudCone 好点，最便宜的是$5/月
+优点：ip如果被封，把创建的vps删除掉，重新创建一个就会有一个新的ip,即是说ip不满意可以通过删掉vps新创建，获取新的ip，不用花钱换
+缺点：普通线路不够稳定，一个月5美元，一年下来也要60美元，并不算便宜</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>带宽</th>
+<th>流量/月</th>
+<th>IP</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 核</td>
+<td>512 MB</td>
+<td>10 GB</td>
+<td>1 Gbps</td>
+<td>500 GB</td>
+<td>1 IPv6</td>
+<td>$2.5/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>1 核</td>
+<td>512 MB</td>
+<td>10 GB</td>
+<td>1 Gbps</td>
+<td>500 GB</td>
+<td>1 IPv4</td>
+<td>$3.5/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>1 核</td>
+<td>1 GB</td>
+<td>25 GB</td>
+<td>1 Gbps</td>
+<td>1 TB</td>
+<td>1 IPv4</td>
+<td>$5/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>1 核</td>
+<td>2 GB</td>
+<td>55 GB</td>
+<td>1 Gbps</td>
+<td>2 TB</td>
+<td>1 IPv4</td>
+<td>$10/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>2 核</td>
+<td>4 GB</td>
+<td>80 GB</td>
+<td>1 Gbps</td>
+<td>3 TB</td>
+<td>1 IPv4</td>
+<td>$20/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>4 核</td>
+<td>8 GB</td>
+<td>160 GB</td>
+<td>1 Gbps</td>
+<td>4 TB</td>
+<td>1 IPv4</td>
+<td>$40/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>6 核</td>
+<td>16 GB</td>
+<td>320 GB</td>
+<td>1 Gbps</td>
+<td>5 TB</td>
+<td>1 IPv4</td>
+<td>$80/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>8 核</td>
+<td>32 GB</td>
+<td>640 GB</td>
+<td>1 Gbps</td>
+<td>6 TB</td>
+<td>1 IPv4</td>
+<td>$160/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>16 核</td>
+<td>64 GB</td>
+<td>1280 GB</td>
+<td>1 Gbps</td>
+<td>10 TB</td>
+<td>1 IPv4</td>
+<td>$320/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+<tr>
+<td>24 核</td>
+<td>96 GB</td>
+<td>1600 GB</td>
+<td>1 Gbps</td>
+<td>15 TB</td>
+<td>1 IPv4</td>
+<td>$640/月</td>
+<td><a href="https://www.vultrcn.com/go/vultr">点击购买</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dmit-性价比高有便宜套餐时推荐但现在只剩高价套餐-便宜的已经售空了排除"><a href="https://p3terx.com/archives/cn2-gia-vps-dmit.html">dmit 性价比高，有便宜套餐时推荐，但现在只剩高价套餐, 便宜的已经售空了，排除</a></h3>
+<blockquote>
+<p>dmit 有 cn2-gia 比较便宜的套餐，但现在已经买不到了
+实测（2026-11-09）：洛杉矶 / 东京 / 圣何塞基本买不到，<strong>香港 28 款全部有货</strong>。
+完整 65 款套餐清单、实时库存、综合排序见下方折叠块。</p>
+</blockquote>
+<details>
+<summary><b><span style="color: red;">点击展开</span>：DMIT VPS 套餐排序表（65 款 · 网络+性价比综合排序 · 含实时库存）</b></summary>
+<h4 id="dmit-全套餐价格表三大机房完整版">DMIT 全套餐价格表（三大机房完整版）</h4>
+<h5 id="洛杉矶-premium-networkcn2-gia-旗舰线路">洛杉矶 Premium Network（CN2 GIA 旗舰线路）</h5>
+<p>电信联通 CN2 GIA 去程，三网 CN2 GIA 回程，晚高峰最稳定，延迟 150-180ms 区间。</p>
+<p style="color: red;">便宜的套餐已经全部缺货</p>
+<p><strong>AN4 平台（AMD EPYC 9004 系列）</strong></p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TINY</td>
+<td>1核/2GB</td>
+<td>20GB SSD</td>
+<td>1000GB</td>
+<td>1Gbps</td>
+<td>$88.88/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=237"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>Pocket</td>
+<td>2核/2GB</td>
+<td>40GB SSD</td>
+<td>1500GB</td>
+<td>4Gbps</td>
+<td>$159.98/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=238"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>STARTER</td>
+<td>2核/2GB</td>
+<td>80GB SSD</td>
+<td>3000GB</td>
+<td>10Gbps</td>
+<td>$29.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=239"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MINI</td>
+<td>4核/4GB</td>
+<td>80GB SSD</td>
+<td>5000GB</td>
+<td>10Gbps</td>
+<td>$58.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=240"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MICRO</td>
+<td>4核/4GB</td>
+<td>160GB SSD</td>
+<td>7000GB</td>
+<td>10Gbps</td>
+<td>$74.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=241"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MEDIUM</td>
+<td>6核/8GB</td>
+<td>160GB SSD</td>
+<td>15000GB</td>
+<td>10Gbps</td>
+<td>$168.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=242"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>LARGE</td>
+<td>8核/16GB</td>
+<td>320GB SSD</td>
+<td>25000GB</td>
+<td>10Gbps</td>
+<td>$338.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=243"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>GIANT</td>
+<td>12核/24GB</td>
+<td>640GB SSD</td>
+<td>50000GB</td>
+<td>10Gbps</td>
+<td>$619.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=244"> 选择此方案</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>AN5 平台（AMD EPYC 9005 系列，更新一代硬件）</strong></p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TINY</td>
+<td>1核/2GB</td>
+<td>20GB SSD</td>
+<td>1000GB</td>
+<td>1Gbps</td>
+<td>$119.99/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=100"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>Pocket</td>
+<td>2核/2GB</td>
+<td>40GB SSD</td>
+<td>1500GB</td>
+<td>4Gbps</td>
+<td>$203.90/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=137"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>STARTER</td>
+<td>2核/2GB</td>
+<td>80GB SSD</td>
+<td>3000GB</td>
+<td>10Gbps</td>
+<td>$38.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=56"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MINI</td>
+<td>4核/4GB</td>
+<td>80GB SSD</td>
+<td>5000GB</td>
+<td>10Gbps</td>
+<td>$76.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=58"> 选择此方案</a></td>
+</tr>
+</tbody>
+</table>
+<h5 id="洛杉矶-eyeball-networkcmin2-性价比线路">洛杉矶 Eyeball Network（CMIN2 性价比线路）</h5>
+<p>电信联通 AS9929/CN2 去程，三网 CMIN2 回程。相比 Premium 便宜，流量还比同价 Premium 多不少。</p>
+<p><strong>AN4 平台</strong></p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TINY</td>
+<td>1核/2GB</td>
+<td>20GB SSD</td>
+<td>1500GB</td>
+<td>2Gbps</td>
+<td>$88.88/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=245"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>Pocket</td>
+<td>2核/2GB</td>
+<td>40GB SSD</td>
+<td>3000GB</td>
+<td>4Gbps</td>
+<td>$159.98/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=246"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>STARTER</td>
+<td>2核/2GB</td>
+<td>80GB SSD</td>
+<td>5000GB</td>
+<td>10Gbps</td>
+<td>$29.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=247"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MINI</td>
+<td>4核/4GB</td>
+<td>80GB SSD</td>
+<td>10000GB</td>
+<td>10Gbps</td>
+<td>$58.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=248"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MICRO</td>
+<td>4核/4GB</td>
+<td>160GB SSD</td>
+<td>14000GB</td>
+<td>10Gbps</td>
+<td>$74.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=249"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MEDIUM</td>
+<td>6核/8GB</td>
+<td>160GB SSD</td>
+<td>30000GB</td>
+<td>10Gbps</td>
+<td>$168.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=250"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>LARGE</td>
+<td>8核/16GB</td>
+<td>320GB SSD</td>
+<td>50000GB</td>
+<td>10Gbps</td>
+<td>$338.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=251"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>GIANT</td>
+<td>12核/24GB</td>
+<td>640GB SSD</td>
+<td>100000GB</td>
+<td>10Gbps</td>
+<td>$619.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=252"> 选择此方案</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>AN5 平台</strong></p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TINY</td>
+<td>1核/2GB</td>
+<td>20GB SSD</td>
+<td>1500GB</td>
+<td>2Gbps</td>
+<td>$119.99/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=189"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>Pocket</td>
+<td>2核/2GB</td>
+<td>40GB SSD</td>
+<td>3000GB</td>
+<td>4Gbps</td>
+<td>$203.90/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=190"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>STARTER</td>
+<td>2核/2GB</td>
+<td>80GB SSD</td>
+<td>5000GB</td>
+<td>10Gbps</td>
+<td>$38.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=191"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>MINI</td>
+<td>4核/4GB</td>
+<td>80GB SSD</td>
+<td>10000GB</td>
+<td>10Gbps</td>
+<td>$76.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=192"> 选择此方案</a></td>
+</tr>
+</tbody>
+</table>
+<h5 id="洛杉矶-tier-1-network大流量国际线路">洛杉矶 Tier 1 Network（大流量国际线路）</h5>
+<p>无中国特殊优化，但10Gbps大带宽，流量极其充裕，适合建站、套CDN、跑大流量任务。</p>
+<p><strong>AN5 VOLUME 系列</strong></p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V2C2G</td>
+<td>2核/2GB</td>
+<td>40GB SSD</td>
+<td>5000GB</td>
+<td>10Gbps</td>
+<td>$14.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=169"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>V2C4G</td>
+<td>2核/4GB</td>
+<td>80GB SSD</td>
+<td>10000GB</td>
+<td>10Gbps</td>
+<td>$23.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=170"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>V4C4G</td>
+<td>4核/4GB</td>
+<td>120GB SSD</td>
+<td>20000GB</td>
+<td>10Gbps</td>
+<td>$36.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=171"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>V4C8G</td>
+<td>4核/8GB</td>
+<td>160GB SSD</td>
+<td>40000GB</td>
+<td>10Gbps</td>
+<td>$52.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=180"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>V8C16G</td>
+<td>8核/16GB</td>
+<td>240GB SSD</td>
+<td>80000GB</td>
+<td>10Gbps</td>
+<td>$119.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=172"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>V12C24G</td>
+<td>12核/24GB</td>
+<td>320GB SSD</td>
+<td>160000GB</td>
+<td>10Gbps</td>
+<td>$199.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446&amp;pid=173"> 选择此方案</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h5 id="香港机房套餐">香港机房套餐</h5>
+<p>香港节点延迟最低，到国内三网通常 20-50ms。Premium 线路走 CN2 GIA，是延迟敏感型业务的首选。代价是价格贵，流量也较少。</p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>线路</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HKG Pro TINY</td>
+<td>Premium / CN2 GIA</td>
+<td>1核/1GB</td>
+<td>20GB SSD</td>
+<td>500GB</td>
+<td>$39.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>HKG EB TINYv2</td>
+<td>Eyeball / CMI</td>
+<td>1核/1GB</td>
+<td>20GB SSD</td>
+<td>1000GB</td>
+<td>$29.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446"> 选择此方案</a></td>
+</tr>
+<tr>
+<td>HKG T1 WEE</td>
+<td>Tier 1 / 国际</td>
+<td>1核/1GB</td>
+<td>20GB SSD</td>
+<td>1000GB</td>
+<td>$36.9/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446"> 选择此方案</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>香港套餐库存波动较大，具体在售款式以官网实时显示为准。</p>
+</blockquote>
+<h5 id="东京机房套餐">东京机房套餐</h5>
+<p>日本东京节点，Premium 线路走电信 CN2 GIA + 联通 AS9929 + 移动 CMI，延迟介于香港和洛杉矶之间，约 80-100ms。</p>
+<table>
+<thead>
+<tr>
+<th>套餐</th>
+<th>线路</th>
+<th>CPU/内存</th>
+<th>存储</th>
+<th>月流量</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TYO Pro 系列</td>
+<td>Premium / CN2 GIA</td>
+<td>1核起</td>
+<td>SSD</td>
+<td>按配置</td>
+<td>$39.9/月起</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446"> 查看东京套餐</a></td>
+</tr>
+<tr>
+<td>TYO Tier 1</td>
+<td>Tier 1 / 国际</td>
+<td>1核/1GB</td>
+<td>20GB SSD</td>
+<td>1000GB</td>
+<td>$2.7/月（年付）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=18446"> 查看东京套餐</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h5 id="当前可用优惠码整理">当前可用优惠码整理</h5>
+<p>根据公开信息整理，以下优惠码使用前请在购物车验证是否仍然有效：</p>
+<ul>
+<li><strong>LAX-EB-LAUNCH-NON-MONTHLY-RECURRING-20OFF</strong>：洛杉矶 Eyeball 系列，年付及以上享 8 折循环折扣（也就是说每年续费都打折，不是一次性）</li>
+<li><strong>HKG-Lite-LAUNCH-NON-MONTHLY-RECURRING-20OFF</strong>：香港 Lite/Eyeball 系列，年付及以上 8 折循环</li>
+<li><strong>7L8O3PQTHNXCFS2TXPLP</strong>：通用 5% 折扣，适用于多产品线非月付订单</li>
+</ul>
+<p>说实话，DMIT 的优惠码不多，力度也不算大。不过 Eyeball 年付那个 8 折循环码如果还能用，算下来洛杉矶入门款每年省将近 $18，还是有点意思的。</p>
+<p>👉 <a href="https://www.dmit.io/aff.php?aff=18446">前往 DMIT 领取最新优惠</a></p>
+<h4 id="dmit-vps-套餐排序表网络-性价比综合-含实时库存">DMIT VPS 套餐排序表（网络 + 性价比综合 · 含实时库存）</h4>
+<blockquote>
+<p>数据来源：<a href="https://p3terx.com/archives/cn2-gia-vps-dmit.html">P3TERX ZONE · DMIT 优惠活动</a>（原文更新 2026-10-02）
+官网：<a href="https://www.dmit.io">https://www.dmit.io</a> ｜ 排序整理：2026-11-09
+<strong>库存实测：2026-11-09 抓取官网 cart 目录全量 92 个 SKU，逐款比对</strong></p>
+</blockquote>
+<hr />
+<h5 id="库存状态说明">库存状态说明</h5>
+<table>
+<thead>
+<tr>
+<th>标记</th>
+<th>含义</th>
+<th>下单结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🟢 <strong>有货</strong></td>
+<td>官网目录中该 SKU 无 <code>none-stock</code> 标记，可正常加入购物车</td>
+<td>立即开通</td>
+</tr>
+<tr>
+<td>🔴 <strong>缺货</strong></td>
+<td>SKU 仍在目录中，但带 <code>none-stock</code>（页面显示 Out of Stock）</td>
+<td>页面提示「We are currently out of stock on this item」</td>
+</tr>
+<tr>
+<td>⚫ <strong>已下架</strong></td>
+<td>该 PID 已不在当前产品目录里（产品名从官网菜单消失）。点进去有两种表现：301 跳到另一个 PID，或直接落到「缺貨中」页</td>
+<td>无法下单，需换新 PID</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>「已下架」的判定口径：<strong>以产品目录为准</strong>，不看单 PID 的返回码。实测 <code>pid=145</code> 会 301 跳到 <code>pid=116</code>、<code>pid=152</code> 跳到 <code>pid=71</code>，而 <code>pid=100/123/124/154/155</code> 直接返回缺货页——两种表现都属于「买不到」，统一归为 ⚫。</p>
+</blockquote>
+<h6 id="两个必须先知道的变化">⚠️ 两个必须先知道的变化</h6>
+<p><strong>① 官网已改用「架构代号」命名，原文的套餐名对不上了</strong></p>
+<table>
+<thead>
+<tr>
+<th>原文名</th>
+<th>官网现名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAX.Pro.*</code> / <code>HKG.Pro.*</code></td>
+<td><code>LAX.AS3.Pro.*</code> / <code>LAX.AN4.Pro.*</code> / <code>LAX.AN5.Pro.*</code></td>
+<td>AS3 = AMD EPYC 7003（Milan）｜AN4 = EPYC 9004（Genoa）｜AN5 = EPYC 9005（Turin）</td>
+</tr>
+<tr>
+<td><code>HKG.EB.*v2</code></td>
+<td><code>HKG.AS3.EB.*</code> / <code>HKG.AN5.EB.*</code></td>
+<td>同上，EB = Eyeball 线路</td>
+</tr>
+<tr>
+<td><code>HKG.T1.*</code></td>
+<td><code>HKG.AS3.T1.*</code></td>
+<td>Tier 1 国际线路</td>
+</tr>
+</tbody>
+</table>
+<p><strong>② 圣何塞（SJC）整条产品线已从官网移除</strong></p>
+<p><code>SJC.T1.*</code> 全 9 款在官网目录中查无此产品（全文搜索 <code>SJC</code> 命中 0 次）。原文排名第 1 的 <code>SJC.T1.UNMETERED</code> 已经买不到了。</p>
+<h6 id="三条硬结论">三条硬结论</h6>
+<ol>
+<li><strong>洛杉矶几乎全灭</strong>：LAX 系列 50 款 SKU 里只有 2 款有货，且都是月付 $79.90 起的 <code>AN5</code> 新款。原文推荐的 <code>LAX.Pro.WEE</code> / <code>MALIBU</code> / <code>PalmSpring</code> 三款限量年付款<strong>全部下架</strong>。</li>
+<li><strong>香港是唯一能随便买的地方</strong>：HKG 全部 28 款 SKU 100% 有货，Pro / EB / T1 三条线齐全。但价格比原文普遍上浮 20–40%。</li>
+<li><strong>东京全灭</strong>：TYO 系列 15 款 SKU 全部缺货。</li>
+</ol>
+<hr />
+<h5 id="排序方法说明">排序方法说明</h5>
+<p>综合得分 = <strong>网络质量 55%</strong> + <strong>性价比 45%</strong></p>
+<p><strong>① 网络质量分（0–100）</strong> 按线路等级打分：</p>
+<table>
+<thead>
+<tr>
+<th>线路等级</th>
+<th>分数</th>
+<th>代表系列</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>97</td>
+<td>HKG.Pro</td>
+<td>三网各自最优线路，物理距离最近，延迟最低，单价最高</td>
+</tr>
+<tr>
+<td>CFMT 5Tbps+ 高防 + CN2 GIA</td>
+<td>96</td>
+<td>LAX.sPro</td>
+<td>去程走 Cloudflare Magic Transit 清洗，回程 CN2 GIA。抗打最强</td>
+</tr>
+<tr>
+<td>CN2 GIA 三网回程</td>
+<td>95</td>
+<td>LAX.Pro / LAX.Pro.u</td>
+<td>电信联通去程 CN2 GIA、移动去程 CMI，三网回程 CN2 GIA。大陆访问标杆</td>
+</tr>
+<tr>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td>90</td>
+<td>TYO.Pro</td>
+<td>三网优化，但带宽被限制在 100Mbps</td>
+</tr>
+<tr>
+<td>CMIN2 三网回程</td>
+<td>84</td>
+<td>LAX.EB</td>
+<td>电信联通去程 CN2、移动去程 CMIN2，三网回程 CMIN2。比 CN2 GIA 弱一档</td>
+</tr>
+<tr>
+<td>香港EB 混合优化</td>
+<td>80</td>
+<td>HKG.EB</td>
+<td>电信联通去程绕日本 NTT，回程 CT163/AS4837 直连，移动双程 CMI</td>
+</tr>
+<tr>
+<td>CT163 + AS4837 + CMI 直连</td>
+<td>74</td>
+<td>SJC.T1</td>
+<td>三网双程直连（非 CN2 GIA），附 20Gbps DDoS 防御，流量极大</td>
+</tr>
+<tr>
+<td>国际线路</td>
+<td>42</td>
+<td>HKG.T1</td>
+<td>无任何中国大陆优化，纯国际业务用</td>
+</tr>
+</tbody>
+</table>
+<p><strong>② 性价比分（0–100）</strong>：先折算年化成本，再算「资源价值 ÷ 年化成本」，取对数归一到 0–100：</p>
+<div class="codehilite"><pre><span></span><code>资源价值 = 内存GB×8 + CPU核数×6 + 硬盘GB×0.35 + 月流量GB×0.03 + 带宽Mbps×0.002
+性价比   = 资源价值 ÷ 年化成本      → 对数归一化到 0–100
+</code></pre></div>
+
+<blockquote>
+<p>不限流量套餐按月流量 20000GB 折算（保守假设，实际价值更高）。
+价格与配置均为<strong>原文 2026-10-02 数据</strong>，用于排序；「官网现价」列为本次实测值。</p>
+</blockquote>
+<hr />
+<h5 id="一综合排序总表65-款由高到低">一、综合排序总表（65 款，由高到低）</h5>
+<p>🔥 = 原文标注的限时限量款（<strong>现已全部下架或缺货</strong>）</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>方案（原文名）</th>
+<th>库存</th>
+<th>机房</th>
+<th>配置（内存/CPU/硬盘）</th>
+<th>流量</th>
+<th>带宽</th>
+<th>原文价</th>
+<th>官网现价</th>
+<th>综合分</th>
+<th>线路</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>SJC.T1.UNMETERED</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>2G/1核/10G</td>
+<td><strong>不限</strong></td>
+<td>1Gbps</td>
+<td>$14.9/年</td>
+<td>—</td>
+<td><strong>85.7</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=152">购买</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>LAX.Pro.MALIBU</code> 🔥</td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$49.9/年</td>
+<td>—</td>
+<td><strong>72.8</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=186">购买</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>LAX.Pro.PalmSpring</code> 🔥</td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/40G</td>
+<td>2T/月</td>
+<td>2Gbps</td>
+<td>$100/年</td>
+<td>—</td>
+<td><strong>72.8</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=182">购买</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>LAX.Pro.WEE</code> 🔥</td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>500G/月</td>
+<td>500Mbps</td>
+<td>$36.9/年</td>
+<td>—</td>
+<td><strong>72.4</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=183">购买</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>LAX.EB.CORONA</code> 🔥</td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>1.5T/月</td>
+<td>2Gbps</td>
+<td>$49.9/年</td>
+<td>—</td>
+<td><strong>68.6</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=218">购买</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>LAX.EB.WEE</code> 🔥</td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$39.9/年</td>
+<td>—</td>
+<td><strong>68.2</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=188">购买</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>LAX.Pro.TINY</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$9.99/月</td>
+<td>—</td>
+<td><strong>67.9</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=100">购买</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>LAX.EB.FONTANA</code> 🔥</td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/40G</td>
+<td>2.5T/月</td>
+<td>4Gbps</td>
+<td>$100/年</td>
+<td>—</td>
+<td><strong>67.8</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=219">购买</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>LAX.Pro.Pocket</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/1核/40G</td>
+<td>1.5T/月</td>
+<td>4Gbps</td>
+<td>$14.9/月</td>
+<td>—</td>
+<td><strong>67.8</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=137">购买</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>LAX.Pro.STARTER</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/80G</td>
+<td>3T/月</td>
+<td>10Gbps</td>
+<td>$29.9/月</td>
+<td>—</td>
+<td><strong>67.3</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=56">购买</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>LAX.Pro.MICRO</code></td>
+<td>🟢 有货</td>
+<td>洛杉矶</td>
+<td>4G/4核/160G</td>
+<td>7T/月</td>
+<td>10Gbps</td>
+<td>$74.99/月</td>
+<td><strong>LAX.AN5.Pro.MICRO</strong><br>$110.90/月</td>
+<td><strong>66.0</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=81">购买</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>LAX.Pro.MINI</code></td>
+<td>🟢 有货</td>
+<td>洛杉矶</td>
+<td>4G/4核/80G</td>
+<td>5T/月</td>
+<td>10Gbps</td>
+<td>$58.88/月</td>
+<td><strong>LAX.AN5.Pro.MINI</strong><br>$79.90/月</td>
+<td><strong>65.6</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58">购买</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>SJC.T1.MEDIUM</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>4G/4核/120G</td>
+<td>32T/月</td>
+<td>10Gbps</td>
+<td>$49.9/月</td>
+<td>—</td>
+<td><strong>64.7</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=149">购买</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>SJC.T1.LARGE</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>8G/4核/200G</td>
+<td>64T/月</td>
+<td>10Gbps</td>
+<td>$99.9/月</td>
+<td>—</td>
+<td><strong>64.6</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=150">购买</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>SJC.T1.GIANT</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>16G/8核/400G</td>
+<td>128T/月</td>
+<td>10Gbps</td>
+<td>$199.99/月</td>
+<td>—</td>
+<td><strong>64.5</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=151">购买</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>SJC.T1.WEE</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>0.5G/1核/10G</td>
+<td>1T/月</td>
+<td>10Gbps</td>
+<td>$36.9/年</td>
+<td>—</td>
+<td><strong>64.4</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=152">购买</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>LAX.sPro.CREATOR</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/20G</td>
+<td>1.5T/月</td>
+<td>100Mbps</td>
+<td>$71.99/季</td>
+<td>—</td>
+<td><strong>64.4</strong></td>
+<td>CFMT 5Tbps+ 高防 + CN2 GIA</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=130">购买</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>LAX.EB.Pocket</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/1核/40G</td>
+<td>3T/月</td>
+<td>4Gbps</td>
+<td>$14.9/月</td>
+<td>—</td>
+<td><strong>64.4</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=190">购买</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>LAX.Pro.MEDIUM</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>8G/4核/160G</td>
+<td>14T/月</td>
+<td>10Gbps</td>
+<td>$168.88/月</td>
+<td><strong>LAX.AN5.Pro.MEDIUM</strong>（缺货）<br>$289.90/月</td>
+<td><strong>64.1</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=82">购买</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>LAX.Pro.GIANT</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>24G/12核/640G</td>
+<td>50T/月</td>
+<td>10Gbps</td>
+<td>$619.99/月</td>
+<td><strong>LAX.AN5.Pro.GIANT</strong>（缺货）<br>$1009.90/月</td>
+<td><strong>63.7</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=98">购买</a></td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>LAX.EB.TINY</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/1核/20G</td>
+<td>1.5T/月</td>
+<td>2Gbps</td>
+<td>$9.99/月</td>
+<td>—</td>
+<td><strong>63.5</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=189">购买</a></td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>LAX.Pro.LARGE</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>16G/8核/320G</td>
+<td>25T/月</td>
+<td>10Gbps</td>
+<td>$338.88/月</td>
+<td><strong>LAX.AN5.Pro.LARGE</strong>（缺货）<br>$499.90/月</td>
+<td><strong>63.4</strong></td>
+<td>CN2 GIA 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=61">购买</a></td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>SJC.T1.MICRO</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>4G/2核/80G</td>
+<td>16T/月</td>
+<td>10Gbps</td>
+<td>$32.9/月</td>
+<td>—</td>
+<td><strong>63.3</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=148">购买</a></td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>LAX.EB.STARTER</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/80G</td>
+<td>5T/月</td>
+<td>10Gbps</td>
+<td>$29.9/月</td>
+<td>—</td>
+<td><strong>63.3</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=191">购买</a></td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>LAX.EB.MICRO</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>4G/4核/160G</td>
+<td>14T/月</td>
+<td>10Gbps</td>
+<td>$74.99/月</td>
+<td><strong>LAX.AN5.EB.MICRO</strong>（缺货）<br>$110.90/月</td>
+<td><strong>63.1</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=193">购买</a></td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>LAX.EB.MINI</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>4G/4核/80G</td>
+<td>10T/月</td>
+<td>10Gbps</td>
+<td>$58.88/月</td>
+<td><strong>LAX.AN5.EB.MINI</strong>（缺货）<br>$79.90/月</td>
+<td><strong>62.6</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=192">购买</a></td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>LAX.Pro.uMINI</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/20G</td>
+<td><strong>不限</strong></td>
+<td>30Mbps</td>
+<td>$239.99/月</td>
+<td>—</td>
+<td><strong>62.3</strong></td>
+<td>CN2 GIA 三网回程 · 不限流量</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=62">购买</a></td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>LAX.EB.MEDIUM</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>8G/6核/160G</td>
+<td>30T/月</td>
+<td>10Gbps</td>
+<td>$168.88/月</td>
+<td><strong>LAX.AN5.EB.MEDIUM</strong>（缺货）<br>$289.90/月</td>
+<td><strong>62.1</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=194">购买</a></td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>SJC.T1.TINY</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>0.75G/1核/10G</td>
+<td>2T/月</td>
+<td>10Gbps</td>
+<td>$6.9/月</td>
+<td>—</td>
+<td><strong>61.8</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=145">购买</a></td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>SJC.T1.MINI</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>2G/2核/40G</td>
+<td>8T/月</td>
+<td>10Gbps</td>
+<td>$21.9/月</td>
+<td>—</td>
+<td><strong>61.8</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=147">购买</a></td>
+</tr>
+<tr>
+<td>31</td>
+<td><code>LAX.EB.GIANT</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>24G/8核/640G</td>
+<td>100T/月</td>
+<td>10Gbps</td>
+<td>$619.99/月</td>
+<td><strong>LAX.AN5.EB.GIANT</strong>（缺货）<br>$1009.90/月</td>
+<td><strong>61.3</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=196">购买</a></td>
+</tr>
+<tr>
+<td>32</td>
+<td><code>SJC.T1.STARTER</code></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>1.5G/1核/20G</td>
+<td>4T/月</td>
+<td>10Gbps</td>
+<td>$12.9/月</td>
+<td>—</td>
+<td><strong>61.3</strong></td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=146">购买</a></td>
+</tr>
+<tr>
+<td>33</td>
+<td><code>LAX.EB.LARGE</code></td>
+<td>🔴 缺货</td>
+<td>洛杉矶</td>
+<td>16G/8核/320G</td>
+<td>50T/月</td>
+<td>10Gbps</td>
+<td>$338.88/月</td>
+<td><strong>LAX.AN5.EB.LARGE</strong>（缺货）<br>$499.90/月</td>
+<td><strong>61.0</strong></td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=195">购买</a></td>
+</tr>
+<tr>
+<td>34</td>
+<td><code>HKG.Pro.LARGE</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>2.4T/月</td>
+<td>1Gbps</td>
+<td>$239.9/月</td>
+<td><strong>HKG.AN5.Pro.LARGE</strong><br>$359.90/月</td>
+<td><strong>59.7</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=128">购买</a></td>
+</tr>
+<tr>
+<td>35</td>
+<td><code>LAX.Pro.uMICRO</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>8G/4核/50G</td>
+<td><strong>不限</strong></td>
+<td>50Mbps</td>
+<td>$399.99/月</td>
+<td>—</td>
+<td><strong>59.6</strong></td>
+<td>CN2 GIA 三网回程 · 不限流量</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=64">购买</a></td>
+</tr>
+<tr>
+<td>36</td>
+<td><code>HKG.Pro.GIANT</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>24G/8核/640G</td>
+<td>4.8T/月</td>
+<td>1Gbps</td>
+<td>$499.9/月</td>
+<td><strong>HKG.AN5.Pro.GIANT</strong><br>$759.90/月</td>
+<td><strong>58.3</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=129">购买</a></td>
+</tr>
+<tr>
+<td>37</td>
+<td><code>HKG.Pro.MEDIUM</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>8G/4核/160G</td>
+<td>1.8T/月</td>
+<td>1Gbps</td>
+<td>$179.9/月</td>
+<td><strong>HKG.AN5.Pro.MEDIUM</strong><br>$279.90/月</td>
+<td><strong>57.7</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=127">购买</a></td>
+</tr>
+<tr>
+<td>38</td>
+<td><code>HKG.Pro.TINY</code></td>
+<td>⚫ 已下架</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>400G/月</td>
+<td>1Gbps</td>
+<td>$39.9/月</td>
+<td>—</td>
+<td><strong>56.1</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=123">购买</a></td>
+</tr>
+<tr>
+<td>39</td>
+<td><code>HKG.Pro.MICRO</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>1.6T/月</td>
+<td>1Gbps</td>
+<td>$159.9/月</td>
+<td><strong>HKG.AN5.Pro.MICRO</strong><br>$199.90/月</td>
+<td><strong>55.8</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=126">购买</a></td>
+</tr>
+<tr>
+<td>40</td>
+<td><code>HKG.Pro.STARTER</code></td>
+<td>⚫ 已下架</td>
+<td>香港</td>
+<td>2G/1核/40G</td>
+<td>800G/月</td>
+<td>1Gbps</td>
+<td>$79.9/月</td>
+<td>—</td>
+<td><strong>55.3</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=124">购买</a></td>
+</tr>
+<tr>
+<td>41</td>
+<td><code>LAX.Pro.uMEDIUM</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>8G/4核/80G</td>
+<td><strong>不限</strong></td>
+<td>100Mbps</td>
+<td>$799.99/月</td>
+<td>—</td>
+<td><strong>55.1</strong></td>
+<td>CN2 GIA 三网回程 · 不限流量</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=65">购买</a></td>
+</tr>
+<tr>
+<td>42</td>
+<td><code>TYO.Pro.TINY</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>0.75G/1核/15G</td>
+<td>300G/月</td>
+<td>100Mbps</td>
+<td>$19.9/月</td>
+<td><strong>TYO.AS3.Pro.TINY</strong>（缺货）<br>$21.90/月</td>
+<td><strong>55.0</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=138">购买</a></td>
+</tr>
+<tr>
+<td>43</td>
+<td><code>HKG.Pro.MINI</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>2G/2核/60G</td>
+<td>1.2T/月</td>
+<td>1Gbps</td>
+<td>$119.9/月</td>
+<td><strong>HKG.AN5.Pro.MINI</strong><br>$149.90/月</td>
+<td><strong>54.8</strong></td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=125">购买</a></td>
+</tr>
+<tr>
+<td>44</td>
+<td><code>TYO.Pro.STARTER</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>1.5G/1核/20G</td>
+<td>500G/月</td>
+<td>100Mbps</td>
+<td>$32.9/月</td>
+<td><strong>TYO.AS3.Pro.STARTER</strong>（缺货）<br>$45.90/月</td>
+<td><strong>54.5</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=139">购买</a></td>
+</tr>
+<tr>
+<td>45</td>
+<td><code>TYO.Pro.MINI</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>2G/2核/40G</td>
+<td>1T/月</td>
+<td>100Mbps</td>
+<td>$69.9/月</td>
+<td><strong>TYO.AS3.Pro.MINI</strong>（缺货）<br>$89.90/月</td>
+<td><strong>53.3</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=140">购买</a></td>
+</tr>
+<tr>
+<td>46</td>
+<td><code>LAX.Pro.uLARGE</code></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>16G/8核/100G</td>
+<td><strong>不限</strong></td>
+<td>200Mbps</td>
+<td>$1399.99/月</td>
+<td>—</td>
+<td><strong>52.3</strong></td>
+<td>CN2 GIA 三网回程 · 不限流量</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=66">购买</a></td>
+</tr>
+<tr>
+<td>47</td>
+<td><code>TYO.Pro.MICRO</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>4G/2核/40G</td>
+<td>2T/月</td>
+<td>100Mbps</td>
+<td>$139.9/月</td>
+<td><strong>TYO.AS3.Pro.MICRO</strong>（缺货）<br>$189.90/月</td>
+<td><strong>52.0</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=141">购买</a></td>
+</tr>
+<tr>
+<td>48</td>
+<td><code>TYO.Pro.MEDIUM</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>4G/4核/60G</td>
+<td>3T/月</td>
+<td>100Mbps</td>
+<td>$199.9/月</td>
+<td><strong>TYO.AS3.Pro.MEDIUM</strong>（缺货）<br>$320.90/月</td>
+<td><strong>51.9</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=142">购买</a></td>
+</tr>
+<tr>
+<td>49</td>
+<td><code>TYO.Pro.LARGE</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>8G/4核/100G</td>
+<td>5T/月</td>
+<td>100Mbps</td>
+<td>$329.9/月</td>
+<td><strong>TYO.AS3.Pro.LARGE</strong>（缺货）<br>$429.90/月</td>
+<td><strong>51.9</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=143">购买</a></td>
+</tr>
+<tr>
+<td>50</td>
+<td><code>TYO.Pro.GIANT</code></td>
+<td>🔴 缺货</td>
+<td>东京</td>
+<td>16G/8核/200G</td>
+<td>10T/月</td>
+<td>100Mbps</td>
+<td>$659.9/月</td>
+<td><strong>TYO.AS3.Pro.GIANT</strong>（缺货）<br>$829.90/月</td>
+<td><strong>51.9</strong></td>
+<td>东京 CN2 GIA / AS9929 / CMI</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=144">购买</a></td>
+</tr>
+<tr>
+<td>51</td>
+<td><code>HKG.EB.TINYv2</code></td>
+<td>⚫ 已下架</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$29.9/月</td>
+<td>—</td>
+<td><strong>51.4</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=154">购买</a></td>
+</tr>
+<tr>
+<td>52</td>
+<td><code>HKG.EB.STARTERv2</code></td>
+<td>⚫ 已下架</td>
+<td>香港</td>
+<td>2G/1核/40G</td>
+<td>2T/月</td>
+<td>2Gbps</td>
+<td>$59.9/月</td>
+<td>—</td>
+<td><strong>51.0</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=155">购买</a></td>
+</tr>
+<tr>
+<td>53</td>
+<td><code>HKG.EB.MEDIUMv2</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>8G/4核/160G</td>
+<td>6T/月</td>
+<td>4Gbps</td>
+<td>$199.9/月</td>
+<td><strong>HKG.AN5.EB.MEDIUM</strong><br>$279.90/月</td>
+<td><strong>51.0</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=158">购买</a></td>
+</tr>
+<tr>
+<td>54</td>
+<td><code>HKG.EB.MICROv2</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>4T/月</td>
+<td>4Gbps</td>
+<td>$129.9/月</td>
+<td><strong>HKG.AN5.EB.MICRO</strong><br>$199.90/月</td>
+<td><strong>50.9</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=157">购买</a></td>
+</tr>
+<tr>
+<td>55</td>
+<td><code>HKG.EB.LARGEv2</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>16G/4核/320G</td>
+<td>12T/月</td>
+<td>4Gbps</td>
+<td>$389.9/月</td>
+<td><strong>HKG.AN5.EB.LARGE</strong><br>$359.90/月</td>
+<td><strong>50.8</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=159">购买</a></td>
+</tr>
+<tr>
+<td>56</td>
+<td><code>HKG.EB.MINIv2</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>2G/2核/60G</td>
+<td>3T/月</td>
+<td>2Gbps</td>
+<td>$89.9/月</td>
+<td><strong>HKG.AN5.EB.MINI</strong><br>$149.90/月</td>
+<td><strong>50.7</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=156">购买</a></td>
+</tr>
+<tr>
+<td>57</td>
+<td><code>HKG.EB.GIANTv2</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>24G/8核/640G</td>
+<td>24T/月</td>
+<td>4Gbps</td>
+<td>$789.9/月</td>
+<td><strong>HKG.AN5.EB.GIANT</strong><br>$759.90/月</td>
+<td><strong>50.4</strong></td>
+<td>香港EB 混合优化（去程绕日本NTT）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=160">购买</a></td>
+</tr>
+<tr>
+<td>58</td>
+<td><code>HKG.T1.WEE</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>10Gbps</td>
+<td>$36.9/年</td>
+<td><strong>HKG.AS3.T1.WEE</strong><br>$36.90/年</td>
+<td><strong>47.6</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=197">购买</a></td>
+</tr>
+<tr>
+<td>59</td>
+<td><code>HKG.T1.MEDIUM</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>8G/4核/160G</td>
+<td>32T/月</td>
+<td>10Gbps</td>
+<td>$49.9/月</td>
+<td><strong>HKG.AS3.T1.MEDIUM</strong><br>$49.90/月</td>
+<td><strong>47.4</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=202">购买</a></td>
+</tr>
+<tr>
+<td>60</td>
+<td><code>HKG.T1.LARGE</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>64T/月</td>
+<td>10Gbps</td>
+<td>$99.9/月</td>
+<td><strong>HKG.AS3.T1.LARGE</strong><br>$99.90/月</td>
+<td><strong>47.4</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=203">购买</a></td>
+</tr>
+<tr>
+<td>61</td>
+<td><code>HKG.T1.GIANT</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>24G/8核/640G</td>
+<td>128T/月</td>
+<td>10Gbps</td>
+<td>$199.9/月</td>
+<td><strong>HKG.AS3.T1.GIANT</strong><br>$199.90/月</td>
+<td><strong>47.2</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=204">购买</a></td>
+</tr>
+<tr>
+<td>62</td>
+<td><code>HKG.T1.MICRO</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>16T/月</td>
+<td>10Gbps</td>
+<td>$32.9/月</td>
+<td><strong>HKG.AS3.T1.MICRO</strong><br>$32.90/月</td>
+<td><strong>45.8</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=201">购买</a></td>
+</tr>
+<tr>
+<td>63</td>
+<td><code>HKG.T1.TINY</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>2T/月</td>
+<td>10Gbps</td>
+<td>$6.9/月</td>
+<td><strong>HKG.AS3.T1.TINY</strong><br>$6.90/月</td>
+<td><strong>44.6</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=198">购买</a></td>
+</tr>
+<tr>
+<td>64</td>
+<td><code>HKG.T1.MINI</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>2G/2核/60G</td>
+<td>8T/月</td>
+<td>10Gbps</td>
+<td>$21.9/月</td>
+<td><strong>HKG.AS3.T1.MINI</strong><br>$21.90/月</td>
+<td><strong>44.3</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=200">购买</a></td>
+</tr>
+<tr>
+<td>65</td>
+<td><code>HKG.T1.STARTER</code></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>2G/1核/40G</td>
+<td>4T/月</td>
+<td>10Gbps</td>
+<td>$12.9/月</td>
+<td><strong>HKG.AS3.T1.STARTER</strong><br>$12.90/月</td>
+<td><strong>44.1</strong></td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=199">购买</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h5 id="二-现货速查-现在就能下单的-20-款">二、🟢 现货速查 —— 现在就能下单的 20 款</h5>
+<p>按综合分排序。这是全站 92 个 SKU 里唯一能买到的一批：<strong>18 款在香港，2 款在洛杉矶</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>官网现名</th>
+<th>原文对应名</th>
+<th>机房</th>
+<th>配置</th>
+<th>现价</th>
+<th>Routing Profile</th>
+<th>综合分*</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>LAX.AN5.Pro.MICRO</code></td>
+<td><code>LAX.Pro.MICRO</code></td>
+<td>洛杉矶</td>
+<td>4G/4核/160G</td>
+<td>$110.90/月</td>
+<td>Premium</td>
+<td>66.0</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=81">购买</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>LAX.AN5.Pro.MINI</code></td>
+<td><code>LAX.Pro.MINI</code></td>
+<td>洛杉矶</td>
+<td>4G/4核/80G</td>
+<td>$79.90/月</td>
+<td>Premium</td>
+<td>65.6</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58">购买</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>HKG.AN5.Pro.LARGE</code></td>
+<td><code>HKG.Pro.LARGE</code></td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>$359.90/月</td>
+<td>Premium</td>
+<td>59.7</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=128">购买</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>HKG.AN5.Pro.GIANT</code></td>
+<td><code>HKG.Pro.GIANT</code></td>
+<td>香港</td>
+<td>24G/12核/640G</td>
+<td>$759.90/月</td>
+<td>Premium</td>
+<td>58.3</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=129">购买</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>HKG.AN5.Pro.MEDIUM</code></td>
+<td><code>HKG.Pro.MEDIUM</code></td>
+<td>香港</td>
+<td>8G/6核/160G</td>
+<td>$279.90/月</td>
+<td>Premium</td>
+<td>57.7</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=127">购买</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>HKG.AN5.Pro.MICRO</code></td>
+<td><code>HKG.Pro.MICRO</code></td>
+<td>香港</td>
+<td>4G/4核/160G</td>
+<td>$199.90/月</td>
+<td>Premium</td>
+<td>55.8</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=126">购买</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>HKG.AN5.Pro.MINI</code></td>
+<td><code>HKG.Pro.MINI</code></td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>$149.90/月</td>
+<td>Premium</td>
+<td>54.8</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=125">购买</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>HKG.AN5.EB.MEDIUM</code></td>
+<td><code>HKG.EB.MEDIUMv2</code></td>
+<td>香港</td>
+<td>8G/6核/160G</td>
+<td>$279.90/月</td>
+<td>Eyeball</td>
+<td>51.0</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=158">购买</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>HKG.AN5.EB.MICRO</code></td>
+<td><code>HKG.EB.MICROv2</code></td>
+<td>香港</td>
+<td>4G/4核/160G</td>
+<td>$199.90/月</td>
+<td>Eyeball</td>
+<td>50.9</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=157">购买</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>HKG.AN5.EB.LARGE</code></td>
+<td><code>HKG.EB.LARGEv2</code></td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>$359.90/月</td>
+<td>Eyeball</td>
+<td>50.8</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=159">购买</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>HKG.AN5.EB.MINI</code></td>
+<td><code>HKG.EB.MINIv2</code></td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>$149.90/月</td>
+<td>Eyeball</td>
+<td>50.7</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=156">购买</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>HKG.AN5.EB.GIANT</code></td>
+<td><code>HKG.EB.GIANTv2</code></td>
+<td>香港</td>
+<td>24G/12核/640G</td>
+<td>$759.90/月</td>
+<td>Eyeball</td>
+<td>50.4</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=160">购买</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>HKG.AS3.T1.WEE</code></td>
+<td><code>HKG.T1.WEE</code></td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>$36.90/年</td>
+<td>Tier 1</td>
+<td>47.6</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=197">购买</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>HKG.AS3.T1.MEDIUM</code></td>
+<td><code>HKG.T1.MEDIUM</code></td>
+<td>香港</td>
+<td>8G/4核/160G</td>
+<td>$49.90/月</td>
+<td>Tier 1</td>
+<td>47.4</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=202">购买</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>HKG.AS3.T1.LARGE</code></td>
+<td><code>HKG.T1.LARGE</code></td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>$99.90/月</td>
+<td>Tier 1</td>
+<td>47.4</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=203">购买</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>HKG.AS3.T1.GIANT</code></td>
+<td><code>HKG.T1.GIANT</code></td>
+<td>香港</td>
+<td>24G/8核/640G</td>
+<td>$199.90/月</td>
+<td>Tier 1</td>
+<td>47.2</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=204">购买</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>HKG.AS3.T1.MICRO</code></td>
+<td><code>HKG.T1.MICRO</code></td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>$32.90/月</td>
+<td>Tier 1</td>
+<td>45.8</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=201">购买</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>HKG.AS3.T1.TINY</code></td>
+<td><code>HKG.T1.TINY</code></td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>$6.90/月</td>
+<td>Tier 1</td>
+<td>44.6</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=198">购买</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>HKG.AS3.T1.MINI</code></td>
+<td><code>HKG.T1.MINI</code></td>
+<td>香港</td>
+<td>2G/2核/60G</td>
+<td>$21.90/月</td>
+<td>Tier 1</td>
+<td>44.3</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=200">购买</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>HKG.AS3.T1.STARTER</code></td>
+<td><code>HKG.T1.STARTER</code></td>
+<td>香港</td>
+<td>2G/1核/40G</td>
+<td>$12.90/月</td>
+<td>Tier 1</td>
+<td>44.1</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=199">购买</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code>Routing Profile</code> 是官网原字段：<strong>Premium</strong> = CN2 GIA 级优化线路，<strong>Eyeball</strong> = EB 混合优化，<strong>Tier 1</strong> = 国际线路（无大陆优化）。</p>
+<p>综合分沿用原文价格口径计算，用于横向比较；<strong>现价普遍高于原文价，实际性价比要打个折</strong>。</p>
+</blockquote>
+<hr />
+<h5 id="三-缺货15-款">三、🔴 缺货（15 款）</h5>
+<p>SKU 还在官网目录里，但显示 Out of Stock。补货时间不定，<strong>限量款基本不会回补</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>方案（原文名）</th>
+<th>机房</th>
+<th>原文价</th>
+<th>官网现价</th>
+<th>综合分</th>
+<th>购买（点进去是缺货页）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>LAX.Pro.MEDIUM</code></td>
+<td>洛杉矶</td>
+<td>$168.88/月</td>
+<td><strong>LAX.AN5.Pro.MEDIUM</strong>（缺货）<br>$289.90/月</td>
+<td>64.1</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=82">链接</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>LAX.Pro.GIANT</code></td>
+<td>洛杉矶</td>
+<td>$619.99/月</td>
+<td><strong>LAX.AN5.Pro.GIANT</strong>（缺货）<br>$1009.90/月</td>
+<td>63.7</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=98">链接</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>LAX.Pro.LARGE</code></td>
+<td>洛杉矶</td>
+<td>$338.88/月</td>
+<td><strong>LAX.AN5.Pro.LARGE</strong>（缺货）<br>$499.90/月</td>
+<td>63.4</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=61">链接</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>LAX.EB.MICRO</code></td>
+<td>洛杉矶</td>
+<td>$74.99/月</td>
+<td><strong>LAX.AN5.EB.MICRO</strong>（缺货）<br>$110.90/月</td>
+<td>63.1</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=193">链接</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>LAX.EB.MINI</code></td>
+<td>洛杉矶</td>
+<td>$58.88/月</td>
+<td><strong>LAX.AN5.EB.MINI</strong>（缺货）<br>$79.90/月</td>
+<td>62.6</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=192">链接</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>LAX.EB.MEDIUM</code></td>
+<td>洛杉矶</td>
+<td>$168.88/月</td>
+<td><strong>LAX.AN5.EB.MEDIUM</strong>（缺货）<br>$289.90/月</td>
+<td>62.1</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=194">链接</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>LAX.EB.GIANT</code></td>
+<td>洛杉矶</td>
+<td>$619.99/月</td>
+<td><strong>LAX.AN5.EB.GIANT</strong>（缺货）<br>$1009.90/月</td>
+<td>61.3</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=196">链接</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>LAX.EB.LARGE</code></td>
+<td>洛杉矶</td>
+<td>$338.88/月</td>
+<td><strong>LAX.AN5.EB.LARGE</strong>（缺货）<br>$499.90/月</td>
+<td>61.0</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=195">链接</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>TYO.Pro.TINY</code></td>
+<td>东京</td>
+<td>$19.9/月</td>
+<td><strong>TYO.AS3.Pro.TINY</strong>（缺货）<br>$21.90/月</td>
+<td>55.0</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=138">链接</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>TYO.Pro.STARTER</code></td>
+<td>东京</td>
+<td>$32.9/月</td>
+<td><strong>TYO.AS3.Pro.STARTER</strong>（缺货）<br>$45.90/月</td>
+<td>54.5</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=139">链接</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>TYO.Pro.MINI</code></td>
+<td>东京</td>
+<td>$69.9/月</td>
+<td><strong>TYO.AS3.Pro.MINI</strong>（缺货）<br>$89.90/月</td>
+<td>53.3</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=140">链接</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>TYO.Pro.MICRO</code></td>
+<td>东京</td>
+<td>$139.9/月</td>
+<td><strong>TYO.AS3.Pro.MICRO</strong>（缺货）<br>$189.90/月</td>
+<td>52.0</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=141">链接</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>TYO.Pro.MEDIUM</code></td>
+<td>东京</td>
+<td>$199.9/月</td>
+<td><strong>TYO.AS3.Pro.MEDIUM</strong>（缺货）<br>$320.90/月</td>
+<td>51.9</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=142">链接</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>TYO.Pro.LARGE</code></td>
+<td>东京</td>
+<td>$329.9/月</td>
+<td><strong>TYO.AS3.Pro.LARGE</strong>（缺货）<br>$429.90/月</td>
+<td>51.9</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=143">链接</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>TYO.Pro.GIANT</code></td>
+<td>东京</td>
+<td>$659.9/月</td>
+<td><strong>TYO.AS3.Pro.GIANT</strong>（缺货）<br>$829.90/月</td>
+<td>51.9</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=144">链接</a></td>
+</tr>
+</tbody>
+</table>
+<p>拆开看：</p>
+<ul>
+<li><strong>可以蹲补货的</strong>：<code>LAX.AN5.Pro.MEDIUM/LARGE/GIANT</code>（pid 82/61/98）、<code>LAX.AN5.EB.*</code>（192–196）、<code>TYO.AS3.Pro.*</code>（138–144）—— 这些是当前在售架构款，只是暂时没货。</li>
+<li><strong>基本不会补的</strong>：<code>LAX.AS3.*</code>、<code>LAX.AN4.*</code> 是上一代 EPYC 7003/9004 库存清空，官网只会补 AN5。</li>
+<li><strong>东京 T1 全系（131–136、228、229）缺货</strong>，原文没收录这条线，但同样买不到。</li>
+</ul>
+<hr />
+<h5 id="四-已下架30-款">四、⚫ 已下架（30 款）</h5>
+<p>PID 已从官网产品目录移除，请求会被重定向回产品首页。<strong>这些链接点了买不到东西</strong>，只能作为「曾经存在过」的记录。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>方案（原文名）</th>
+<th>机房</th>
+<th>原文价</th>
+<th>综合分</th>
+<th>下架原因</th>
+<th>现在买什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>SJC.T1.UNMETERED</code></td>
+<td>圣何塞</td>
+<td>$14.9/年</td>
+<td>85.7</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>LAX.Pro.MALIBU</code></td>
+<td>洛杉矶</td>
+<td>$49.9/年</td>
+<td>72.8</td>
+<td>限量年付款，售罄即下架</td>
+<td>无（限量款不补货）</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>LAX.Pro.PalmSpring</code></td>
+<td>洛杉矶</td>
+<td>$100/年</td>
+<td>72.8</td>
+<td>限量年付款，售罄即下架</td>
+<td>无（限量款不补货）</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>LAX.Pro.WEE</code></td>
+<td>洛杉矶</td>
+<td>$36.9/年</td>
+<td>72.4</td>
+<td>限量年付款，售罄即下架</td>
+<td>无（限量款不补货）</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>LAX.EB.CORONA</code></td>
+<td>洛杉矶</td>
+<td>$49.9/年</td>
+<td>68.6</td>
+<td>限量年付款，售罄即下架</td>
+<td>无（限量款不补货）</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>LAX.EB.WEE</code></td>
+<td>洛杉矶</td>
+<td>$39.9/年</td>
+<td>68.2</td>
+<td>限量年付款，售罄即下架</td>
+<td>无（限量款不补货）</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>LAX.Pro.TINY</code></td>
+<td>洛杉矶</td>
+<td>$9.99/月</td>
+<td>67.9</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58"><code>LAX.AN5.Pro.MINI</code> $79.90/月（贵 8 倍）</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>LAX.EB.FONTANA</code></td>
+<td>洛杉矶</td>
+<td>$100/年</td>
+<td>67.8</td>
+<td>限量年付款，售罄即下架</td>
+<td>无（限量款不补货）</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>LAX.Pro.Pocket</code></td>
+<td>洛杉矶</td>
+<td>$14.9/月</td>
+<td>67.8</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58"><code>LAX.AN5.Pro.MINI</code> $79.90/月</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>LAX.Pro.STARTER</code></td>
+<td>洛杉矶</td>
+<td>$29.9/月</td>
+<td>67.3</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58"><code>LAX.AN5.Pro.MINI</code> $79.90/月（配置更低）</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>SJC.T1.MEDIUM</code></td>
+<td>圣何塞</td>
+<td>$49.9/月</td>
+<td>64.7</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>SJC.T1.LARGE</code></td>
+<td>圣何塞</td>
+<td>$99.9/月</td>
+<td>64.6</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>SJC.T1.GIANT</code></td>
+<td>圣何塞</td>
+<td>$199.99/月</td>
+<td>64.5</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>SJC.T1.WEE</code></td>
+<td>圣何塞</td>
+<td>$36.9/年</td>
+<td>64.4</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>LAX.sPro.CREATOR</code></td>
+<td>洛杉矶</td>
+<td>$71.99/季</td>
+<td>64.4</td>
+<td>sPro 高防线整条移除</td>
+<td>无（高防线已删）</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>LAX.EB.Pocket</code></td>
+<td>洛杉矶</td>
+<td>$14.9/月</td>
+<td>64.4</td>
+<td>旧 PID，换代更名</td>
+<td>无现货</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>LAX.EB.TINY</code></td>
+<td>洛杉矶</td>
+<td>$9.99/月</td>
+<td>63.5</td>
+<td>旧 PID，换代更名</td>
+<td>无现货</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>SJC.T1.MICRO</code></td>
+<td>圣何塞</td>
+<td>$32.9/月</td>
+<td>63.3</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>LAX.EB.STARTER</code></td>
+<td>洛杉矶</td>
+<td>$29.9/月</td>
+<td>63.3</td>
+<td>旧 PID，换代更名</td>
+<td>无现货</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>LAX.Pro.uMINI</code></td>
+<td>洛杉矶</td>
+<td>$239.99/月</td>
+<td>62.3</td>
+<td>不限流量线整条移除</td>
+<td>无（不限流量线已删）</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>SJC.T1.TINY</code></td>
+<td>圣何塞</td>
+<td>$6.9/月</td>
+<td>61.8</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>SJC.T1.MINI</code></td>
+<td>圣何塞</td>
+<td>$21.9/月</td>
+<td>61.8</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>SJC.T1.STARTER</code></td>
+<td>圣何塞</td>
+<td>$12.9/月</td>
+<td>61.3</td>
+<td>圣何塞整线移除</td>
+<td>无（产品线已删）</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>LAX.Pro.uMICRO</code></td>
+<td>洛杉矶</td>
+<td>$399.99/月</td>
+<td>59.6</td>
+<td>不限流量线整条移除</td>
+<td>无（不限流量线已删）</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>HKG.Pro.TINY</code></td>
+<td>香港</td>
+<td>$39.9/月</td>
+<td>56.1</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=265"><code>HKG.AS3.Pro.TINY</code> $39.90/月</a></td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>HKG.Pro.STARTER</code></td>
+<td>香港</td>
+<td>$79.9/月</td>
+<td>55.3</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=266"><code>HKG.AS3.Pro.STARTER</code> $79.90/月</a></td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>LAX.Pro.uMEDIUM</code></td>
+<td>洛杉矶</td>
+<td>$799.99/月</td>
+<td>55.1</td>
+<td>不限流量线整条移除</td>
+<td>无（不限流量线已删）</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>LAX.Pro.uLARGE</code></td>
+<td>洛杉矶</td>
+<td>$1399.99/月</td>
+<td>52.3</td>
+<td>不限流量线整条移除</td>
+<td>无（不限流量线已删）</td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>HKG.EB.TINYv2</code></td>
+<td>香港</td>
+<td>$29.9/月</td>
+<td>51.4</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=210"><code>HKG.AS3.EB.TINY</code> $39.90/月</a></td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>HKG.EB.STARTERv2</code></td>
+<td>香港</td>
+<td>$59.9/月</td>
+<td>51.0</td>
+<td>旧 PID，换代更名</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=211"><code>HKG.AS3.EB.STARTER</code> $79.90/月</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h5 id="五分项榜-a纯网络质量-top-20">五、分项榜 A：纯网络质量 Top 20</h5>
+<p>不考虑价格，只看线路好不好。同分按性价比二次排序。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>方案</th>
+<th>网络分</th>
+<th>库存</th>
+<th>线路</th>
+<th>机房</th>
+<th>配置</th>
+<th>流量</th>
+<th>带宽</th>
+<th>原文价</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>HKG.Pro.LARGE</code></td>
+<td><strong>97</strong></td>
+<td>🟢 有货</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>2.4T/月</td>
+<td>1Gbps</td>
+<td>$239.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=128">购买</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HKG.Pro.GIANT</code></td>
+<td><strong>97</strong></td>
+<td>🟢 有货</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>24G/8核/640G</td>
+<td>4.8T/月</td>
+<td>1Gbps</td>
+<td>$499.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=129">购买</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>HKG.Pro.MEDIUM</code></td>
+<td><strong>97</strong></td>
+<td>🟢 有货</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>8G/4核/160G</td>
+<td>1.8T/月</td>
+<td>1Gbps</td>
+<td>$179.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=127">购买</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>HKG.Pro.TINY</code></td>
+<td><strong>97</strong></td>
+<td>⚫ 已下架</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>400G/月</td>
+<td>1Gbps</td>
+<td>$39.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=123">购买</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>HKG.Pro.MICRO</code></td>
+<td><strong>97</strong></td>
+<td>🟢 有货</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>1.6T/月</td>
+<td>1Gbps</td>
+<td>$159.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=126">购买</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>HKG.Pro.STARTER</code></td>
+<td><strong>97</strong></td>
+<td>⚫ 已下架</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>2G/1核/40G</td>
+<td>800G/月</td>
+<td>1Gbps</td>
+<td>$79.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=124">购买</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>HKG.Pro.MINI</code></td>
+<td><strong>97</strong></td>
+<td>🟢 有货</td>
+<td>香港 CN2 GIA / AS9929 / CMI</td>
+<td>香港</td>
+<td>2G/2核/60G</td>
+<td>1.2T/月</td>
+<td>1Gbps</td>
+<td>$119.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=125">购买</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>LAX.sPro.CREATOR</code></td>
+<td><strong>96</strong></td>
+<td>⚫ 已下架</td>
+<td>CFMT 5Tbps+ 高防 + CN2 GIA</td>
+<td>洛杉矶</td>
+<td>2G/2核/20G</td>
+<td>1.5T/月</td>
+<td>100Mbps</td>
+<td>$71.99/季</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=130">购买</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>LAX.Pro.MALIBU</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$49.9/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=186">购买</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>LAX.Pro.PalmSpring</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>2G/2核/40G</td>
+<td>2T/月</td>
+<td>2Gbps</td>
+<td>$100/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=182">购买</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>LAX.Pro.WEE</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>500G/月</td>
+<td>500Mbps</td>
+<td>$36.9/年</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=183">购买</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>LAX.Pro.TINY</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>2G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$9.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=100">购买</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>LAX.Pro.Pocket</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>2G/1核/40G</td>
+<td>1.5T/月</td>
+<td>4Gbps</td>
+<td>$14.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=137">购买</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>LAX.Pro.STARTER</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>2G/2核/80G</td>
+<td>3T/月</td>
+<td>10Gbps</td>
+<td>$29.9/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=56">购买</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>LAX.Pro.MICRO</code></td>
+<td><strong>95</strong></td>
+<td>🟢 有货</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>4G/4核/160G</td>
+<td>7T/月</td>
+<td>10Gbps</td>
+<td>$74.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=81">购买</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>LAX.Pro.MINI</code></td>
+<td><strong>95</strong></td>
+<td>🟢 有货</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>4G/4核/80G</td>
+<td>5T/月</td>
+<td>10Gbps</td>
+<td>$58.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58">购买</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>LAX.Pro.MEDIUM</code></td>
+<td><strong>95</strong></td>
+<td>🔴 缺货</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>8G/4核/160G</td>
+<td>14T/月</td>
+<td>10Gbps</td>
+<td>$168.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=82">购买</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>LAX.Pro.GIANT</code></td>
+<td><strong>95</strong></td>
+<td>🔴 缺货</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>24G/12核/640G</td>
+<td>50T/月</td>
+<td>10Gbps</td>
+<td>$619.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=98">购买</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>LAX.Pro.LARGE</code></td>
+<td><strong>95</strong></td>
+<td>🔴 缺货</td>
+<td>CN2 GIA 三网回程</td>
+<td>洛杉矶</td>
+<td>16G/8核/320G</td>
+<td>25T/月</td>
+<td>10Gbps</td>
+<td>$338.88/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=61">购买</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>LAX.Pro.uMINI</code></td>
+<td><strong>95</strong></td>
+<td>⚫ 已下架</td>
+<td>CN2 GIA 三网回程 · 不限流量</td>
+<td>洛杉矶</td>
+<td>2G/2核/20G</td>
+<td><strong>不限</strong></td>
+<td>30Mbps</td>
+<td>$239.99/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=62">购买</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注意：网络分 Top 20 里，<strong>香港 Pro 7 款有货（🟢），洛杉矶 Pro 只有 2 款有货，圣何塞与东京全灭</strong>。也就是说「线路最好的现货」集中香港。</p>
+</blockquote>
+<hr />
+<h5 id="六分项榜-b纯性价比-top-20">六、分项榜 B：纯性价比 Top 20</h5>
+<p>不考虑线路，只看「同样的钱买到多少资源」。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>方案</th>
+<th>性价比分</th>
+<th>库存</th>
+<th>机房</th>
+<th>配置</th>
+<th>流量</th>
+<th>带宽</th>
+<th>原文价</th>
+<th>线路</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>SJC.T1.UNMETERED</code></td>
+<td><strong>100.0</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>2G/1核/10G</td>
+<td><strong>不限</strong></td>
+<td>1Gbps</td>
+<td>$14.9/年</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=152">购买</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HKG.T1.WEE</code></td>
+<td><strong>54.4</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>10Gbps</td>
+<td>$36.9/年</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=197">购买</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>HKG.T1.MEDIUM</code></td>
+<td><strong>54.1</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>8G/4核/160G</td>
+<td>32T/月</td>
+<td>10Gbps</td>
+<td>$49.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=202">购买</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>HKG.T1.LARGE</code></td>
+<td><strong>53.9</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>16G/8核/320G</td>
+<td>64T/月</td>
+<td>10Gbps</td>
+<td>$99.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=203">购买</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>HKG.T1.GIANT</code></td>
+<td><strong>53.5</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>24G/8核/640G</td>
+<td>128T/月</td>
+<td>10Gbps</td>
+<td>$199.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=204">购买</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>SJC.T1.MEDIUM</code></td>
+<td><strong>53.4</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>4G/4核/120G</td>
+<td>32T/月</td>
+<td>10Gbps</td>
+<td>$49.9/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=149">购买</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>SJC.T1.LARGE</code></td>
+<td><strong>53.0</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>8G/4核/200G</td>
+<td>64T/月</td>
+<td>10Gbps</td>
+<td>$99.9/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=150">购买</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>SJC.T1.GIANT</code></td>
+<td><strong>52.9</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>16G/8核/400G</td>
+<td>128T/月</td>
+<td>10Gbps</td>
+<td>$199.99/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=151">购买</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>SJC.T1.WEE</code></td>
+<td><strong>52.8</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>0.5G/1核/10G</td>
+<td>1T/月</td>
+<td>10Gbps</td>
+<td>$36.9/年</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=152">购买</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>HKG.T1.MICRO</code></td>
+<td><strong>50.5</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>4G/4核/80G</td>
+<td>16T/月</td>
+<td>10Gbps</td>
+<td>$32.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=201">购买</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>SJC.T1.MICRO</code></td>
+<td><strong>50.2</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>4G/2核/80G</td>
+<td>16T/月</td>
+<td>10Gbps</td>
+<td>$32.9/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=148">购买</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>LAX.EB.CORONA</code></td>
+<td><strong>49.8</strong></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>1.5T/月</td>
+<td>2Gbps</td>
+<td>$49.9/年</td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=218">购买</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>LAX.EB.WEE</code></td>
+<td><strong>49.0</strong></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>1G/1核/20G</td>
+<td>1T/月</td>
+<td>1Gbps</td>
+<td>$39.9/年</td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=188">购买</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>LAX.EB.FONTANA</code></td>
+<td><strong>48.1</strong></td>
+<td>⚫ 已下架</td>
+<td>洛杉矶</td>
+<td>2G/2核/40G</td>
+<td>2.5T/月</td>
+<td>4Gbps</td>
+<td>$100/年</td>
+<td>CMIN2 三网回程</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=219">购买</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>HKG.T1.TINY</code></td>
+<td><strong>47.7</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>1G/1核/20G</td>
+<td>2T/月</td>
+<td>10Gbps</td>
+<td>$6.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=198">购买</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>HKG.T1.MINI</code></td>
+<td><strong>47.1</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>2G/2核/60G</td>
+<td>8T/月</td>
+<td>10Gbps</td>
+<td>$21.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=200">购买</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>SJC.T1.TINY</code></td>
+<td><strong>46.9</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>0.75G/1核/10G</td>
+<td>2T/月</td>
+<td>10Gbps</td>
+<td>$6.9/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=145">购买</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>SJC.T1.MINI</code></td>
+<td><strong>46.8</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>2G/2核/40G</td>
+<td>8T/月</td>
+<td>10Gbps</td>
+<td>$21.9/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=147">购买</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>HKG.T1.STARTER</code></td>
+<td><strong>46.7</strong></td>
+<td>🟢 有货</td>
+<td>香港</td>
+<td>2G/1核/40G</td>
+<td>4T/月</td>
+<td>10Gbps</td>
+<td>$12.9/月</td>
+<td>国际线路（无大陆优化）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=199">购买</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>SJC.T1.STARTER</code></td>
+<td><strong>45.7</strong></td>
+<td>⚫ 已下架</td>
+<td>圣何塞</td>
+<td>1.5G/1核/20G</td>
+<td>4T/月</td>
+<td>10Gbps</td>
+<td>$12.9/月</td>
+<td>CT163 + AS4837 + CMI 直连（含20Gbps防御）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=146">购买</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h5 id="七结论速览按今天能不能买到重排">七、结论速览（按「今天能不能买到」重排）</h5>
+<h6 id="现货里最能打的-5-款">现货里最能打的 5 款</h6>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>官网现名</th>
+<th>价格</th>
+<th>为什么选它</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>HKG.AN5.Pro.LARGE</code></td>
+<td>$359.90/月</td>
+<td>香港 Premium 线路 + 16G/8核/320G，现货里综合分最高的「大机器」。AN5 是 EPYC 9005 最新代</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HKG.AN5.Pro.MEDIUM</code></td>
+<td>$279.90/月</td>
+<td>8G/6核/160G，香港 Pro 的中端现货，比 LARGE 便宜 $80</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>LAX.AN5.Pro.MINI</code></td>
+<td>$79.90/月</td>
+<td><strong>洛杉矶唯一能买的便宜款</strong>，4G/4核/80G + Premium（CN2 GIA）线路</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>LAX.AN5.Pro.MICRO</code></td>
+<td>$110.90/月</td>
+<td>同上，硬盘 80G→160G，加 $31</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>HKG.AN5.Pro.MINI</code></td>
+<td>$149.90/月</td>
+<td>香港 Pro 入门款，4G/4核/80G。比 AS3 版（$126.90）贵 $23 但换 EPYC 9005</td>
+</tr>
+</tbody>
+</table>
+<h6 id="按需求直接选只列能下单的">按需求直接选（只列能下单的）</h6>
+<table>
+<thead>
+<tr>
+<th>你的需求</th>
+<th>选它</th>
+<th>现价</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>要 CN2 GIA + 洛杉矶落地 + 预算 $100/月内</td>
+<td><code>LAX.AN5.Pro.MINI</code></td>
+<td>$79.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=58">购买</a></td>
+</tr>
+<tr>
+<td>要 CN2 GIA + 洛杉矶 + 大硬盘</td>
+<td><code>LAX.AN5.Pro.MICRO</code></td>
+<td>$110.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=81">购买</a></td>
+</tr>
+<tr>
+<td>低延迟（华南/游戏/实时）+ 预算优先</td>
+<td><code>HKG.AS3.Pro.TINY</code></td>
+<td>$39.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=265">购买</a></td>
+</tr>
+<tr>
+<td>低延迟 + 要最新 CPU</td>
+<td><code>HKG.AN5.Pro.MINI</code></td>
+<td>$149.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=125">购买</a></td>
+</tr>
+<tr>
+<td>香港 + 便宜 + 线路可妥协</td>
+<td><code>HKG.AS3.EB.WEE</code></td>
+<td>$24.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=209">购买</a></td>
+</tr>
+<tr>
+<td>极致便宜 + 纯国际业务</td>
+<td><code>HKG.AS3.T1.TINY</code></td>
+<td>$6.90/月</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=198">购买</a></td>
+</tr>
+<tr>
+<td>大流量跑量 + 便宜</td>
+<td><code>HKG.AS3.T1.GIANT</code></td>
+<td>$199.90/月（24G/8核/640G）</td>
+<td><a href="https://www.dmit.io/aff.php?aff=2296&amp;pid=204">购买</a></td>
+</tr>
+<tr>
+<td>建站抗 DDoS</td>
+<td>无现货（<code>LAX.sPro</code> 唯一一款已下架）</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>日本/亚太落地</td>
+<td>无现货（TYO 全灭）</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>不限流量</td>
+<td>无现货（<code>LAX.Pro.u*</code> 与 <code>SJC.T1.UNMETERED</code> 全下架）</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h6 id="排序里几个反直觉的点">排序里几个反直觉的点</h6>
+<ol>
+<li><strong>原文榜首 <code>SJC.T1.UNMETERED</code> 已经买不到了</strong> —— 圣何塞整条线（9 款）从官网移除。它的 85.7 分只是历史记录。</li>
+<li><strong>香港 Pro 在纯排序里只排 34–56 名，但在现货里是绝对主力</strong> —— 因为洛杉矶、东京、圣何塞全灭，能买的高端线路只剩香港。</li>
+<li><strong>现货 20 款里 18 款是香港</strong> —— 想买洛杉矶只有 <code>AN5.Pro.MINI/MICRO</code> 两款，且必须月付 $79.90 起。</li>
+<li><strong>香港 Pro 涨价了</strong>：<code>HKG.Pro.MINI</code> 原文 $119.90 → 现 <code>HKG.AN5.Pro.MINI</code> $149.90（+25%）；<code>HKG.Pro.MICRO</code> $159.90 → $199.90（+25%）。</li>
+<li><strong><code>HKG.AS3.*</code> 比 <code>HKG.AN5.*</code> 便宜 15–30%</strong>，同为 Premium 线路，只是 CPU 代差（EPYC 7003 vs 9005）。预算敏感就选 AS3。</li>
+</ol>
+<hr />
+<h5 id="八必须知道的坑">八、必须知道的坑</h5>
+<ol>
+<li><strong>只有 Pro 系列承诺高端线路</strong>，EB 等系列可能因攻击/成本原因切换路由。CN2 GIA 是刚需就别买 EB。</li>
+<li><strong>IP 被墙</strong>：每 15 天可免费换一次，其它情况 $5/次（见 TOS 的 <em>IP Replacement Policy</em>）。</li>
+<li><strong>默认仅 SSH 密钥登录</strong>，需先按官方教程配置 XShell，否则连不上。</li>
+<li><strong>限量款售罄即下架，不会补货</strong> —— 原文 6 款 🔥 限量款现在全部 ⚫ 已下架，就是证据。</li>
+<li><strong>官网 PID 会随产品换代变更</strong> —— 旧 PID 直接 302 跳回首页，不报错也不提示。收藏的购买链接过几个月可能就失效。</li>
+<li><strong>套餐会「加量不加价」升级</strong>，已购同步升级；但<strong>新购价格也会跟着调整</strong>，本表价格可能落后官网。</li>
+</ol>
+<hr />
+<h5 id="附测试-ip">附：测试 IP</h5>
+<table>
+<thead>
+<tr>
+<th>机房/系列</th>
+<th>测试 IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>洛杉矶 Pro / Pro.u</td>
+<td><code>154.17.2.2</code></td>
+</tr>
+<tr>
+<td>洛杉矶 EB</td>
+<td><code>154.17.226.2</code> / <code>2605:52c0:1:3:2c2a:59ff:fe05:65c2</code></td>
+</tr>
+<tr>
+<td>洛杉矶 sPro</td>
+<td><code>45.88.194.2</code></td>
+</tr>
+<tr>
+<td>圣何塞 T1（已下线）</td>
+<td><code>174.136.205.2</code></td>
+</tr>
+<tr>
+<td>香港 Pro</td>
+<td><code>103.117.100.2</code></td>
+</tr>
+<tr>
+<td>香港 EB</td>
+<td><code>154.3.32.3</code></td>
+</tr>
+<tr>
+<td>香港 T1</td>
+<td><code>154.12.176.2</code></td>
+</tr>
+<tr>
+<td>东京 Pro</td>
+<td><code>154.12.190.2</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>购买链接为原文所附推广链接。库存状态为 2026-11-09 实测，随时会变；价格与配置以下单时官网为准。</em></p>
+</details>
+<h3 id="搬瓦工推荐稳定且有cn2-gia线路的服务商但目前的套餐也涨价了"><a href="https://bandwagonhost.com/">搬瓦工，推荐，稳定且有cn2-gia线路的服务商，但目前的套餐也涨价了</a></h3>
+<blockquote>
+<p>实测（2026-11-09）：<code>d.m123.org</code> 的购买链接 302 跳到 <code>bwh89.net</code>（搬瓦工官方 AFF 域名）。页面注明「商家已不再提供优惠码」。
+36 款完整套餐表、按系列对比与购买链接见下方折叠块。</p>
+</blockquote>
+<details>
+<summary><b><span style="color: red;">点击展开</span>：搬瓦工 CN2 GIA 高速优化线路套餐表（36 款 · 含机房/价格/购买链接）</b></summary>
+<h4 id="搬瓦工-cn2-gia-高速优化线路套餐表36-款">搬瓦工 CN2 GIA 高速优化线路套餐表（36 款）</h4>
+<blockquote>
+<p>来源：<a href="https://d.m123.org/">https://d.m123.org/</a>（YouTube <a href="https://www.youtube.com/@bulianglin">@bulianglin</a> 整理的选购表，抓取于 2026-11-09）
+页面原话：「商家已不再提供优惠码」。价格均为<strong>年付</strong>，单位美元。
+视频演示：<a href="https://www.youtube.com/watch?v=MgtOAVOXBWo">https://www.youtube.com/watch?v=MgtOAVOXBWo</a>
+落地实测（2026-11-09）：<code>dd.m123.org</code> 的购买链接 302 跳转到 <strong><code>bwh89.net</code></strong>（搬瓦工官方 AFF 域名之一）。</p>
+</blockquote>
+<h5 id="全部-36-款一览">全部 36 款一览</h5>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CN2 GIA-E (视频同款)</strong></td>
+<td>3核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>2000GB</td>
+<td>2.5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$299.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=88">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>3000GB</td>
+<td>2.5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$549.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=89">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>5000GB</td>
+<td>5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$879.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=90">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>8000GB</td>
+<td>5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$1599.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=91">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>10000GB</td>
+<td>10Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$2759.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=92">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>12000GB</td>
+<td>10Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$5399.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=93">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong><span style="color: red;">(cn2 gia里的便宜套餐)</span></td>
+<td>2核</td>
+<td>1GB</td>
+<td>20GB</td>
+<td>500GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$169.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=114">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>3核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>1000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$299.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=115">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>2000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$549.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=116">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>3000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$879.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=117">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$1599.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=118">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>5000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$2759.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=119">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>6000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$5399.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=120">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>2核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>500GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$499.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=134">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>1000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$869.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=135">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>2000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$1665.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=136">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$3279.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=137">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>6000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$5549.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=138">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>8000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$10559.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=139">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>2核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>500GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=108">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>1000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$1559.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=109">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>2000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$2999.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=110">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$5899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=111">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>6000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$9989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=123">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>8000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$18989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=125">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA (延迟最低)</strong></td>
+<td>2核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>500GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=95">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>1000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$1559.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=96">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>2000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$2999.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=97">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$5899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=98">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>6000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$9989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=122">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>8000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$18989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=124">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM (最便宜)</strong></td>
+<td>3核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>2000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET 、美国、加拿大、荷兰等 9 个机房</td>
+<td>$99.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=45">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>3000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$199.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=46">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>5核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>4000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$399.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=47">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>6核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>5000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$799.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=48">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>7核</td>
+<td>24GB</td>
+<td>480GB</td>
+<td>6000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$1199.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=49">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<h5 id="按系列看含适用场景">按系列看（含适用场景）</h5>
+<h6 id="cn2-gia-e6-款">CN2 GIA-E（6 款）</h6>
+<blockquote>
+<p><strong>主力款</strong>。DC6 CN2 GIA-E / DC9 CN2 GIA / 日本软银 / 美加荷等 13 个机房可迁移，三网回程 CN2 GIA，性价比最高的高端线路档。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CN2 GIA-E (视频同款)</strong></td>
+<td>3核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>2000GB</td>
+<td>2.5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$299.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=88">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>3000GB</td>
+<td>2.5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$549.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=89">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>5000GB</td>
+<td>5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$879.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=90">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>8000GB</td>
+<td>5Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$1599.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=91">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>10000GB</td>
+<td>10Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$2759.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=92">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>CN2 GIA-E</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>12000GB</td>
+<td>10Gbps</td>
+<td>DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 13 个机房</td>
+<td>$5399.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=93">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<h6 id="dubai7-款">DUBAI（7 款）</h6>
+<blockquote>
+<p>迪拜机房，比 CN2 GIA-E 多一个可选机房（14 个），但带宽只有 1Gbps。适合需要中东节点的场景。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>2核</td>
+<td>1GB</td>
+<td>20GB</td>
+<td>500GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$169.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=114">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>3核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>1000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$299.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=115">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>2000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$549.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=116">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>3000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$879.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=117">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$1599.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=118">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>5000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$2759.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=119">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>DUBAI</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>6000GB</td>
+<td>1Gbps</td>
+<td>迪拜、DC6 CN2 GIA-E、DC9 CN2 GIA、日本软银、美国、加拿大、荷兰等 14 个机房</td>
+<td>$5399.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=120">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<h6 id="osaka-cn2-gia6-款">OSAKA CN2 GIA（6 款）</h6>
+<blockquote>
+<p>日本大阪 CN2 GIA 单机房，延迟介于美西和香港之间，1.5Gbps 带宽。价格偏高。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>2核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>500GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$499.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=134">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>1000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$869.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=135">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>2000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$1665.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=136">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$3279.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=137">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>6000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$5549.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=138">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>OSAKA CN2 GIA</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>8000GB</td>
+<td>1.5Gbps</td>
+<td>日本大阪 CN2 GIA</td>
+<td>$10559.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=139">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<h6 id="tokyo-cn2-gia6-款">TOKYO CN2 GIA（6 款）</h6>
+<blockquote>
+<p>日本东京 CN2 GIA 单机房，1.2Gbps 带宽，延迟比大阪更低但价格更贵。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>2核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>500GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=108">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>1000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$1559.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=109">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>2000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$2999.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=110">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$5899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=111">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>6000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$9989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=123">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>TOKYO CN2 GIA</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>8000GB</td>
+<td>1.2Gbps</td>
+<td>日本东京 CN2 GIA</td>
+<td>$18989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=125">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<h6 id="hk-cn2-gia6-款">HK CN2 GIA（6 款）</h6>
+<blockquote>
+<p><strong>延迟最低</strong>。中国香港 + 日本东京 CN2 GIA 双机房可选，1Gbps。同配置价格与东京持平但延迟优势明显。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HK CN2 GIA (延迟最低)</strong></td>
+<td>2核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>500GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=95">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>1000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$1559.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=96">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>6核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>2000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$2999.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=97">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>8核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>4000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$5899.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=98">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>10核</td>
+<td>32GB</td>
+<td>640GB</td>
+<td>6000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$9989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=122">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>HK CN2 GIA</strong></td>
+<td>12核</td>
+<td>64GB</td>
+<td>1280GB</td>
+<td>8000GB</td>
+<td>1Gbps</td>
+<td>中国香港 CN2 GIA、日本东京 CN2 GIA</td>
+<td>$18989.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=124">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<h6 id="kvm5-款">KVM（5 款）</h6>
+<blockquote>
+<p><strong>最便宜</strong>。DC3 CN2 / DC8 ZNET / 美加荷等 9 个机房，普通优化线路（非 CN2 GIA 三网回程），晚高峰表现弱于上面几档。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>CPU</th>
+<th>内存</th>
+<th>硬盘</th>
+<th>月流量</th>
+<th>带宽</th>
+<th>可选地区（机房）</th>
+<th>价格</th>
+<th>购买</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>KVM (最便宜)</strong></td>
+<td>3核</td>
+<td>2GB</td>
+<td>40GB</td>
+<td>2000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET 、美国、加拿大、荷兰等 9 个机房</td>
+<td>$99.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=45">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>4核</td>
+<td>4GB</td>
+<td>80GB</td>
+<td>3000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$199.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=46">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>5核</td>
+<td>8GB</td>
+<td>160GB</td>
+<td>4000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$399.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=47">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>6核</td>
+<td>16GB</td>
+<td>320GB</td>
+<td>5000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$799.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=48">立即购买</a></td>
+</tr>
+<tr>
+<td><strong>KVM</strong></td>
+<td>7核</td>
+<td>24GB</td>
+<td>480GB</td>
+<td>6000GB</td>
+<td>1Gbps</td>
+<td>DC3 CN2、DC8 ZNET、美国、加拿大、荷兰等 9 个机房</td>
+<td>$1199.99/年</td>
+<td><a href="https://dd.m123.org/aff.php?aff=68569&amp;pid=49">立即购买</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p><em>表格为第三方整理页抓取结果，价格与库存以下单时商家页面为准。推广链接含 AFF 参数，介意可去掉 <code>aff=68569</code> 后访问。</em></p>
+</blockquote>
+</details>
+  </div>
+</main>
+
+<button id="totop" title="回到顶部">↑</button>
+
+<script>
+(function(){
+  // ---- 目录树折叠 ----
+  var toc=document.getElementById('toc');
+  function setupTree(){
+    var items=[].slice.call(toc.querySelectorAll('li'));
+    items.forEach(function(li){
+      var a=li.querySelector('a'); if(!a) return;
+      var lv=parseInt((li.className.match(/lv(\d)/)||[0,0])[1],10);
+      // 若本项有子列表，加折叠按钮
+      var sub=li.querySelector('ul');
+      if(sub){
+        li.classList.add('has-sub');
+        // 初始：lv1 / lv2 展开，lv3 及更深折叠（等价于原来"默认展开到 lv3"）
+        if(lv>=3) li.classList.add('collapsed');
+        var btn=document.createElement('span');
+        btn.className='toggle';
+        btn.textContent = li.classList.contains('collapsed') ? '+' : '−';
+        btn.title='展开/收起';
+        btn.onclick=function(e){
+          e.preventDefault(); e.stopPropagation();
+          // 折叠状态只挂在当前这一层，子孙各自保持原样
+          var collapsed = li.classList.toggle('collapsed');
+          li.classList.toggle('open', !collapsed);
+          btn.textContent = collapsed ? '+' : '−';
+        };
+        a.appendChild(btn);
+      }
+    });
+  }
+  setupTree();
+
+  // ---- 滚动高亮 ----
+  var links=[].slice.call(toc.querySelectorAll('a[href^="#"]'));
+  var map={};
+  links.forEach(function(a){ map[decodeURIComponent(a.getAttribute('href').slice(1))]=a; });
+  var heads=[].slice.call(document.querySelectorAll('#content h1,#content h2,#content h3,#content h4,#content h5,#content h6'));
+  var current=null;
+  function onScroll(){
+    var top=window.scrollY+110, found=null;
+    for(var i=0;i<heads.length;i++){
+      if(heads[i].offsetTop<=top) found=heads[i]; else break;
+    }
+    if(!found) found=heads[0];
+    if(!found) return;
+    var a=map[found.id];
+    if(a===current) return;
+    if(current) current.classList.remove('active');
+    current=a;
+    if(a){
+      a.classList.add('active');
+      // 展开所有祖先（同时清掉 collapsed，并让 +/− 图标跟着变）
+      var li=a.parentElement;
+      while(li && li!==toc){
+        if(li.tagName==='LI'){
+          li.classList.add('open');
+          li.classList.remove('collapsed');
+          var tg=li.querySelector(':scope > a > .toggle');
+          if(tg) tg.textContent='−';
+        }
+        li=li.parentElement;
+      }
+      // 让高亮项可见
+      var r=a.getBoundingClientRect(), sr=toc.getBoundingClientRect();
+      if(r.top<sr.top+8 || r.bottom>sr.bottom-8){
+        a.scrollIntoView({block:'nearest'});
+      }
+    }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+
+  // ---- 搜索过滤 ----
+  var box=document.getElementById('tocSearch');
+  if(box){
+    box.addEventListener('input',function(){
+      var q=box.value.trim().toLowerCase();
+      var lis=[].slice.call(toc.querySelectorAll('li'));
+      if(!q){
+        lis.forEach(function(li){
+          li.style.display='';
+          var lv=parseInt((li.className.match(/lv(\d)/)||[0,0])[1],10);
+          // 恢复默认视图：lv1/lv2 展开，lv3 及更深折叠
+          if(lv>=3){
+            li.classList.add('collapsed'); li.classList.remove('open');
+          }else{
+            li.classList.remove('collapsed'); li.classList.add('open');
+          }
+          var tg=li.querySelector(':scope > a > .toggle');
+          if(tg) tg.textContent = li.classList.contains('collapsed') ? '+' : '−';
+        });
+        onScroll(); return;
+      }
+      // 用数组下标做 key（不能用 li 当对象属性名，会被统一转成 "[object HTMLLIElement]"）
+      var hit=[];
+      lis.forEach(function(li,idx){
+        var a=li.querySelector('a');
+        var t='';
+        if(a){
+          // 只取 <a> 自身的直接文本节点，排除折叠按钮的 +/- 字符
+          for(var n=a.firstChild;n;n=n.nextSibling){
+            if(n.nodeType===3) t+=n.nodeValue;
+          }
+        }
+        hit[idx] = t.toLowerCase().indexOf(q)>=0;
+      });
+      // 自底向上：子孙命中则祖先也保留
+      for(var i=lis.length-1;i>=0;i--){
+        if(hit[i]) continue;
+        var sub=lis[i].querySelectorAll('li');
+        for(var j=0;j<sub.length;j++){
+          var k=lis.indexOf(sub[j]);
+          if(k>=0 && hit[k]){ hit[i]=true; break; }
+        }
+      }
+      lis.forEach(function(li,idx){
+        var show=!!hit[idx];
+        li.style.display = show ? '' : 'none';
+        if(show){
+          li.classList.add('open'); li.classList.remove('collapsed');
+          var tg=li.querySelector(':scope > a > .toggle');
+          if(tg) tg.textContent='−';
+        }
+      });
+    });
+  }
+
+  // ---- 表格包一层，便于横向滚动；列数少的撑满宽度 ----
+  [].forEach.call(document.querySelectorAll('#content table'),function(t){
+    var cols = t.querySelectorAll('thead th').length || (t.rows[0]?t.rows[0].cells.length:0);
+    if(cols && cols<=5) t.classList.add('narrow');
+    if(t.parentElement.classList.contains('table-wrap')) return;
+    var w=document.createElement('div'); w.className='table-wrap';
+    t.parentNode.insertBefore(w,t); w.appendChild(t);
+    // 实际超宽时给个渐隐 + 提示
+    setTimeout(function(){
+      if(w.scrollWidth > w.clientWidth+4){
+        w.classList.add('scrollable');
+        var hint=document.createElement('div');
+        hint.className='table-hint show';
+        hint.textContent='← 这张表比较宽，可以左右拖动查看完整列 →';
+        w.parentNode.insertBefore(hint,w);
+      }
+    },80);
+  });
+
+  // ---- 主题切换 ----
+  var btnTheme=document.getElementById('btnTheme');
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem('mdhtml-theme',t);}catch(e){}
+    if(btnTheme) btnTheme.textContent = t==='dark' ? '☀ 亮色' : '🌙 暗色';
+  }
+  var saved='light';
+  try{ saved=localStorage.getItem('mdhtml-theme')||'light'; }catch(e){}
+  applyTheme(saved);
+  if(btnTheme) btnTheme.onclick=function(){
+    applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+  };
+
+  // ---- 全部展开 / 收起折叠块 ----
+  var btnFold=document.getElementById('btnFold');
+  var allOpen=false;
+  if(btnFold) btnFold.onclick=function(){
+    allOpen=!allOpen;
+    [].forEach.call(document.querySelectorAll('#content details'),function(d){ d.open=allOpen; });
+    btnFold.textContent = allOpen ? '收起折叠块' : '展开折叠块';
+    btnFold.classList.toggle('on',allOpen);
+  };
+
+  // ---- 打印 ----
+  var btnPrint=document.getElementById('btnPrint');
+  if(btnPrint) btnPrint.onclick=function(){ window.print(); };
+
+  // ---- 返回顶部 ----
+  var totop=document.getElementById('totop');
+  window.addEventListener('scroll',function(){
+    totop.classList.toggle('show',window.scrollY>500);
+  },{passive:true});
+  totop.onclick=function(){ window.scrollTo({top:0,behavior:'smooth'}); };
+
+  // ---- 移动端菜单 ----
+  var mb=document.getElementById('menuBtn'), sb=document.getElementById('sidebar'),
+      scrim=document.getElementById('scrim');
+  function setMenu(open){
+    if(open){ sb.classList.add('open'); document.body.classList.add('menu-open'); }
+    else{ sb.classList.remove('open'); document.body.classList.remove('menu-open'); }
+  }
+  if(mb) mb.onclick=function(e){ e.stopPropagation(); setMenu(!sb.classList.contains('open')); };
+  // 点侧栏以外的区域（遮罩）收起
+  if(scrim) scrim.onclick=function(){ setMenu(false); };
+  // 点正文区也收起（遮罩已覆盖，双保险）
+  var mainEl=document.getElementById('main');
+  if(mainEl) mainEl.addEventListener('click',function(){ if(window.innerWidth<=1100) setMenu(false); });
+  // Esc 收起
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'||e.keyCode===27) setMenu(false); });
+  // 窗口变宽自动复位
+  window.addEventListener('resize',function(){ if(window.innerWidth>1100) setMenu(false); });
+  [].forEach.call(toc.querySelectorAll('a'),function(a){
+    a.addEventListener('click',function(){ if(window.innerWidth<=1100) setMenu(false); });
+  });
+
+  // ---- 锚点定位（URL 带 #hash 时） ----
+  function openAncestors(el){
+    var p=el.parentElement;
+    while(p){
+      if(p.tagName==='DETAILS') p.open=true;
+      p=p.parentElement;
+    }
+  }
+  // 点目录里指向折叠块内部的锚点时，先展开祖先 <details>，否则跳过去是一片空白
+  [].forEach.call(toc.querySelectorAll('a[href^="#"]'),function(a){
+    a.addEventListener('click',function(){
+      var id=decodeURIComponent(a.getAttribute('href').slice(1));
+      var el=document.getElementById(id);
+      if(el) openAncestors(el);
+    });
+  });
+  if(location.hash){
+    var id=decodeURIComponent(location.hash.slice(1));
+    var el=document.getElementById(id);
+    if(el){ openAncestors(el); setTimeout(function(){ el.scrollIntoView(); },60); }
+  }
+})();
+</script>
+</body>
+</html>
