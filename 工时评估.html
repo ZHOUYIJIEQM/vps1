@@ -502,8 +502,9 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <li class="lv2"><a href="#阶段-7-分流规则与路由体系">阶段 7 分流规则与路由体系</a></li>
 <li class="lv2"><a href="#阶段-8-多用户与订阅分发">阶段 8 多用户与订阅分发</a></li>
 <li class="lv2"><a href="#阶段-9-监控告警与自动备份">阶段 9 监控告警与自动备份</a></li>
-<li class="lv2"><a href="#阶段-10-客户端部署">阶段 10 客户端部署</a></li>
-<li class="lv2"><a href="#阶段-11-测试验收与交付">阶段 11 测试验收与交付</a></li>
+<li class="lv2"><a href="#阶段-10-客户端部署与分流落地">阶段 10 客户端部署与分流落地</a></li>
+<li class="lv2"><a href="#阶段-11-tls-指纹与主动探测对抗">阶段 11 TLS 指纹与主动探测对抗</a></li>
+<li class="lv2"><a href="#阶段-12-测试验收与交付">阶段 12 测试验收与交付</a></li>
 </ul>
 </li>
 </ul>
@@ -549,8 +550,8 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tr>
 <td>3</td>
 <td>配置 VLESS + REALITY 入站</td>
-<td>无需域名与证书的 TCP 主力线路：借真站 TLS 指纹、Vision 流控，抗主动探测</td>
-<td>2</td>
+<td>无需域名与证书的 TCP 主力线路：挑伪装目标、验证书链与 ALPN、写 realitySettings 七项、Vision 流控；再模拟主动探测核对证书与页面是否与真站一致</td>
+<td>2.5</td>
 </tr>
 <tr>
 <td>4</td>
@@ -567,8 +568,8 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tr>
 <td>6</td>
 <td>Nginx 反代与可视化面板</td>
-<td>门面与控制台一起做：nginx 与伪装站点把 443 之外的流量装成正常小网站（面板与订阅反代走 127.0.0.1，443 留给 REALITY）；面板只监听本机，纳管三条入站，配 2FA 与 IP 白名单、日志脱敏与限流</td>
-<td>1.5</td>
+<td>门面与控制台一起做：nginx 与伪装站点把 443 之外的流量装成正常小网站（面板与订阅反代走 127.0.0.1，443 留给 REALITY）；面板只监听本机、纳管三条入站、2FA 与 IP 白名单；订阅页按 UA 分流并出二维码，最后排端口归属与日志脱敏</td>
+<td>2.5</td>
 </tr>
 <tr>
 <td>7</td>
@@ -590,12 +591,18 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </tr>
 <tr>
 <td>10</td>
-<td>客户端部署</td>
-<td>四端落地（Windows / macOS / Android / iOS）：导入订阅、TUN 模式、开机自启、统一分流</td>
-<td>0.5</td>
+<td>客户端部署与分流落地</td>
+<td>四平台各一套方案：Windows（v2rayN / Clash Verge Rev）、macOS（Clash Verge Rev + 系统扩展授权 + Gatekeeper 放行）、Android（NekoBox / Hiddify + 省电白名单）、iOS（Clash Mi 主力 + Karing / Streisand 备用，全程零付费，只需一个非国区 Apple ID）；再手写 TUN + fake-ip + 同源规则集的配置，四端核对结果并整理冲突清单</td>
+<td>2</td>
 </tr>
 <tr>
 <td>11</td>
+<td>TLS 指纹与主动探测对抗</td>
+<td>上线前把特征收一遍：JA3/JA4 与真站对齐、主动探测模拟（openssl / curl / nmap）、shortId 与 spiderX 轮换、UDP 侧混淆收敛，产出暴露面自查清单</td>
+<td>1</td>
+</tr>
+<tr>
+<td>12</td>
 <td>测试验收与交付</td>
 <td>测服务、端口、出口 IP、速度、重启自启，然后交付：机器密码、机器的管理后台、可视化管理面板入口</td>
 <td>0.5</td>
@@ -604,10 +611,11 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <td></td>
 <td><strong>合计</strong></td>
 <td></td>
-<td><strong>16 小时</strong></td>
+<td><strong>20 小时</strong></td>
 </tr>
 </tbody>
 </table>
+
 
 <h3>阶段依赖与可并行点</h3>
 <ul>
@@ -615,8 +623,9 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <li><strong>先验线路</strong>：阶段 1 的线路体检放在最前面，不合格当天就换机房；换完复测再往下走，否则后面每一步都要重做。</li>
 <li><strong>可并行</strong>：阶段 3 / 4 / 5 三条入站彼此独立，装完核心后可以连着做，也可以分三次做；端口上只要避开 443/tcp 与 443/udp 的冲突。</li>
 <li><strong>端口主权</strong>：阶段 6 里 nginx 与面板都只能蹲在 <code>127.0.0.1</code>（nginx 8443、面板另给一个本地端口），<code>0.0.0.0:443</code> 永远留给 REALITY；顺序反了就是 <code>address already in use</code>，面板自带的一键签证书要先关掉。</li>
-<li><strong>前置依赖</strong>：阶段 6 内部的顺序是「nginx 门面 → 面板 → 反代 → 纳管」，反代不通就别急着往面板里加节点；阶段 7 / 8 依赖阶段 6 的面板配置读写能力；阶段 10 依赖阶段 7 的规则定稿；阶段 11 依赖全部前序。</li>
-<li><strong>可随时插入</strong>：阶段 9 的采集与备份不阻塞主线，等 3 条线路都连通后再补也来得及。</li>
+<li><strong>前置依赖</strong>：阶段 6 内部顺序是「nginx 门面 → 面板 → 反代 → 纳管 → 订阅页」，反代不通就别急着往面板里加节点；阶段 7 / 8 依赖阶段 6 的面板配置读写能力；阶段 10 依赖阶段 8 的订阅链接与阶段 7 的规则定稿；阶段 11 依赖阶段 3～6 的最终配置；阶段 12 依赖全部前序。</li>
+<li><strong>可随时插入</strong>：阶段 9 的采集与备份不阻塞主线，可以在验收前补；阶段 11 的指纹自查必须在验收前做完——验收单上要填「探测者会看到什么」的核对结论。</li>
+<li><strong>不可并行</strong>：阶段 3 与阶段 6 在 443 上有强耦合，REALITY 的 <code>dest</code> 定下来之前不要动 nginx 的伪装站风格；反过来说，阶段 6 改完伪装站也不必回头改 REALITY，两者只需「同源风格」，不需要同一份文件。</li>
 </ul>
 <hr />
 
@@ -805,21 +814,21 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 
 <h2 id="阶段-3-配置-vless-reality-入站">阶段 3　配置 VLESS + REALITY 入站</h2>
 <blockquote>
-<p><strong>目标</strong>：拿下主用 TCP 线路——不需要自有域名、不需要证书，直接借真站的 TLS 指纹与证书链，被动看像在访问那个站，主动探测也拿不到区别。</p>
-<p><strong>产出</strong>：443/tcp 上的 VLESS + REALITY + Vision 入站、一条可导入客户端的 <code>vless://</code> 链接、一份排错清单。</p>
+<p><strong>目标</strong>：拿下主用 TCP 线路——不需要自有域名、不需要证书，直接借真站的 TLS 指纹与证书链，被动看像在访问那个站，主动探测也拿不到区别。这是整台机器的主线，调不透后面所有测试都白测。</p>
+<p><strong>产出</strong>：443/tcp 上的 VLESS + REALITY + Vision 入站、一条可导入客户端的 <code>vless://</code> 链接、一份「探测者会看到什么」的对照记录、一份排错清单。</p>
 </blockquote>
 <p><strong>流程</strong>：</p>
 <ol>
 <li><code>xray x25519</code> 出密钥对（私钥进服务端、公钥进客户端）</li>
 <li><code>xray uuid</code> 出客户端 ID，一个用户一个，方便单独停用</li>
 <li>挑伪装目标：满足 TLS 1.3 + HTTP/2 + 非国内 + 非 Cloudflare 代理 + 不是本机——<strong>通常要试三四个候选才碰上一个合适的</strong></li>
-<li>用 <code>curl -I --tlsv1.3 --http2</code> 与 <code>openssl s_client</code> 验证目标可用</li>
-<li><code>openssl rand -hex 8</code> 出 shortId</li>
+<li>用 <code>curl -I --tlsv1.3 --http2</code> 与 <code>openssl s_client</code> 验证目标可用，再看它的证书链有效期与页面是否为静态</li>
+<li><code>openssl rand -hex 8</code> 出 shortId；按用户预留多个</li>
 <li>写 inbound（vless / 443 / decryption none / flow vision / realitySettings 七项）</li>
 <li>补 <code>sniffing</code>，让分流能按域名判断</li>
-<li>校验 → 重启 → <code>ss -tlnp</code> 看监听</li>
-<li>拼客户端链接（sni / fp / pbk / sid / type）</li>
-<li>浏览器直连 <code>https://IP:443</code> 做主动探测模拟，再按清单排错</li>
+<li>校验 → 重启 → <code>ss -tlnp</code> 看监听，确认 443 上只有 xray 一个主人</li>
+<li>拼客户端链接（sni / fp / pbk / sid / type），fp 要与真站浏览器族一致</li>
+<li>浏览器直连 <code>https://IP:443</code> 做主动探测模拟：证书、页面、响应头三项都要与真站一致，再按清单排错</li>
 </ol>
 <table>
 <thead>
@@ -843,22 +852,22 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tr>
 <td>挑伪装目标</td>
 <td>要求同时满足：TLS 1.3、HTTP/2、非国内站、非 Cloudflare 代理、非本机。候选如 <code>www.microsoft.com</code>、<code>swdist.apple.com</code>、<code>www.lovelive-anime.jp</code>；<strong>实际筛选通常要换三四个候选才遇到一个合适的</strong>（TLS 1.3 与 h2 都对上、又不是 CF 代理的站点比想象中少）</td>
-<td>20</td>
+<td>25</td>
 </tr>
 <tr>
 <td>验证伪装目标</td>
-<td><code>curl -I --tlsv1.3 --http2 https://目标域名</code> 看是否 200、<code>openssl s_client -connect 目标:443 -tls1_3</code> 看证书链与 ALPN 是否含 h2</td>
-<td>15</td>
+<td><code>curl -I --tlsv1.3 --http2 https://目标域名</code> 看是否 200、<code>openssl s_client -connect 目标:443 -tls1_3</code> 看证书链与 ALPN 是否含 h2；顺手记下证书有效期——目标站换证书那天你的 <code>dest</code> 也得跟着换</td>
+<td>20</td>
 </tr>
 <tr>
 <td>生成 shortId</td>
-<td><code>openssl rand -hex 8</code>；可配多个 shortId 给不同客户端，留空字符串也允许</td>
+<td><code>openssl rand -hex 8</code>；可配多个 shortId 给不同客户端，留空字符串也允许；按用户预留，方便单独吊销</td>
 <td>8</td>
 </tr>
 <tr>
 <td>写 inbound</td>
-<td><code>protocol: vless</code>、<code>port: 443</code>、<code>listen: 0.0.0.0</code>、<code>decryption: none</code>、<code>clients</code> 填 UUID 与 <code>flow: xtls-rprx-vision</code>、<code>streamSettings.security: reality</code>、<code>realitySettings</code> 填 <code>dest</code>（目标:443）、<code>serverNames</code>、<code>privateKey</code>、<code>shortIds</code>、<code>spiderX: /</code></td>
-<td>22</td>
+<td><code>protocol: vless</code>、<code>port: 443</code>、<code>listen: 0.0.0.0</code>、<code>decryption: none</code>、<code>clients</code> 填 UUID 与 <code>flow: xtls-rprx-vision</code>、<code>streamSettings.security: reality</code>、<code>realitySettings</code> 填 <code>dest</code>（目标:443）、<code>serverNames</code>、<code>privateKey</code>、<code>shortIds</code>、<code>spiderX: /</code>；<code>realitySettings</code> 七项少一项都不握手</td>
+<td>30</td>
 </tr>
 <tr>
 <td>补 sniffing</td>
@@ -867,23 +876,23 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </tr>
 <tr>
 <td>校验与重启</td>
-<td>先 <code>xray run -test</code>，再 <code>systemctl restart xray</code>，<code>ss -tlnp | grep 443</code></td>
+<td>先 <code>xray run -test</code>，再 <code>systemctl restart xray</code>，<code>ss -tlnp | grep 443</code>；<code>journalctl -u xray -n 30</code> 确认没有 handshake 报错</td>
 <td>12</td>
 </tr>
 <tr>
 <td>生成客户端链接</td>
-<td>手拼 <code>vless://UUID@IP:443?encryption=none&amp;flow=xtls-rprx-vision&amp;security=reality&amp;sni=目标域名&amp;fp=chrome&amp;pbk=公钥&amp;sid=shortId&amp;type=tcp#备注</code></td>
+<td>手拼 <code>vless://UUID@IP:443?encryption=none&amp;flow=xtls-rprx-vision&amp;security=reality&amp;sni=目标域名&amp;fp=chrome&amp;pbk=公钥&amp;sid=shortId&amp;type=tcp#备注</code>；<code>fp</code> 与真站同族，别乱填</td>
 <td>10</td>
 </tr>
 <tr>
 <td>主动探测模拟与排错</td>
-<td>浏览器直连 <code>https://IP:443</code> 看是否返回伪装目标的证书与页面；连不上先查三处：<code>journalctl -u xray</code> 的 handshake 报错、服务器时间、客户端 <code>pbk</code> 与 <code>sid</code></td>
-<td>15</td>
+<td>浏览器直连 <code>https://IP:443</code>，核对三项：证书链是不是真站的、页面内容是不是真站的、响应头里的 server 字段有没有露 nginx；再 <code>openssl s_client -servername 真站域名 -connect IP:443</code> 看 SNI 正确时是否回落真站。连不上先查三处：<code>journalctl -u xray</code> 的 handshake 报错、服务器时间（误差超 60s 直接失败）、客户端 <code>pbk</code> 与 <code>sid</code></td>
+<td>27</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
-<p><strong>本阶段小计 120 分钟</strong>。伪装目标筛选是最容易被低估的一步：三四个候选里往往只有一个同时满足 TLS 1.3 + h2 + 非 Cloudflare 代理，条件卡得越死，筛掉的比例越高。取舍上——知名大站更稳但更容易被识别；小众站更隐蔽但哪天对方换证书就得跟着改。建议选一个静态资源多、常年不变的域名。</p>
+<p><strong>本阶段小计 150 分钟</strong>。伪装目标筛选是最容易被低估的一步：三四个候选里往往只有一个同时满足 TLS 1.3 + h2 + 非 Cloudflare 代理，条件卡得越死，筛掉的比例越高。取舍上——知名大站更稳但更容易被识别；小众站更隐蔽但哪天对方换证书就得跟着改。建议选一个静态资源多、常年不变的域名。写 inbound 那 30 分钟也别压：<code>realitySettings</code> 的 <code>dest</code> / <code>serverNames</code> / <code>privateKey</code> / <code>shortIds</code> / <code>spiderX</code> 五处只要错一处，表现都是「握手成功但立刻断开」，没有明确报错。</p>
 </blockquote>
 <hr />
 
@@ -1028,7 +1037,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </tr>
 <tr>
 <td>客户端与切网测试</td>
-<td>sing-box / mihomo / Shadowrocket 都吃：<code>type: tuic</code>、<code>server_port: 4433</code>、<code>uuid</code>、<code>password</code>、<code>congestion_control: bbr</code>、<code>udp_relay_mode: native</code>、<code>alpn: ["h3"]</code>、自签证书开 <code>insecure</code>；手机在 WiFi 与 4G 之间来回切，看是否自动迁移不断线</td>
+<td>sing-box / mihomo（Clash Mi、Clash Verge Rev）/ Shadowrocket 都吃：<code>type: tuic</code>、<code>server_port: 4433</code>、<code>uuid</code>、<code>password</code>、<code>congestion_control: bbr</code>、<code>udp_relay_mode: native</code>、<code>alpn: ["h3"]</code>、自签证书开 <code>insecure</code>；手机在 WiFi 与 4G 之间来回切，看是否自动迁移不断线</td>
 <td>15</td>
 </tr>
 <tr>
@@ -1046,7 +1055,7 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <h2 id="阶段-6-nginx-反代与可视化面板">阶段 6　Nginx 反代与可视化面板（伪装站点 + 面板纳管）</h2>
 <blockquote>
 <p><strong>目标</strong>：把这台机器做成「一个正常的小网站」，同时把三条入站从「改 JSON 重启」变成「面板里点一下」——443 上除了 REALITY 没有别的指纹可挑，面板自己不暴露任何新端口，只从反代后面进。</p>
-<p><strong>产出</strong>：nginx（HTTP/2 + gzip + 关版本号）与一个与 REALITY <code>dest</code> 同风格的静态伪装站、带 TLS 1.3 的证书与自动续期钩子、面板的反代 location（只监听 <code>127.0.0.1</code>）、带 2FA 与 IP 白名单的面板登录、纳管三条入站的节点列表与在线状态、访问日志脱敏与限流规则。</p>
+<p><strong>产出</strong>：nginx（HTTP/2 + gzip + 关版本号）与一个与 REALITY <code>dest</code> 同风格的静态伪装站、带 TLS 1.3 的证书与自动续期钩子、面板的反代 location（只监听 <code>127.0.0.1</code>）、带 2FA 与 IP 白名单的面板登录、纳管三条入站的节点列表与在线状态、订阅页与二维码、访问日志脱敏与限流规则。</p>
 </blockquote>
 <p><strong>流程</strong>：</p>
 <ol>
@@ -1057,6 +1066,8 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <li>nginx 加 <code>location /panel/</code>，补 WebSocket 升级头与真实 IP 头，配 <code>allow</code> / <code>deny</code> 白名单</li>
 <li>改后台路径与端口、上强密码 + 2FA，关掉面板自带的「一键签证书」</li>
 <li>面板里把三条入站纳管，逐条核对面板值与实际运行的配置文件一致</li>
+<li>做订阅页：<code>/sub/</code> 反代到面板的订阅接口，按 UA 返回不同格式，配二维码</li>
+<li>排一遍「nginx 与 REALITY 共存」的坑：端口归属、<code>stream</code> 与 <code>http</code> 块的选择、SNI 分流</li>
 <li>日志脱敏、限流、关目录列表，确认根路径回正常页面而不是默认页</li>
 </ol>
 <table>
@@ -1071,47 +1082,57 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tr>
 <td>安装与基础调优</td>
 <td><code>apt install nginx</code>；<code>worker_connections</code>、<code>keepalive_timeout</code>、<code>gzip on</code>、<code>server_tokens off</code>、<code>http2 on</code>；删掉 <code>default</code> 站点，避免 <code>/</code> 回 nginx 欢迎页</td>
-<td>10</td>
+<td>12</td>
 </tr>
 <tr>
 <td>伪装站点</td>
 <td><code>/var/www/masq</code> 放静态页（index + 一点静态资源），风格与阶段 3 选的 <code>serverNames</code> 同源；<strong>nginx 只监听 <code>127.0.0.1:8443</code></strong>，把 <code>0.0.0.0:443</code> 留给 REALITY，两个进程抢 443 是最常见的翻车点</td>
-<td>10</td>
+<td>15</td>
 </tr>
 <tr>
 <td>证书与 HTTP/2</td>
 <td><code>acme.sh --issue -d 域名</code> 或 Caddy 代签；<code>ssl_protocols TLSv1.3 TLSv1.2</code>、<code>ssl_prefer_server_ciphers on</code>、<code>add_header Strict-Transport-Security</code>；续期必须挂 <code>--reloadcmd "systemctl reload nginx"</code>，否则 90 天后证书链自己失效</td>
-<td>10</td>
+<td>15</td>
 </tr>
 <tr>
 <td>面板选型与安装</td>
 <td>推荐 3x-ui 系列（自带 Xray，文档与生态快）或其他 sing-box / Xray 面板，<strong>装完只监听 <code>127.0.0.1</code></strong>；本机 <code>curl 127.0.0.1:端口</code> 确认出登录页，此刻外网应该连不上</td>
-<td>15</td>
+<td>20</td>
 </tr>
 <tr>
 <td>反代与 WebSocket</td>
-<td><code>location /panel/ { proxy_pass http://127.0.0.1:PORT/; }</code>，带 <code>Host</code> / <code>X-Real-IP</code> / <code>X-Forwarded-For</code> / <code>Upgrade</code> / <code>Connection</code> 头，否则实时状态页与 WebSocket 直接断；<code>proxy_read_timeout</code> 调大；顺手把订阅路径 <code>/sub/</code> 一起反代</td>
-<td>15</td>
+<td><code>location /panel/ { proxy_pass http://127.0.0.1:PORT/; }</code>，带 <code>Host</code> / <code>X-Real-IP</code> / <code>X-Forwarded-For</code> / <code>Upgrade</code> / <code>Connection</code> 头，否则实时状态页与 WebSocket 直接断；<code>proxy_read_timeout</code> 调大</td>
+<td>20</td>
 </tr>
 <tr>
 <td>面板安全加固</td>
 <td>改后台路径、改端口、强密码、开 2FA、会话超时；<code>allow</code> / <code>deny</code> 白名单（只放自己常在的出口 IP 与内网段）；<strong>关掉面板自带的一键签证书</strong>，它会去抢 nginx 的 80/443</td>
-<td>12</td>
+<td>15</td>
 </tr>
 <tr>
 <td>三入站纳管核对</td>
 <td>把 REALITY / Hysteria2 / TUIC 三条加进面板，逐字段核对面板里的值与 <code>config.json</code>、<code>config.yaml</code>、<code>sing-box.json</code> 一致；面板改完必须重启对应服务，改完再跑一次客户端连通性，确认「面板显示已生效」等于「客户端真连上」</td>
-<td>13</td>
+<td>18</td>
+</tr>
+<tr>
+<td>订阅页与二维码</td>
+<td><code>location /sub/ { proxy_pass http://127.0.0.1:PORT/sub/; }</code>；面板侧按 UA 返回不同格式（clash / sing-box / v2rayN），二维码用 <code>qrencode</code> 或面板自带生成；订阅链接别明文走 HTTP，一定套在 443 反代下</td>
+<td>15</td>
+</tr>
+<tr>
+<td>端口归属与共存排错</td>
+<td><code>ss -tlnp | grep -E ':443|:8443'</code> 确认 443 只有 xray、8443 只有 nginx；想用 <code>stream</code> 块做 SNI 四层分流时注意它和 <code>http</code> 块不能抢同一个端口；<code>curl -I https://域名 --resolve</code> 走一遍反代链路，看 <code>X-Forwarded-For</code> 有没有正确传到面板</td>
+<td>10</td>
 </tr>
 <tr>
 <td>日志脱敏与限流</td>
 <td><code>access_log</code> 里去掉带 uuid 的查询串、<code>limit_req_zone</code> 给 <code>/panel/</code> 上 5r/s、<code>autoindex off</code>，确认 404 不暴露目录结构</td>
-<td>5</td>
+<td>10</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
-<p><strong>本阶段小计 90 分钟</strong>。门面和控制台本来就是一件事：nginx 是门面，面板是门后的控制台。三条红线——nginx 只准蹲 <code>127.0.0.1:8443</code>、<code>0.0.0.0:443</code> 永远归 REALITY、面板装完第一件事是关掉它自带的一键签证书。改完面板里的配置必须重启对应进程，<code>ss -tlnp</code> 上 443 只应该有一个主人。</p>
+<p><strong>本阶段小计 150 分钟</strong>。门面和控制台本来就是一件事：nginx 是门面，面板是门后的控制台。三条红线——nginx 只准蹲 <code>127.0.0.1:8443</code>、<code>0.0.0.0:443</code> 永远归 REALITY、面板装完第一件事是关掉它自带的一键签证书。改完面板里的配置必须重启对应进程，<code>ss -tlnp</code> 上 443 只应该有一个主人。加出来的那一小时主要花在两处：订阅页要按 UA 分流（不同客户端吃不同格式，配错了客户端会静默导入失败），以及 nginx 与 REALITY 的端口归属要反复确认。</p>
 </blockquote>
 <hr />
 
@@ -1271,18 +1292,22 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 </blockquote>
 <hr />
 
-<h2 id="阶段-10-客户端部署">阶段 10　客户端部署</h2>
+<h2 id="阶段-10-客户端部署与分流落地">阶段 10　客户端部署与分流落地（Windows / macOS / Android / iOS）</h2>
 <blockquote>
-<p><strong>目标</strong>：四端都能一条订阅导入、自动选路、开机即用，且分流规则与服务端保持同构。</p>
-<p><strong>产出</strong>：Windows / macOS / Android / iOS 各一套可用配置、统一的分流规则、一份「换设备怎么恢复」的三行说明。</p>
+<p><strong>目标</strong>：四个平台各有一套「装完就能用」的客户端方案，且调出来的分流结果与服务端同构——不是「Windows 上能用」，是「四端跑得一样」。iOS 端走零付费路线，不买 Shadowrocket。</p>
+<p><strong>产出</strong>：Windows / macOS / Android / iOS 四套客户端与配置、一份手写的客户端配置（TUN + fake-ip + 同源规则集）、四端一致的核对记录、一份「换设备怎么恢复」的三行说明、一份 iOS 免费客户端与三条线路的兼容性对照。</p>
 </blockquote>
 <p><strong>流程</strong>：</p>
 <ol>
-<li>Windows：v2rayN 或 Clash Verge Rev，导入订阅、开 TUN、设自启</li>
-<li>macOS：处理 Gatekeeper 首次放行与系统扩展</li>
-<li>Android：NekoBox / Hiddify，开 VPN 模式、加省电白名单</li>
-<li>iOS：Shadowrocket（非国区 ID），注意 TUIC 版本要求</li>
-<li>分流规则统一：国内直连、国外代理、AI 固定线路，四端一致</li>
+<li>Windows：v2rayN（轻、原生 Xray）与 Clash Verge Rev（规则强）各装一个，比出主力</li>
+<li>macOS：装 Clash Verge Rev（与 Windows 同一份 Clash YAML，直接复用），过 Gatekeeper 首次放行与 Network Extension 系统扩展授权</li>
+<li>Android：NekoBox / Hiddify，开 VPN 模式、加省电白名单、配分应用代理</li>
+<li>iOS：先备一个非国区（美区）Apple ID（免费注册、无需付款方式），App Store 切区后装 Clash Mi 作主力，再用 Karing / Streisand 验单链接；不买 Shadowrocket</li>
+<li>iOS 按线路配参数：REALITY 要 <code>client-fingerprint: chrome</code> 与 <code>reality-opts</code>；hy2 / tuic 都要 <code>udp: true</code>、自签证书开 <code>skip-cert-verify</code>；iOS 默认走 hy2 出口</li>
+<li>手写一份客户端配置：TUN 模式、DNS 用 fake-ip、规则集指向与服务端同源的地址</li>
+<li>四端各导一次，用同一批站点核对出口 IP 与是否直连</li>
+<li>结果不一致时按顺序查：客户端自带 GeoIP → 系统代理与 TUN 同时开 → DNS 被劫持</li>
+<li>写一份换设备的恢复说明，连同订阅二维码一起交付</li>
 </ol>
 <table>
 <thead>
@@ -1295,37 +1320,112 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <tbody>
 <tr>
 <td>Windows</td>
-<td>v2rayN 或 Clash Verge Rev，导入订阅、开 TUN 模式、设开机自启，确认系统代理与 TUN 不冲突</td>
-<td>8</td>
+<td>v2rayN 与 Clash Verge Rev 各装一个：v2rayN 直接吃 <code>vless://</code> 与 <code>hysteria2://</code>，Clash Verge Rev 规则能力强但要转换订阅；开 TUN 模式、设开机自启，确认系统代理与 TUN 不同时开</td>
+<td>18</td>
 </tr>
 <tr>
 <td>macOS</td>
-<td>处理 Gatekeeper 首次放行、开 TUN、三协议逐个验证，Clash 系要装系统扩展</td>
-<td>6</td>
+<td>装 <strong>Clash Verge Rev</strong>（macOS 版，与 Windows 端同一份 Clash YAML 直接复用，不用另写配置）：首次打开要过 Gatekeeper（右键打开或 <code>xattr -d com.apple.quarantine</code>）；装 Network Extension 系统扩展并在「系统设置 → 隐私与安全性」授权，未授权时 TUN 起不来、只走系统代理；<code>scutil --proxy</code> 确认系统代理状态，TUN 模式下把「设为系统代理」关掉。备选 v2rayN 无 macOS 版，要单链接就用 V2Box 或 NekoRay</td>
+<td>16</td>
 </tr>
 <tr>
 <td>Android</td>
-<td>NekoBox 或 Hiddify，导入订阅、开 VPN 模式、把 App 加进省电白名单否则后台被杀</td>
-<td>6</td>
+<td>NekoBox 或 Hiddify，导入订阅、开 VPN 模式；把 App 加进省电白名单（MIUI / HyperOS 还要关「后台弹出界面」限制）否则锁屏后被杀；配分应用代理，让国内 App 不走代理</td>
+<td>16</td>
 </tr>
 <tr>
-<td>iOS</td>
-<td>Shadowrocket（需非国区 Apple ID），配规则与全局两种模式，注意 TUIC 需要较新版本</td>
-<td>6</td>
+<td>iOS 选型与安装</td>
+<td>注册一个非国区（美区）Apple ID（免费、无需付款方式），App Store 切区后装 <strong>Clash Mi</strong>（免费、mihomo 内核，与 Windows 端 Clash Verge Rev 同源，一份 Clash YAML 两端通用）作主力；再装 <strong>Karing</strong> 与 <strong>Streisand</strong> 作备用（都免费，前者双内核带新手模式、能直接吃 <code>vless://</code> / <code>hy2://</code> 单链接，后者最轻量、协议覆盖全）。不买 Shadowrocket / Stash；V2Box、Happ 虽免费但不支持 TUIC，sing-box MT 只吃 JSON 配置，留给自用</td>
+<td>14</td>
 </tr>
 <tr>
-<td>分流规则下发</td>
-<td>定一套规则：国内直连、国外走代理、AI 服务固定走某条线路；客户端与服务端各配一份并保持一致</td>
+<td>iOS 三线路参数与兼容验证</td>
+<td>Clash Mi 里三条线路逐条配通：REALITY 写 <code>client-fingerprint: chrome</code>、<code>reality-opts.public-key</code>、<code>reality-opts.short-id</code>、<code>servername</code> 填伪装目标的 SNI；hy2 与 tuic 都要 <code>udp: true</code>、自签证书开 <code>skip-cert-verify: true</code>、tuic 补 <code>alpn: [h3]</code>。三个坑：① 只给它 Clash YAML，别丢单链接（它的订阅转换弱）；② 必须开 TUN + <code>dns.enhanced-mode: fake-ip</code>，否则规则「看着生效实际全直连」；③ 装完先去「设置 → 通用 → VPN 与设备管理」确认 Network Extension 已授权，连不上先看这里而不是怀疑节点。iOS 默认出口走 hy2，避开 sing-box 系对 <code>flow: xtls-rprx-vision</code> 的兼容差异</td>
+<td>14</td>
+</tr>
+<tr>
+<td>客户端配置手写</td>
+<td><code>tun: {enable: true, stack: system}</code>、<code>dns: {enhanced-mode: fake-ip}</code>、<code>rule-providers</code> 指向与服务端同源的 rule_set 地址；关掉客户端自带的一键分流，避免两套规则打架</td>
+<td>14</td>
+</tr>
+<tr>
+<td>四端一致性核对</td>
+<td>同一批站点（国内 3 个、国外 3 个、AI 1 个）在四端各查一次出口 IP 与是否直连；把「哪端走了代理、哪端直连」的差异列成表，差异处就是配置不一致的地方。iOS 端额外验一次「单链接能不能通」，那是阶段 3、4 的产出物</td>
+<td>15</td>
+</tr>
+<tr>
+<td>冲突排查清单</td>
+<td>三条按顺序查：客户端自带 GeoIP 覆盖了自定义规则、系统代理与 TUN 同时开、DNS 被运营商劫持；每条附验证命令（<code>curl ifconfig.me</code>、<code>scutil --proxy</code>、<code>dig @223.5.5.5</code>）</td>
+<td>9</td>
+</tr>
+<tr>
+<td>恢复说明与二维码</td>
+<td>写三行「换设备怎么恢复」：装哪个客户端、扫哪个二维码、开哪两项开关；二维码与订阅链接一起存进手机备忘录与密码库，别只留在一台机器上。iOS 那行注明「非国区 Apple ID 才能装」</td>
 <td>4</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
-<p><strong>本阶段小计 30 分钟</strong>。四端不必全做：先做自己常用的两端，剩下两端等阶段 11 验收时补一次即可。</p>
+<p><strong>本阶段小计 120 分钟</strong>。四端真正吃时间的是平台差异而不是配置本身：macOS 卡在系统扩展授权、Android 卡在厂商的省电策略、iOS 卡在「非国区 ID 装客户端」与三条线路的参数对齐，Windows 反而最省事。iOS 端全部选免费客户端（Clash Mi 主力 + Karing / Streisand 备用），零付费，代价是要多花十分钟注册美区 Apple ID 并切区；Clash Mi 与 Windows 端同为 mihomo 内核，一份 Clash YAML 两端通用，所以它不只是「免费替代」，而是让四端一致性最容易达成的那条路。客户端不需要「功能全开」，需要「四端结果一致」；不一致时先怀疑客户端的本地规则，再怀疑服务端。</p>
 </blockquote>
 <hr />
 
-<h2 id="阶段-11-测试验收与交付">阶段 11　测试验收与交付</h2>
+<h2 id="阶段-11-tls-指纹与主动探测对抗">阶段 11　TLS 指纹与主动探测对抗</h2>
+<blockquote>
+<p><strong>目标</strong>：把「像不像那个真站」从配置层面做到指纹层面。REALITY 已经借了证书链，但 JA3/JA4、HTTP/2 的 SETTINGS、QUIC 的初始包长这些细节对不上，一样能被筛出来。</p>
+<p><strong>产出</strong>：一条与真站对齐的指纹链、一次主动探测模拟的记录、多 shortId 的分配表、一份「哪些行为会暴露这台机器」的自查清单。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>查真站的指纹：JA3/JA4、HTTP/2 SETTINGS、支持的扩展顺序，作为对齐目标</li>
+<li>客户端 <code>fingerprint</code> 选与真站同一浏览器族，别用 <code>randomized</code> 每次都变</li>
+<li>自己模拟探测：不带客户端、只做 TLS 握手和 HTTP 请求，看会不会露馅</li>
+<li>shortId 按用户分配、定期轮换；<code>spiderX</code> 指向真站真实路径</li>
+<li>UDP 侧收敛特征：混淆密码强度、<code>masquerade</code> 回落、ALPN 与 QUIC 版本</li>
+<li>把可能暴露的行为逐条过一遍，形成清单</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+<th>分钟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真站指纹采集</td>
+<td>用 <code>tls.peet.ws</code> / <code>browserleaks.com/tls</code> 访问 <code>dest</code> 域名，记下 JA3、JA4、HTTP/2 SETTINGS（<code>INITIAL_WINDOW_SIZE</code>、<code>MAX_FRAME_SIZE</code>）、扩展顺序与 ALPN；这就是要对齐的靶子</td>
+<td>15</td>
+</tr>
+<tr>
+<td>客户端指纹对齐</td>
+<td>客户端 <code>fingerprint</code> 填 <code>chrome</code> / <code>firefox</code> / <code>safari</code> 中与真站同族的一个；<code>randomized</code> 每次握手都变，反而比固定更像工具；对完再用同一工具复测 JA3 是否一致</td>
+<td>15</td>
+</tr>
+<tr>
+<td>主动探测模拟</td>
+<td><code>openssl s_client -connect IP:443 -servername dest域名 -tls1_3</code> 看证书链是否回落真站；<code>curl -I --tlsv1.3 --http2 https://dest域名 --resolve dest域名:443:IP</code> 看响应头是否同源；<code>nmap --script ssl-enum-ciphers -p 443 IP</code> 看套件顺序；浏览器直连 <code>https://IP:443</code> 看是否露出默认页</td>
+<td>15</td>
+</tr>
+<tr>
+<td>shortId 与 spiderX</td>
+<td>一个用户一个 shortId，便于单独停用；<code>spiderX</code> 填真站的真实子路径（如 <code>/</code> 或某个静态目录），探测者抓到的抓取路径与真站一致；轮换 shortId 不必改端口</td>
+<td>8</td>
+</tr>
+<tr>
+<td>UDP 侧特征收敛</td>
+<td>hy2 的 <code>obfs: salamander</code> 密码要长且随机；<code>masquerade</code> 指向真站而不是 nginx 默认页；TUIC 的 <code>alpn: h3</code> 与 QUIC 版本要和主流客户端一致；关掉不必要的 0-RTT 暴露面</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>本阶段小计 60 分钟</strong>。指纹这件事只有「一致」和「不一致」两种结果，没有中间态：真站是 Chrome 的 JA3，客户端却用 Firefox 的指纹，握手特征一对就露。清单里最容易被忽略的两条——面板路径可猜、订阅 URL 明文走 HTTP，这两个比 TLS 指纹更容易暴露。</p>
+</blockquote>
+<hr />
+
+<h2 id="阶段-12-测试验收与交付">阶段 12　测试验收与交付</h2>
 <blockquote>
 <p><strong>目标</strong>：把机器从头到尾真跑一遍——服务在跑、端口通、出口 IP 变了、速度不掉、重启能自己回来，然后把密码、后台、面板入口交到用的人手上。</p>
 <p><strong>产出</strong>：一份打勾的验收单、3 条线路的横评记录（哪条最快、哪条晚高峰最稳），以及一份交付说明（root 密码或密钥、SSH 端口、面板地址与账号、订阅链接）。</p>
