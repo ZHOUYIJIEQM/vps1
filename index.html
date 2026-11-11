@@ -1,13 +1,304 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文档</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>自建科学上网节点 · 文档合集</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1f2328; --muted:#656d76; --line:#d8dee4;
+  --card:#ffffff;
+  --accent:#0969da;
+  --c1:#0969da; --c1-soft:#ddf4ff;
+  --c2:#8250df; --c2-soft:#f4ebff;
+  --c3:#1a7f37; --c3-soft:#dafbe1;
+  --shadow:0 1px 3px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 28px rgba(0,0,0,.10);
+  --glow:rgba(9,105,218,.30);
+  --bg-grad:radial-gradient(1100px 520px at 50% -180px, #e8f2ff 0%, rgba(255,255,255,0) 72%);
+}
+html[data-theme="dark"]{
+  --bg:#0d1117; --fg:#e6edf3; --muted:#8b949e; --line:#30363d;
+  --card:#161b22;
+  --accent:#58a6ff;
+  --c1:#58a6ff; --c1-soft:#12253c;
+  --c2:#a371f7; --c2-soft:#241a38;
+  --c3:#3fb950; --c3-soft:#12261a;
+  --shadow:0 1px 3px rgba(0,0,0,.45);
+  --shadow-lg:0 10px 28px rgba(0,0,0,.60);
+  --glow:rgba(88,166,255,.35);
+  --bg-grad:radial-gradient(1100px 520px at 50% -180px, #12253c 0%, rgba(13,17,23,0) 72%);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; padding:58px 22px 80px; min-height:100vh;
+  background-color:var(--bg); background-image:var(--bg-grad);
+  background-repeat:no-repeat; background-attachment:fixed;
+  color:var(--fg);
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,sans-serif;
+  font-size:15px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  transition:background-color .2s ease, color .2s ease;
+}
+.wrap{max-width:1060px; margin:0 auto}
+
+/* ---------- 头部 ---------- */
+header{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:18px; margin-bottom:26px;
+}
+.brand{display:flex; align-items:center; gap:15px; min-width:0}
+.logo{
+  flex:none; width:48px; height:48px; border-radius:13px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:23px; font-weight:800; color:#fff; letter-spacing:-.5px;
+  background:linear-gradient(135deg,#0969da 0%,#8250df 100%);
+  box-shadow:0 6px 16px var(--glow);
+}
+.brand-t{min-width:0}
+h1{
+  margin:0; font-size:25px; line-height:1.32; letter-spacing:-.4px;
+  font-weight:800;
+}
+.brand-t p{margin:4px 0 0; font-size:13px; color:var(--muted); letter-spacing:.2px}
+.theme-btn{
+  flex:none; padding:8px 14px; border-radius:10px; cursor:pointer;
+  border:1px solid var(--line); background:var(--card); color:var(--fg);
+  font-size:12.5px; font-weight:600; font-family:inherit; white-space:nowrap;
+  box-shadow:var(--shadow);
+  transition:border-color .16s ease, color .16s ease, transform .16s ease;
+}
+.theme-btn:hover{border-color:var(--accent); color:var(--accent); transform:translateY(-1px)}
+
+/* ---------- 导语 ---------- */
+.lede{
+  margin:0 0 30px; padding:14px 18px;
+  border-left:3px solid var(--accent);
+  border-radius:0 10px 10px 0;
+  background:linear-gradient(90deg, var(--c1-soft) 0%, rgba(127,127,127,.05) 100%);
+  font-size:14px; line-height:1.85; color:var(--fg);
+}
+.lede b{color:var(--accent); font-weight:700}
+.lede .path{font-variant-numeric:tabular-nums; letter-spacing:.5px}
+
+/* ---------- 卡片 ---------- */
+.cards{
+  display:grid; gap:20px;
+  grid-template-columns:repeat(auto-fit, minmax(272px, 1fr));
+}
+.card{
+  position:relative; display:flex; flex-direction:column; overflow:hidden;
+  padding:28px 24px 18px; border-radius:16px;
+  background:var(--card); border:1px solid var(--line);
+  box-shadow:var(--shadow); text-decoration:none; color:inherit;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:var(--cc); opacity:.9;
+}
+.card.c1{--cc:var(--c1); --cc-soft:var(--c1-soft)}
+.card.c2{--cc:var(--c2); --cc-soft:var(--c2-soft)}
+.card.c3{--cc:var(--c3); --cc-soft:var(--c3-soft)}
+.card:hover{
+  transform:translateY(-4px); box-shadow:var(--shadow-lg);
+  border-color:var(--cc);
+}
+.card:focus-visible{outline:2px solid var(--cc); outline-offset:3px}
+
+.num{
+  display:inline-flex; align-items:center; justify-content:center;
+  flex:none; width:40px; height:40px; border-radius:11px; margin-bottom:15px;
+  background:var(--cc-soft); color:var(--cc);
+  font-size:14px; font-weight:800; letter-spacing:.6px;
+  font-variant-numeric:tabular-nums;
+  transition:transform .18s ease;
+}
+.card:hover .num{transform:scale(1.06)}
+
+.card h2{
+  margin:0; font-size:18.5px; line-height:1.35; letter-spacing:-.2px;
+  font-weight:750;
+}
+.card .sub{
+  margin:5px 0 0; font-size:12.5px; font-weight:600;
+  color:var(--cc); letter-spacing:.2px;
+}
+.card .desc{
+  margin:12px 0 0; font-size:13.5px; line-height:1.78; color:var(--muted);
+}
+
+.pts{
+  margin:15px 0 0; padding:0; list-style:none;
+  font-size:12.8px; line-height:1.95; color:var(--muted);
+}
+.pts li{position:relative; padding-left:15px}
+.pts li::before{
+  content:''; position:absolute; left:2px; top:.82em;
+  width:5px; height:5px; border-radius:50%;
+  background:var(--cc); opacity:.65;
+}
+
+.foot{
+  margin-top:auto; padding-top:16px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  border-top:1px dashed var(--line);
+  font-size:12.3px;
+}
+.foot .meta{color:var(--muted); font-variant-numeric:tabular-nums}
+.foot .go{
+  color:var(--cc); font-weight:700; white-space:nowrap;
+  transition:transform .16s ease;
+}
+.card:hover .foot .go{transform:translateX(3px)}
+
+/* ---------- 页脚 ---------- */
+.note{
+  margin:34px 0 0; padding-top:20px;
+  border-top:1px solid var(--line);
+  font-size:12.5px; line-height:1.85; color:var(--muted);
+  text-align:center;
+}
+.note code{
+  padding:1px 5px; border-radius:5px; font-size:12px;
+  background:var(--cc-soft, var(--c1-soft)); color:var(--fg);
+  font-family:ui-monospace,Consolas,"Courier New",monospace;
+}
+
+/* ---------- 响应式：三列 → 单列 ---------- */
+@media (max-width:900px){
+  .cards{grid-template-columns:1fr}
+  .card{padding:24px 22px 17px}
+  .pts{margin-top:13px}
+}
+@media (max-width:640px){
+  body{padding:36px 15px 56px}
+  header{gap:12px; margin-bottom:20px}
+  .logo{width:42px; height:42px; border-radius:11px; font-size:20px}
+  h1{font-size:20.5px}
+  .brand-t p{font-size:12px}
+  .theme-btn{padding:7px 11px; font-size:12px}
+  .lede{padding:12px 14px; font-size:13px; margin-bottom:24px}
+  .cards{gap:16px}
+  .card{padding:24px 19px 16px}
+  .card h2{font-size:17px}
+}
+@media (max-width:400px){
+  body{padding:30px 13px 48px}
+  header{gap:8px; align-items:center}
+  .brand{flex:1 1 auto; gap:10px; min-width:0}
+  .logo{width:36px; height:36px; border-radius:10px; font-size:17px}
+  h1{font-size:17px; letter-spacing:-.3px}
+  .brand-t p{font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .theme-btn{flex:none; padding:6px 9px; font-size:11px; border-radius:8px}
+  .lede{font-size:12.5px; line-height:1.8; padding:11px 12px}
+  .card{padding:22px 16px 15px; border-radius:13px}
+  .card h2{font-size:16.5px}
+  .num{width:36px; height:36px; font-size:13px; border-radius:9px}
+  .pts{font-size:12.3px}
+  .foot{font-size:11.5px}
+  .note{font-size:11.8px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+}
+@media print{
+  body{background:#fff; padding:0}
+  .theme-btn{display:none}
+  .card{box-shadow:none; break-inside:avoid}
+}
+</style>
 </head>
 <body>
-    <a href="./搭建方案.html">搭建方案.html</a>
-    <a href="./各家VPS提供商的套餐.html">各家VPS提供商的套餐.html</a>
-    <a href="./工时评估.html">工时评估</a>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">V</div>
+      <div class="brand-t">
+        <h1>自建科学上网节点</h1>
+        <p>VPS 选型 · 搭建方案 · 工时评估</p>
+      </div>
+    </div>
+    <button id="themeBtn" class="theme-btn" title="切换明暗主题">🌙 暗色</button>
+  </header>
+
+  <p class="lede">
+    按 <span class="path">01 → 02 → 03</span> 的顺序看：<b>先定预算和线路方向</b>，再挑具体服务商的套餐，最后照工时表一步步落地。三份文档之间顶部可以互相跳转。
+  </p>
+
+  <div class="cards">
+
+    <a class="card c1" href="./搭建方案.html">
+      <span class="num">01</span>
+      <h2>搭建方案</h2>
+      <p class="sub">VPS 选型 + 搭建方案 + 价格总表</p>
+      <p class="desc">四套购买方案并排对比年费、流量、晚高峰表现和 IP 被封的换机成本，再给出协议层选型与客户端推荐。</p>
+      <ul class="pts">
+        <li>4 套方案年费 $21.99 – $169.99 对比</li>
+        <li>7 款 VPS 实测与避坑</li>
+        <li>协议层选型 + 搭建结论</li>
+      </ul>
+      <div class="foot"><span class="meta">6 章 · 5 张表 · 约 17 分钟</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card c2" href="./各家VPS提供商的套餐.html">
+      <span class="num">02</span>
+      <h2>VPS 套餐</h2>
+      <p class="sub">各家提供商横向对比</p>
+      <p class="desc">先讲清三家运营商的出口线路怎么认（CN2 GIA / 9929 / CMIN2），再把 Cloudcone、RackNerd、Vultr、DMIT、搬瓦工的套餐逐条摊开。</p>
+      <ul class="pts">
+        <li>电信 / 联通 / 移动出口线路辨认</li>
+        <li>5 家服务商 32 张套餐表</li>
+        <li>便宜机与稳定机怎么取舍</li>
+      </ul>
+      <div class="foot"><span class="meta">2 章 · 32 张表 · 约 83 分钟</span><span class="go">打开 →</span></div>
+    </a>
+
+    <a class="card c3" href="./工时评估.html">
+      <span class="num">03</span>
+      <h2>工时评估</h2>
+      <p class="sub">自建节点 · 工时拆解</p>
+      <p class="desc">从挑 VPS 到测试验收拆成 10 个阶段，每段标注实际耗时，合计 16 小时，用来判断值不值得自己动手。</p>
+      <ul class="pts">
+        <li>10 阶段拆解 · 合计 16 小时</li>
+        <li>每阶段实际耗时与踩坑点</li>
+        <li>已完成阶段单独标注</li>
+      </ul>
+      <div class="foot"><span class="meta">10 阶段 · 10 张表 · 约 19 分钟</span><span class="go">打开 →</span></div>
+    </a>
+
+  </div>
+
+  <p class="note">
+    三份文档同一套模板：顶部切换条与侧栏「相关文档」都能互相跳转，支持暗色模式与 <code>打印 / PDF</code> 导出。
+  </p>
+
+</div>
+
+<script>
+(function(){
+  var btn = document.getElementById('themeBtn');
+  var KEY = 'mdhtml-theme';   /* 与三份文档共用同一个 key，主题状态互通 */
+
+  function apply(t){
+    document.documentElement.setAttribute('data-theme', t);
+    try{ localStorage.setItem(KEY, t); }catch(e){}
+    btn.textContent = (t === 'dark') ? '☀ 亮色' : '🌙 暗色';
+  }
+
+  var saved = 'light';
+  try{ saved = localStorage.getItem(KEY) || 'light'; }catch(e){}
+  if(!saved){ saved = 'light'; }
+  apply(saved);
+
+  btn.onclick = function(){
+    apply(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  };
+})();
+</script>
 </body>
 </html>
