@@ -493,16 +493,17 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <ul>
 <li class="lv1"><a href="#自建节点-工时评估">自建节点 · 工时评估</a><ul>
 <li class="lv2"><a href="#总览">总览</a></li>
-<li class="lv2"><a href="#阶段-1-vps-挑选">阶段 1 vps 挑选</a></li>
-<li class="lv2"><a href="#阶段-2-采购与开通">阶段 2 采购与开通</a></li>
-<li class="lv2"><a href="#阶段-3-系统加固">阶段 3 系统加固</a></li>
-<li class="lv2"><a href="#阶段-4-安装-xray-core">阶段 4 安装 Xray-core</a></li>
-<li class="lv2"><a href="#阶段-5-配置-vless-reality-入站">阶段 5 配置 VLESS + REALITY 入站</a></li>
-<li class="lv2"><a href="#阶段-6-配置-hysteria2-入站udp">阶段 6 配置 Hysteria2 入站（UDP）</a></li>
-<li class="lv2"><a href="#阶段-7-配置-tuic-v5-入站sing-box-手工">阶段 7 配置 TUIC v5 入站（sing-box 手工）</a></li>
-<li class="lv2"><a href="#阶段-8-部署可视化面板">阶段 8 部署可视化面板</a></li>
-<li class="lv2"><a href="#阶段-9-客户端部署">阶段 9 客户端部署</a></li>
-<li class="lv2"><a href="#阶段-10-测试与验收">阶段 10 测试与验收</a></li>
+<li class="lv2"><a href="#阶段-1-系统加固与机房线路确认">阶段 1 系统加固与机房线路确认</a></li>
+<li class="lv2"><a href="#阶段-2-安装-xray-core">阶段 2 安装 Xray-core</a></li>
+<li class="lv2"><a href="#阶段-3-配置-vless-reality-入站">阶段 3 配置 VLESS + REALITY 入站</a></li>
+<li class="lv2"><a href="#阶段-4-配置-hysteria2-入站udp">阶段 4 配置 Hysteria2 入站（UDP）</a></li>
+<li class="lv2"><a href="#阶段-5-配置-tuic-v5-入站sing-box-手工">阶段 5 配置 TUIC v5 入站（sing-box 手工）</a></li>
+<li class="lv2"><a href="#阶段-6-nginx-反代与可视化面板">阶段 6 Nginx 反代与可视化面板</a></li>
+<li class="lv2"><a href="#阶段-7-分流规则与路由体系">阶段 7 分流规则与路由体系</a></li>
+<li class="lv2"><a href="#阶段-8-多用户与订阅分发">阶段 8 多用户与订阅分发</a></li>
+<li class="lv2"><a href="#阶段-9-监控告警与自动备份">阶段 9 监控告警与自动备份</a></li>
+<li class="lv2"><a href="#阶段-10-客户端部署">阶段 10 客户端部署</a></li>
+<li class="lv2"><a href="#阶段-11-测试验收与交付">阶段 11 测试验收与交付</a></li>
 </ul>
 </li>
 </ul>
@@ -518,497 +519,872 @@ html[data-theme="dark"] .codehilite .il { color: #AE81FF } /* Literal.Number.Int
 <main id="main">
   <div id="content">
 <h1 id="自建节点-工时评估">自建节点 · 工时评估</h1>
+<blockquote>
+<p>VPS 选型与购买开通不在此表内（比价与下单属于采购环节，另见 <a href="./各家VPS提供商的套餐.html"><code>各家VPS提供商的套餐.html</code></a>）。</p>
+</blockquote>
+
 <h2 id="总览">总览</h2>
 <table>
 <thead>
 <tr>
 <th>阶段</th>
 <th>名称</th>
+<th>功能描述与阶段产出</th>
 <th>时长/小时</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
-<td>vps 选型（调研寻找便宜适用的 vps）</td>
-<td>4</td>
+<td>系统加固与机房线路确认（Ubuntu 22.04 + BBR）</td>
+<td>先验线路：三网回程与带宽体检，不合格当天换机房并重装；把 IP / dest / UUID / 证书抽成变量，再收敛基线——密钥登录、最小端口、BBR 与校时、干净快照</td>
+<td>1.5</td>
 </tr>
 <tr>
 <td>2</td>
-<td>采购与开通</td>
-<td>1</td>
-</tr>
-<tr>
-<td>3</td>
-<td>系统加固（Ubuntu 22.04 + BBR）</td>
-<td>1</td>
-</tr>
-<tr>
-<td>4</td>
 <td>安装 Xray-core</td>
+<td>落地核心二进制、五段式配置骨架（log / dns / inbounds / outbounds / routing）与受守护的 systemd 单元</td>
 <td>2.5</td>
 </tr>
 <tr>
-<td>5</td>
+<td>3</td>
 <td>配置 VLESS + REALITY 入站</td>
+<td>无需域名与证书的 TCP 主力线路：借真站 TLS 指纹、Vision 流控，抗主动探测</td>
 <td>2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>配置 Hysteria2 入站（UDP）</td>
+<td>装 hysteria 服务端与自签证书，配 443/udp 的 QUIC 入站（密码、obfs、带宽声明），nftables 把 20000-30000 端口段 DNAT 到 443 做端口跳跃，出 hy2 链接</td>
+<td>2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>配置 TUIC v5 入站</td>
+<td>用 sing-box 起 TUIC 入站（4433/udp，UUID + 密码、ALPN h3、拥塞控制 bbr），复用 hy2 的证书，验语法与端口、放行 ufw 与安全组，客户端跑一次连接迁移</td>
+<td>1.5</td>
 </tr>
 <tr>
 <td>6</td>
-<td>配置 Hysteria2 入站（UDP）</td>
-<td>2</td>
+<td>Nginx 反代与可视化面板</td>
+<td>门面与控制台一起做：nginx 与伪装站点把 443 之外的流量装成正常小网站（面板与订阅反代走 127.0.0.1，443 留给 REALITY）；面板只监听本机，纳管三条入站，配 2FA 与 IP 白名单、日志脱敏与限流</td>
+<td>1.5</td>
 </tr>
 <tr>
 <td>7</td>
-<td>配置 TUIC v5 入站</td>
+<td>分流规则与路由体系</td>
+<td>决定「哪些流量走哪条线路」：域名/IP/端口规则集、DNS 分流、国内直连与 AI 专线</td>
 <td>1.5</td>
 </tr>
 <tr>
 <td>8</td>
-<td>安装后台管理面板</td>
-<td>1</td>
+<td>多用户与订阅分发</td>
+<td>从单人自用升级为可交付：用户模型、三协议订阅链接、二维码、流量配额与吊销</td>
+<td>1.5</td>
 </tr>
 <tr>
 <td>9</td>
-<td>客户端部署</td>
-<td>0.5</td>
+<td>监控告警与自动备份</td>
+<td>可观测与可恢复：流量/连接/服务状态采集、告警通道、配置与证书定时备份</td>
+<td>1</td>
 </tr>
 <tr>
 <td>10</td>
-<td>测试与验收</td>
+<td>客户端部署</td>
+<td>四端落地（Windows / macOS / Android / iOS）：导入订阅、TUN 模式、开机自启、统一分流</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>11</td>
+<td>测试验收与交付</td>
+<td>测服务、端口、出口 IP、速度、重启自启，然后交付：机器密码、机器的管理后台、可视化管理面板入口</td>
 <td>0.5</td>
 </tr>
 <tr>
 <td></td>
 <td><strong>合计</strong></td>
+<td></td>
 <td><strong>16 小时</strong></td>
 </tr>
 </tbody>
 </table>
+
+<h3>阶段依赖与可并行点</h3>
+<ul>
+<li><strong>串行主干</strong>：阶段 1 → 阶段 2 必须按顺序，配置骨架没校验通过之前不要开入站。</li>
+<li><strong>先验线路</strong>：阶段 1 的线路体检放在最前面，不合格当天就换机房；换完复测再往下走，否则后面每一步都要重做。</li>
+<li><strong>可并行</strong>：阶段 3 / 4 / 5 三条入站彼此独立，装完核心后可以连着做，也可以分三次做；端口上只要避开 443/tcp 与 443/udp 的冲突。</li>
+<li><strong>端口主权</strong>：阶段 6 里 nginx 与面板都只能蹲在 <code>127.0.0.1</code>（nginx 8443、面板另给一个本地端口），<code>0.0.0.0:443</code> 永远留给 REALITY；顺序反了就是 <code>address already in use</code>，面板自带的一键签证书要先关掉。</li>
+<li><strong>前置依赖</strong>：阶段 6 内部的顺序是「nginx 门面 → 面板 → 反代 → 纳管」，反代不通就别急着往面板里加节点；阶段 7 / 8 依赖阶段 6 的面板配置读写能力；阶段 10 依赖阶段 7 的规则定稿；阶段 11 依赖全部前序。</li>
+<li><strong>可随时插入</strong>：阶段 9 的采集与备份不阻塞主线，等 3 条线路都连通后再补也来得及。</li>
+</ul>
 <hr />
-<h2 id="阶段-1-vps-挑选">阶段 1　vps 挑选</h2>
-<p>已完成，参考 <a href="./各家VPS提供商的套餐.html"><code>各家VPS提供商的套餐.html</code></a>。此阶段 4 小时是比价与线路调研的实际耗时，本次不再重复。</p>
-<hr />
-<h2 id="阶段-2-采购与开通">阶段 2　采购与开通</h2>
+
+<h2 id="阶段-1-系统加固与机房线路确认">阶段 1　系统加固与机房线路确认（Ubuntu 22.04 + BBR）</h2>
+<blockquote>
+<p><strong>目标</strong>：机器一到手先确认「这条线路值不值得配」——三网回程不合格当天就换机房或换 IP，别等三个协议装完才发现晚高峰拉不动；线路确认下来之后，再把它收敛成可信基线。</p>
+<p><strong>产出</strong>：一份线路体检记录（去程 / 回程 / 带宽 / IP 纯净度）、必要时的机房迁移与新 IP、参数化后的配置模板与迁移清单、加固完成的 Ubuntu 22.04、<code>ufw</code> 规则集、<code>/etc/sysctl.d/99-net.conf</code>、<code>/etc/security/limits.d/99-nofile.conf</code>、一份干净系统快照。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>拿到 IP 先做线路体检：三网去程、回程落点、带宽、IP 纯净度，晚高峰再抽测一次</li>
+<li>不合格就在商家后台换机房或换 IP（多数商家给一次免费迁移），迁移后重装 Ubuntu 22.04 并复测</li>
+<li>把 IP / <code>dest</code> / UUID / 证书路径抽成变量，后面真换机房只改变量</li>
+<li>首次登录做基线体检（会话、爆破记录、系统版本）</li>
+<li>全量更新并装齐网络排障工具</li>
+<li>上传 ed25519 公钥 → 关密码登录 → 改 SSH 端口 → 双窗口验证</li>
+<li>ufw 与云安全组两层同时放行，外网侧逐个 <code>nc -vz</code> 验证</li>
+<li>写内核参数（fq + bbr + fastopen + 缓冲区 + ip_forward）并核对生效值</li>
+<li>chrony 校时压到 100ms 内（REALITY 对时间敏感）</li>
+<li>抬文件句柄上限、限日志体积</li>
+<li>打一个干净快照作为回滚点</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>注册核验</td>
-<td>注册账号、邮箱验证、部分商家要手机号或 KYC、绑定支付方式</td>
+<td>线路体检与机房确认</td>
+<td>本机（家宽）跑 <code>ping</code> 与 <code>mtr -rw VPS_IP</code> 看去程；<strong>回程在 VPS 上反 trace</strong>——<code>nexttrace</code> / <code>besttrace</code> 对电信、联通、移动的测试目标各跑一次，看落点落在哪条骨干；三网视角另用在线探针（<code>itdog.cn</code>、<code>ping.pe</code>）补，无需三条宽带；带宽用 <code>iperf3</code> 或 <code>curl -o /dev/null -w '%{speed_download}'</code> 对比；再查 IP 是否在常见黑名单、是否被流媒体识别为机房 IP。晚上 20:00–23:00 再抽测一次（探针看丢包、本机看实际速率），不合格当场决定换机房</td>
+<td>15</td>
 </tr>
 <tr>
-<td>下单支付</td>
-<td>按 pid 直接下单、试优惠码是否生效、处理 3DS 验证 / PayPal 跳转 / 支付宝扫码</td>
+<td>机房迁移与重装</td>
+<td>商家后台迁移/换 IP（先问清换 IP 政策与是否免费），等新 IP 生效、旧 IP 释放；重装 Ubuntu 22.04，确认 <code>uname -m</code> 是 x86_64、记下内核版本与磁盘分区；迁移完把线路体检重跑一遍，确保不是换汤不换药</td>
+<td>10</td>
 </tr>
 <tr>
-<td>等待开机</td>
-<td>记录开机邮件、拿到 IP / root 密码 / SSH 端口，有的商家要等人工审核几十分钟</td>
+<td>配置参数化与迁移清单</td>
+<td>把 IP、<code>dest</code>、UUID 集、证书路径抽成变量（一份 <code>env.sh</code> 或模板文件），写清换机房要搬的四样：<code>/usr/local/etc/xray</code>、<code>/etc/hysteria</code>、<code>/etc/sing-box</code>、面板数据目录；顺手把订阅域名解析 TTL 调到 300s，否则换 IP 要干等一小时</td>
+<td>10</td>
 </tr>
-<tr>
-<td>连通性验证</td>
-<td><code>ping</code> 与 <code>mtr</code> 看三网去程、<code>besttrace</code> 看回程、<code>curl -o /dev/null -w '%{speed_download}'</code> 测带宽是否达标</td>
-</tr>
-<tr>
-<td>IP 纯净度</td>
-<td>查 IP 是否在常见黑名单、是否被流媒体识别为机房 IP、是否已被墙（换 IP 政策此时就要问清）</td>
-</tr>
-<tr>
-<td>重装系统</td>
-<td>后台重装 Ubuntu 22.04，确认是 x86_64 还是 ARM、内核版本、磁盘分区</td>
-</tr>
-<tr>
-<td>有问题时工单沟通</td>
-<td>问清流量口径、换 IP 流程、超量处理，记录响应时效</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="阶段-3-系统加固">阶段 3　系统加固</h2>
-<table>
-<thead>
-<tr>
-<th>工作项</th>
-<th>做什么</th>
-</tr>
-</thead>
-<tbody>
 <tr>
 <td>首次登录</td>
-<td>改 root 密码、确认 <code>who</code> 里没有陌生会话、<code>lastb</code> 看有没有人在爆破</td>
+<td>改 root 密码、<code>who</code> 确认没有陌生会话、<code>lastb</code> 看有没有人在爆破、<code>lsb_release -a</code> 与 <code>uname -r</code> 记下版本</td>
+<td>5</td>
+</tr>
+<tr>
+<td>更新与基础工具</td>
+<td><code>apt update &amp;&amp; apt full-upgrade -y</code>，重启一次确认内核已更新；装 curl、wget、unzip、vim、htop、mtr、tcpdump、jq、socat、ca-certificates、net-tools</td>
+<td>5</td>
 </tr>
 <tr>
 <td>时区与 locale</td>
-<td><code>timedatectl set-timezone Asia/Shanghai</code>、<code>locale-gen en_US.UTF-8</code>、避免后面日志时间对不上</td>
-</tr>
-<tr>
-<td>更新</td>
-<td><code>apt update &amp;&amp; apt full-upgrade -y</code>，重启一次确认内核已更新</td>
-</tr>
-<tr>
-<td>装基础工具</td>
-<td>curl、wget、unzip、vim、htop、mtr、tcpdump、jq、socat、ca-certificates、net-tools</td>
+<td><code>timedatectl set-timezone Asia/Shanghai</code>、<code>locale-gen en_US.UTF-8</code>，避免后面日志时间与客户端对不上</td>
+<td>5</td>
 </tr>
 <tr>
 <td>SSH 加固</td>
-<td>本地 <code>ssh-keygen -t ed25519</code> 生成密钥、<code>ssh-copy-id</code> 上传、<code>/etc/ssh/sshd_config</code> 关 <code>PasswordAuthentication</code>、改端口、<code>systemctl reload ssh</code>，先开新窗口验证能登再关旧窗口</td>
+<td>本地 <code>ssh-keygen -t ed25519</code> 生成密钥、<code>ssh-copy-id</code> 上传、<code>/etc/ssh/sshd_config</code> 关 <code>PasswordAuthentication</code>、改端口、<code>systemctl reload ssh</code>；<strong>先开新窗口验证能登再关旧窗口</strong></td>
+<td>10</td>
 </tr>
 <tr>
 <td>防火墙</td>
-<td><code>ufw default deny incoming</code>、<code>ufw allow 端口</code> 逐条放行，<strong>云厂商安全组是另一层，两边都要开</strong>，放行后逐个用 <code>telnet</code> 或 <code>nc -vz</code> 从外网验证</td>
+<td><code>ufw default deny incoming</code>、<code>ufw allow 端口</code> 逐条放行，<strong>云厂商安全组是另一层，两边都要开</strong>，放行后从外网 <code>nc -vz IP PORT</code> 逐个验证</td>
+<td>5</td>
 </tr>
 <tr>
 <td>内核调优</td>
-<td>写 <code>/etc/sysctl.d/99-net.conf</code>：<code>net.core.default_qdisc=fq</code>、<code>net.ipv4.tcp_congestion_control=bbr</code>、<code>net.ipv4.tcp_fastopen=3</code>、<code>net.core.rmem_max</code> / <code>wmem_max</code>、<code>net.ipv4.ip_forward=1</code>、<code>fs.file-max</code>；<code>sysctl --system</code> 后用 <code>sysctl net.ipv4.tcp_congestion_control</code> 确认是 bbr</td>
+<td>写 <code>/etc/sysctl.d/99-net.conf</code>：<code>net.core.default_qdisc=fq</code>、<code>net.ipv4.tcp_congestion_control=bbr</code>、<code>net.ipv4.tcp_fastopen=3</code>、<code>rmem_max</code>/<code>wmem_max</code>、<code>net.ipv4.ip_forward=1</code>、<code>fs.file-max</code>；<code>sysctl --system</code> 后用 <code>sysctl net.ipv4.tcp_congestion_control</code> 确认是 bbr</td>
+<td>10</td>
 </tr>
 <tr>
 <td>时间同步</td>
-<td><code>apt install chrony</code>、配就近 NTP、<code>chronyc sources -v</code> 看偏移，压到 100ms 内（REALITY 对时间敏感，误差超 60s 直接握手失败）</td>
+<td><code>apt install chrony</code>、配就近 NTP 源、<code>chronyc sources -v</code> 看偏移，压到 100ms 内；误差超 60s 会让 REALITY 握手直接失败</td>
+<td>5</td>
 </tr>
 <tr>
-<td>连接数上限</td>
-<td>写 <code>/etc/security/limits.d/99-nofile.conf</code>，<code>nofile 1048576</code>，因为后面 systemd 单元要设 <code>LimitNOFILE</code></td>
+<td>连接数与日志</td>
+<td>写 <code>/etc/security/limits.d/99-nofile.conf</code>（<code>nofile 1048576</code>，后面 systemd 单元要设 <code>LimitNOFILE</code>）、<code>journalctl --vacuum-size=200M</code>、配 logrotate 防日志撑爆小硬盘</td>
+<td>5</td>
 </tr>
 <tr>
 <td>快照</td>
-<td>在商家后台打一个干净系统快照，后面配错了能一键回滚，省掉重装的时间</td>
-</tr>
-<tr>
-<td>日志与监控</td>
-<td>装 netdata 或用 <code>vnstat</code> 看流量、<code>logrotate</code> 限制日志体积、<code>journalctl --vacuum-size=200M</code> 防止日志撑爆小硬盘</td>
+<td>在商家后台打一个干净系统快照，后面配错了能一键回滚，省掉重装时间</td>
+<td>5</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 90 分钟</strong>。先测线路再加固，顺序反了等于白干：加固全做完才发现回程绕美西，换机房又得从 SSH 重来一遍。三条换机房红线——晚高峰 1080p 稳不住、回程三网有两条绕路、IP 已被流媒体判定为机房段。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-4-安装-xray-core">阶段 4　安装 Xray-core</h2>
+
+<h2 id="阶段-2-安装-xray-core">阶段 2　安装 Xray-core</h2>
+<blockquote>
+<p><strong>目标</strong>：把核心二进制、目录结构、五段式配置骨架和 systemd 守护装到「可以开始填入站」的状态。</p>
+<p><strong>产出</strong>：<code>/usr/local/bin/xray</code>（1.8.x 以上）、<code>/usr/local/etc/xray/config.json</code>（骨架，<code>Configuration OK</code>）、<code>xray.service</code>（含 <code>LimitNOFILE</code> 与自动重启）、预置的 <code>geoip.dat</code> / <code>geosite.dat</code>。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li><code>uname -m</code> 定架构，决定下哪个 release 包</li>
+<li>首选官方脚本一把装完（省掉手写单元）</li>
+<li>脚本被墙时手动装兜底（下 zip → 解二进制 → 自写单元）</li>
+<li>规划目录与权限（配置 644、私钥 600）</li>
+<li>手写 config.json 五大块，<code>inbounds</code> 故意留空</li>
+<li>预置 geo 数据，避免首次启动联网失败</li>
+<li><code>xray run -test</code> 必须输出 <code>Configuration OK</code></li>
+<li>补 systemd 单元（<code>LimitNOFILE</code>、<code>Restart=on-failure</code>）</li>
+<li>启停一次，把 loglevel 临时调 info 看日志，稳定后回 warning</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>确认架构</td>
 <td><code>uname -m</code> 判断 amd64 还是 arm64，决定下哪个 release 包</td>
+<td>8</td>
 </tr>
 <tr>
 <td>装官方脚本</td>
 <td><code>bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install</code>，脚本会建 <code>/usr/local/bin/xray</code>、<code>/usr/local/etc/xray/</code>、<code>/etc/systemd/system/xray.service</code>、<code>/var/log/xray/</code></td>
+<td>15</td>
 </tr>
 <tr>
 <td>手动装（备选）</td>
-<td>脚本被墙时改用手动：从 release 页下 <code>Xray-linux-64.zip</code>、<code>unzip</code> 解出 <code>xray</code> 二进制、<code>install -m 755 xray /usr/local/bin/</code>、自己写 systemd 单元</td>
+<td>脚本被墙时改手动：release 页下 <code>Xray-linux-64.zip</code>、<code>unzip</code> 解出 <code>xray</code>、<code>install -m 755 xray /usr/local/bin/</code>、自己写 systemd 单元</td>
+<td>22</td>
 </tr>
 <tr>
 <td>校验版本</td>
-<td><code>xray version</code>、确认是 1.8.x 以上（REALITY 与 Vision 需要新版本）</td>
+<td><code>xray version</code>，确认 1.8.x 以上（REALITY 与 Vision 需要新版本）</td>
+<td>5</td>
 </tr>
 <tr>
 <td>目录规划</td>
-<td>配置放 <code>/usr/local/etc/xray/config.json</code>、证书放 <code>/usr/local/etc/xray/cert/</code>、日志放 <code>/var/log/xray/</code>，权限 <code>chmod 644</code> 配置文件、<code>600</code> 私钥</td>
+<td>配置 <code>/usr/local/etc/xray/config.json</code>、证书 <code>/usr/local/etc/xray/cert/</code>、日志 <code>/var/log/xray/</code>；配置文件 644、私钥 600</td>
+<td>12</td>
 </tr>
 <tr>
 <td>写配置骨架</td>
-<td>手写 config.json 的五大块：<code>log</code>（loglevel warning、access 与 error 分开）、<code>dns</code>（1.1.1.1 / 8.8.8.8 与 <code>localhost</code> 的 domains 分流）、<code>inbounds</code>（先留空）、<code>outbounds</code>（freedom + blackhole）、<code>routing</code>（<code>geoip:private</code> 与 <code>geosite:cn</code> 走 direct）</td>
+<td>五大块：<code>log</code>（loglevel warning、access 与 error 分开）、<code>dns</code>（1.1.1.1 / 8.8.8.8 与 <code>localhost</code> 的 domains 分流）、<code>inbounds</code>（先留空）、<code>outbounds</code>（freedom + blackhole）、<code>routing</code>（<code>geoip:private</code> 与 <code>geosite:cn</code> 走 direct）</td>
+<td>35</td>
 </tr>
 <tr>
 <td>下载 geo 数据</td>
-<td><code>xray</code> 首次启动会自动下 <code>geoip.dat</code> / <code>geosite.dat</code>，也可以手动 <code>curl -L -o /usr/local/share/xray/geoip.dat</code> 提前放好，避免开机时联网失败</td>
+<td>首次启动会自动拉 <code>geoip.dat</code> / <code>geosite.dat</code>，也可手动 <code>curl -L -o /usr/local/share/xray/geoip.dat</code> 提前放好，避免开机联网失败</td>
+<td>10</td>
 </tr>
 <tr>
 <td>语法校验</td>
 <td><code>xray run -test -c /usr/local/etc/xray/config.json</code>，必须输出 <code>Configuration OK</code> 才继续</td>
+<td>8</td>
 </tr>
 <tr>
 <td>调 systemd 单元</td>
-<td><code>systemctl cat xray</code> 看官方单元内容、补 <code>LimitNOFILE=1048576</code>、<code>Restart=on-failure</code>、<code>RestartSec=3</code></td>
+<td><code>systemctl cat xray</code> 看官方单元、补 <code>LimitNOFILE=1048576</code>、<code>Restart=on-failure</code>、<code>RestartSec=3</code></td>
+<td>20</td>
 </tr>
 <tr>
 <td>启停与自启</td>
-<td><code>systemctl enable --now xray</code>、<code>systemctl status xray</code> 确认 active、<code>journalctl -u xray -n 50 --no-pager</code> 看有没有报错</td>
+<td><code>systemctl enable --now xray</code>、<code>systemctl status xray</code> 确认 active、<code>journalctl -u xray -n 50 --no-pager</code> 看报错</td>
+<td>10</td>
 </tr>
 <tr>
 <td>日志观察</td>
-<td>临时把 loglevel 调成 info，<code>tail -f /var/log/xray/error.log</code> 边改边看，稳定后再调回 warning</td>
+<td>临时把 loglevel 调 info，<code>tail -f /var/log/xray/error.log</code> 边改边看，稳定后调回 warning</td>
+<td>5</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 150 分钟</strong>。骨架写错最常见的两处：<code>routing</code> 里的 <code>domainStrategy</code> 拼错、<code>outbounds</code> 少了 <code>tag: direct</code> 导致后面规则全不生效。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-5-配置-vless-reality-入站">阶段 5　配置 VLESS + REALITY 入站</h2>
+
+<h2 id="阶段-3-配置-vless-reality-入站">阶段 3　配置 VLESS + REALITY 入站</h2>
+<blockquote>
+<p><strong>目标</strong>：拿下主用 TCP 线路——不需要自有域名、不需要证书，直接借真站的 TLS 指纹与证书链，被动看像在访问那个站，主动探测也拿不到区别。</p>
+<p><strong>产出</strong>：443/tcp 上的 VLESS + REALITY + Vision 入站、一条可导入客户端的 <code>vless://</code> 链接、一份排错清单。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li><code>xray x25519</code> 出密钥对（私钥进服务端、公钥进客户端）</li>
+<li><code>xray uuid</code> 出客户端 ID，一个用户一个，方便单独停用</li>
+<li>挑伪装目标：满足 TLS 1.3 + HTTP/2 + 非国内 + 非 Cloudflare 代理 + 不是本机——<strong>通常要试三四个候选才碰上一个合适的</strong></li>
+<li>用 <code>curl -I --tlsv1.3 --http2</code> 与 <code>openssl s_client</code> 验证目标可用</li>
+<li><code>openssl rand -hex 8</code> 出 shortId</li>
+<li>写 inbound（vless / 443 / decryption none / flow vision / realitySettings 七项）</li>
+<li>补 <code>sniffing</code>，让分流能按域名判断</li>
+<li>校验 → 重启 → <code>ss -tlnp</code> 看监听</li>
+<li>拼客户端链接（sni / fp / pbk / sid / type）</li>
+<li>浏览器直连 <code>https://IP:443</code> 做主动探测模拟，再按清单排错</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>生成密钥对</td>
-<td><code>xray x25519</code> 输出 Private key 与 Public key，私钥写进服务端配置，公钥留给客户端，抄错一位就连不上</td>
+<td><code>xray x25519</code> 输出 Private key 与 Public key，私钥写服务端配置、公钥留给客户端，抄错一位就连不上</td>
+<td>5</td>
 </tr>
 <tr>
 <td>生成 UUID</td>
 <td><code>xray uuid</code> 生成客户端 ID，一个用户一个 UUID，方便日后单独停用</td>
+<td>5</td>
 </tr>
 <tr>
 <td>挑伪装目标</td>
-<td>要求同时满足：支持 TLS 1.3、支持 HTTP/2、不是国内站、不是 Cloudflare 代理的站、不是自己这台机器。候选如 <code>www.microsoft.com</code>、<code>swdist.apple.com</code>、<code>www.lovelive-anime.jp</code></td>
+<td>要求同时满足：TLS 1.3、HTTP/2、非国内站、非 Cloudflare 代理、非本机。候选如 <code>www.microsoft.com</code>、<code>swdist.apple.com</code>、<code>www.lovelive-anime.jp</code>；<strong>实际筛选通常要换三四个候选才遇到一个合适的</strong>（TLS 1.3 与 h2 都对上、又不是 CF 代理的站点比想象中少）</td>
+<td>20</td>
 </tr>
 <tr>
 <td>验证伪装目标</td>
-<td><code>curl -I --tlsv1.3 --http2 https://目标域名</code> 看返回是不是 200、<code>openssl s_client -connect 目标:443 -tls1_3</code> 看证书链与 ALPN 是否有 h2</td>
+<td><code>curl -I --tlsv1.3 --http2 https://目标域名</code> 看是否 200、<code>openssl s_client -connect 目标:443 -tls1_3</code> 看证书链与 ALPN 是否含 h2</td>
+<td>15</td>
 </tr>
 <tr>
 <td>生成 shortId</td>
-<td><code>openssl rand -hex 8</code>，可以配多个 shortId 给不同客户端，留空字符串也允许</td>
+<td><code>openssl rand -hex 8</code>；可配多个 shortId 给不同客户端，留空字符串也允许</td>
+<td>8</td>
 </tr>
 <tr>
 <td>写 inbound</td>
-<td><code>protocol: vless</code>、<code>port: 443</code>、<code>listen: 0.0.0.0</code>、<code>decryption: none</code>、<code>clients</code> 里填 UUID 与 <code>flow: xtls-rprx-vision</code>、<code>streamSettings.security: reality</code>、<code>realitySettings</code> 里填 <code>dest</code>（目标:443）、<code>serverNames</code>、<code>privateKey</code>、<code>shortIds</code>、<code>spiderX: /</code></td>
+<td><code>protocol: vless</code>、<code>port: 443</code>、<code>listen: 0.0.0.0</code>、<code>decryption: none</code>、<code>clients</code> 填 UUID 与 <code>flow: xtls-rprx-vision</code>、<code>streamSettings.security: reality</code>、<code>realitySettings</code> 填 <code>dest</code>（目标:443）、<code>serverNames</code>、<code>privateKey</code>、<code>shortIds</code>、<code>spiderX: /</code></td>
+<td>22</td>
 </tr>
 <tr>
 <td>补 sniffing</td>
-<td><code>sniffing: {enabled: true, destOverride: ["http","tls","quic"]}</code>，让分流能按域名判断</td>
+<td><code>sniffing: {enabled: true, destOverride: ["http","tls","quic"]}</code>，让路由能按域名分流</td>
+<td>8</td>
 </tr>
 <tr>
 <td>校验与重启</td>
-<td>先 <code>xray run -test</code>，再 <code>systemctl restart xray</code>，<code>ss -tlnp\| grep 443</code></td>
-</tr>
-<tr>
-<td>放行端口</td>
-<td><code>ufw allow 443/tcp</code> + 云安全组放行，从外网 <code>nc -vz IP 443</code> 验证</td>
+<td>先 <code>xray run -test</code>，再 <code>systemctl restart xray</code>，<code>ss -tlnp | grep 443</code></td>
+<td>12</td>
 </tr>
 <tr>
 <td>生成客户端链接</td>
 <td>手拼 <code>vless://UUID@IP:443?encryption=none&amp;flow=xtls-rprx-vision&amp;security=reality&amp;sni=目标域名&amp;fp=chrome&amp;pbk=公钥&amp;sid=shortId&amp;type=tcp#备注</code></td>
+<td>10</td>
 </tr>
 <tr>
-<td>主动探测模拟</td>
-<td>用浏览器直接访问 <code>https://IP:443</code>，看是否返回伪装目标的证书与页面；再用 <code>xray</code> 自带的 <code>tls ping</code> 或第三方探针确认没有明显特征</td>
-</tr>
-<tr>
-<td>排错</td>
-<td>连不上先看三处：<code>journalctl -u xray</code> 有没有 handshake 报错、服务器时间对不对、客户端 <code>pbk</code> 与 <code>sid</code> 有没有抄错</td>
+<td>主动探测模拟与排错</td>
+<td>浏览器直连 <code>https://IP:443</code> 看是否返回伪装目标的证书与页面；连不上先查三处：<code>journalctl -u xray</code> 的 handshake 报错、服务器时间、客户端 <code>pbk</code> 与 <code>sid</code></td>
+<td>15</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 120 分钟</strong>。伪装目标筛选是最容易被低估的一步：三四个候选里往往只有一个同时满足 TLS 1.3 + h2 + 非 Cloudflare 代理，条件卡得越死，筛掉的比例越高。取舍上——知名大站更稳但更容易被识别；小众站更隐蔽但哪天对方换证书就得跟着改。建议选一个静态资源多、常年不变的域名。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-6-配置-hysteria2-入站udp">阶段 6　配置 Hysteria2 入站（UDP）</h2>
+
+<h2 id="阶段-4-配置-hysteria2-入站udp">阶段 4　配置 Hysteria2 入站（UDP）</h2>
+<blockquote>
+<p><strong>目标</strong>：补一条抗丢包、能吃满带宽的 UDP 线路（3 条线路里的第 2 条，行内俗称「腿」），用在晚高峰与跨境弱网场景，并配上端口跳跃躲开单端口 QoS。</p>
+<p><strong>产出</strong>：QUIC 上的 Hysteria2 服务（自签或 ACME 证书 + salamander 混淆 + 端口跳跃 DNAT）、一条 <code>hysteria2://</code> 链接。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>下二进制、<code>install -m 755</code>、验证能跑</li>
+<li>备证书：自签（客户端开 insecure）或 acme.sh 签真证书（要域名）</li>
+<li>写 <code>config.yaml</code>：listen / tls / auth / bandwidth（按实际带宽 80%）/ masquerade / obfs</li>
+<li>自写 systemd 单元（官方没给通用模板），注意证书读权限</li>
+<li>端口跳跃：nftables 或 iptables 把 20000-30000/UDP DNAT 到 443</li>
+<li>持久化规则（<code>netfilter-persistent</code> 或 <code>nft</code> 规则文件）并验证重启后还在</li>
+<li><code>tc netem</code> 造 30% 丢包压测，确认还能流畅播视频</li>
+<li>出客户端链接（含 obfs 参数与端口段写法）</li>
+<li>排错：UDP 不通的四个常见原因逐条排除</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>下二进制</td>
-<td>从 GitHub release 下 <code>hysteria-linux-amd64</code>，<code>install -m 755</code> 到 <code>/usr/local/bin/hysteria</code>，<code>hysteria version</code> 确认能跑</td>
+<td>GitHub release 下 <code>hysteria-linux-amd64</code>，<code>install -m 755</code> 到 <code>/usr/local/bin/hysteria</code>，<code>hysteria version</code> 确认能跑</td>
+<td>10</td>
 </tr>
 <tr>
 <td>准备证书</td>
-<td>两种方案：<code>openssl req -x509 -nodes -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -keyout key.pem -out cert.pem -subj "/CN=bing.com" -days 3650</code> 自签；或用 acme.sh 申请真证书（要域名）。自签就得在客户端开 <code>insecure</code></td>
+<td><code>openssl req -x509 -nodes -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -keyout key.pem -out cert.pem -subj "/CN=bing.com" -days 3650</code> 自签；或用 acme.sh 申请真证书（要域名）。自签则客户端必须开 <code>insecure</code></td>
+<td>18</td>
 </tr>
 <tr>
 <td>写配置</td>
-<td><code>/etc/hysteria/config.yaml</code>：<code>listen: :443</code>、<code>tls</code> 段填 cert 与 key、<code>auth.type: password</code> 与 <code>auth.password</code>、<code>bandwidth.up</code> / <code>down</code> 按机器实际带宽的 80% 填（填太高会自己把线路打死）、<code>masquerade</code> 填一个正常网站做伪装、<code>obfs.type: salamander</code> 与 <code>obfs.password</code></td>
+<td><code>/etc/hysteria/config.yaml</code>：<code>listen: :443</code>、<code>tls</code> 段填 cert/key、<code>auth.type: password</code> 与 <code>auth.password</code>、<code>bandwidth.up</code>/<code>down</code> 按机器实际带宽 80% 填（填太高会自己把线路打死）、<code>masquerade</code> 填正常网站做伪装、<code>obfs.type: salamander</code> 与 <code>obfs.password</code></td>
+<td>25</td>
 </tr>
 <tr>
 <td>写 systemd 单元</td>
-<td>官方没给通用单元，自己写 <code>/etc/systemd/system/hysteria-server.service</code>：<code>ExecStart=/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml</code>、<code>Restart=on-failure</code>、<code>LimitNOFILE=1048576</code>、<code>User=nobody</code>（配好证书读权限）</td>
-</tr>
-<tr>
-<td>启停</td>
-<td><code>systemctl daemon-reload</code>、<code>enable --now hysteria-server</code>、<code>journalctl -u hysteria-server -n 50</code> 看有没有证书读不到</td>
+<td>自写 <code>/etc/systemd/system/hysteria-server.service</code>：<code>ExecStart=/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml</code>、<code>Restart=on-failure</code>、<code>LimitNOFILE=1048576</code>、<code>User=nobody</code>（先配好证书读权限），<code>daemon-reload</code> 后 <code>enable --now</code></td>
+<td>12</td>
 </tr>
 <tr>
 <td>端口跳跃</td>
-<td>需求是客户端连一个端口段、服务端自动落到 443。服务端写 nftables 或 iptables 规则把 <code>20000-30000</code> 的 UDP 全部 DNAT 到 443，再用 <code>netfilter-persistent</code> 或 <code>nft</code> 规则文件持久化，重启后要还在</td>
+<td>需求是客户端连端口段、服务端落到 443。写 nftables 或 iptables 把 <code>20000-30000</code> 的 UDP 全部 DNAT 到 443</td>
+<td>22</td>
 </tr>
 <tr>
-<td>验证跳跃</td>
-<td><code>ss -ulnp</code> 看 443 在监听、<code>nft list ruleset</code> 看 DNAT 规则在、从客户端连 <code>IP:20001</code> 试能不能通</td>
-</tr>
-<tr>
-<td>放行端口</td>
-<td><code>ufw allow 443/udp</code>、<code>ufw allow 20000:30000/udp</code>，云安全组同样两条</td>
+<td>持久化与验证</td>
+<td>用 <code>netfilter-persistent</code> 或 <code>nft</code> 规则文件持久化，重启后仍在；<code>ss -ulnp</code> 看 443 在听、<code>nft list ruleset</code> 看 DNAT 在、客户端连 <code>IP:20001</code> 试通</td>
+<td>10</td>
 </tr>
 <tr>
 <td>抗丢包测试</td>
-<td>服务端 <code>tc qdisc add dev eth0 root netem loss 30%</code> 模拟 30% 丢包，看还能不能看视频，测完 <code>tc qdisc del dev eth0 root</code> 删掉</td>
+<td>服务端 <code>tc qdisc add dev eth0 root netem loss 30%</code> 模拟 30% 丢包看还能不能看视频，测完 <code>tc qdisc del dev eth0 root</code> 删掉</td>
+<td>8</td>
 </tr>
 <tr>
 <td>生成客户端链接</td>
-<td><code>hysteria2://密码@IP:443/?sni=bing.com&amp;insecure=1&amp;obfs=salamander&amp;obfs-password=xxx#备注</code>，端口跳跃写法是 <code>IP:20000-30000</code></td>
+<td><code>hysteria2://密码@IP:443/?sni=bing.com&amp;insecure=1&amp;obfs=salamander&amp;obfs-password=xxx#备注</code>，端口跳跃写法 <code>IP:20000-30000</code></td>
+<td>5</td>
 </tr>
 <tr>
 <td>排错</td>
-<td>UDP 不通的常见原因：云安全组只放行了 TCP、运营商封 UDP、<code>bandwidth</code> 填太满、自签证书 CN 与 <code>sni</code> 不一致</td>
+<td>UDP 不通的四个常见原因：云安全组只放行 TCP、运营商封 UDP、<code>bandwidth</code> 填太满、自签证书 CN 与 <code>sni</code> 不一致</td>
+<td>10</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 120 分钟</strong>。云安全组最容易漏：<code>ufw</code> 放行了 443/udp，安全组里却只有 443/tcp，表象是「TCP 一切正常，UDP 永远超时」。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-7-配置-tuic-v5-入站sing-box-手工">阶段 7　配置 TUIC v5 入站（sing-box 手工）</h2>
+
+<h2 id="阶段-5-配置-tuic-v5-入站sing-box-手工">阶段 5　配置 TUIC v5 入站（sing-box 手工）</h2>
+<blockquote>
+<p><strong>目标</strong>：第 3 条线路，重点在移动端连接迁移——WiFi 与蜂窝网互切时不断流，这正是 TUIC 相对 Hysteria2 的核心优势。</p>
+<p><strong>产出</strong>：4433/udp 上的 TUIC v5 服务（复用证书、BBR 拥塞控制、关掉 0-RTT）、sing-box systemd 单元、客户端参数模板。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>下 sing-box 二进制并验证版本</li>
+<li>复用 Hysteria2 那套 <code>cert.pem</code> / <code>key.pem</code>，省一次签发</li>
+<li>写 <code>/etc/sing-box/config.json</code>：<code>type: tuic</code>、<code>listen_port: 4433</code>、users、<code>congestion_control: bbr</code>、<strong><code>zero_rtt_handshake: false</code></strong></li>
+<li><code>ss -ulnp</code> 确认 4433 没被占、443 已是 hy2 的</li>
+<li><code>sing-box check</code> + <code>sing-box format -w</code> 统一格式</li>
+<li>套官方单元，启停看日志</li>
+<li><code>ufw allow 4433/udp</code> + 云安全组，<code>nc -vzu</code> 验证</li>
+<li>客户端填参数，WiFi/4G 来回切验证不断线</li>
+<li>按「连上但打不开网页」「握手失败」两类症状排错</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>下二进制</td>
-<td>从 GitHub release 下 <code>sing-box-*-linux-amd64.tar.gz</code>，解出 <code>sing-box</code>，<code>install -m 755</code> 到 <code>/usr/local/bin/</code>，<code>sing-box version</code> 确认</td>
+<td>GitHub release 下 <code>sing-box-*-linux-amd64.tar.gz</code>，解出 <code>sing-box</code>，<code>install -m 755</code> 到 <code>/usr/local/bin/</code>，<code>sing-box version</code> 确认</td>
+<td>8</td>
 </tr>
 <tr>
 <td>复用证书</td>
-<td>TUIC 走 QUIC，必须有 TLS。直接复用 Hysteria2 那套 <code>cert.pem</code> / <code>key.pem</code>，省一次签发</td>
+<td>TUIC 走 QUIC 必须有 TLS，直接复用 Hysteria2 的 <code>cert.pem</code> / <code>key.pem</code></td>
+<td>7</td>
 </tr>
 <tr>
 <td>写配置</td>
-<td><code>/etc/sing-box/config.json</code>：<code>log</code> 段、<code>inbounds</code> 里加 <code>type: tuic</code>、<code>listen: ::</code>、<code>listen_port: 4433</code>、<code>users</code> 填 <code>uuid</code> 与 <code>password</code>、<code>congestion_control: bbr</code>、<strong><code>zero_rtt_handshake: false</code></strong>（官方明确警告开 0-RTT 会被重放攻击 "Attack of the clones"）、<code>tls</code> 段填 <code>enabled: true</code> 与证书路径</td>
+<td><code>/etc/sing-box/config.json</code>：<code>log</code> 段、<code>inbounds</code> 里 <code>type: tuic</code>、<code>listen: ::</code>、<code>listen_port: 4433</code>、<code>users</code> 填 <code>uuid</code> 与 <code>password</code>、<code>congestion_control: bbr</code>、<strong><code>zero_rtt_handshake: false</code></strong>（官方明确警告开 0-RTT 会被重放攻击 "Attack of the clones"）、<code>tls</code> 段 <code>enabled: true</code> 与证书路径</td>
+<td>22</td>
 </tr>
 <tr>
 <td>端口冲突检查</td>
-<td>TUIC 和 Hysteria2 都吃 UDP，<code>ss -ulnp</code> 确认 4433 没被占、443 已经是 hy2 的，两个必须分开</td>
+<td><code>ss -ulnp</code> 确认 4433 空着、443 已经是 hy2 的，两个 UDP 服务必须分开</td>
+<td>8</td>
 </tr>
 <tr>
 <td>语法校验</td>
-<td><code>sing-box check -c /etc/sing-box/config.json</code>，再用 <code>sing-box format -c ... -w</code> 统一格式</td>
+<td><code>sing-box check -c /etc/sing-box/config.json</code>，再 <code>sing-box format -c ... -w</code> 统一格式</td>
+<td>7</td>
 </tr>
 <tr>
 <td>写 systemd 单元</td>
-<td>官方有 <code>sing-box.service</code> 模板，<code>systemctl enable --now sing-box</code>，<code>journalctl -u sing-box -n 50</code> 看有没有 TLS 加载失败</td>
+<td>用官方 <code>sing-box.service</code> 模板，<code>systemctl enable --now sing-box</code>，<code>journalctl -u sing-box -n 50</code> 看 TLS 加载失败</td>
+<td>10</td>
 </tr>
 <tr>
 <td>放行端口</td>
 <td><code>ufw allow 4433/udp</code> + 云安全组，<code>nc -vzu IP 4433</code> 验证</td>
+<td>5</td>
 </tr>
 <tr>
-<td>客户端配置</td>
-<td>sing-box / mihomo / Shadowrocket 都能吃：<code>type: tuic</code>、<code>server_port: 4433</code>、<code>uuid</code>、<code>password</code>、<code>congestion_control: bbr</code>、<code>udp_relay_mode: native</code>、<code>alpn: ["h3"]</code>、自签证书要开 <code>insecure</code> 或 <code>disable_sni</code></td>
-</tr>
-<tr>
-<td>切网测试</td>
-<td>手机在 WiFi 与 4G 之间来回切，看连接是否自动迁移不断线——这是 TUIC 相对 hy2 的核心优势，值得单独验一遍</td>
+<td>客户端与切网测试</td>
+<td>sing-box / mihomo / Shadowrocket 都吃：<code>type: tuic</code>、<code>server_port: 4433</code>、<code>uuid</code>、<code>password</code>、<code>congestion_control: bbr</code>、<code>udp_relay_mode: native</code>、<code>alpn: ["h3"]</code>、自签证书开 <code>insecure</code>；手机在 WiFi 与 4G 之间来回切，看是否自动迁移不断线</td>
+<td>15</td>
 </tr>
 <tr>
 <td>排错</td>
 <td>连上但打不开网页多半是 <code>udp_relay_mode</code> 不对；握手失败看 <code>alpn</code> 与服务端证书是否匹配</td>
+<td>8</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 90 分钟</strong>。3 条线路到齐：443/tcp（REALITY，稳）、443/udp（Hysteria2，快）、4433/udp（TUIC，切网不断）。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-8-部署可视化面板">阶段 8　部署可视化面板</h2>
+
+<h2 id="阶段-6-nginx-反代与可视化面板">阶段 6　Nginx 反代与可视化面板（伪装站点 + 面板纳管）</h2>
+<blockquote>
+<p><strong>目标</strong>：把这台机器做成「一个正常的小网站」，同时把三条入站从「改 JSON 重启」变成「面板里点一下」——443 上除了 REALITY 没有别的指纹可挑，面板自己不暴露任何新端口，只从反代后面进。</p>
+<p><strong>产出</strong>：nginx（HTTP/2 + gzip + 关版本号）与一个与 REALITY <code>dest</code> 同风格的静态伪装站、带 TLS 1.3 的证书与自动续期钩子、面板的反代 location（只监听 <code>127.0.0.1</code>）、带 2FA 与 IP 白名单的面板登录、纳管三条入站的节点列表与在线状态、访问日志脱敏与限流规则。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>装 nginx 做基础调优（连接数、keepalive、gzip、HTTP/2、隐藏版本号）</li>
+<li>建伪装站目录与静态页，风格对齐阶段 3 借用的那个真站</li>
+<li>签证书（acme.sh 或 Caddy 代签），443 上开 TLS 1.3 + HTTP/2，挂上续期后的 reload 钩子</li>
+<li>选面板（3x-ui / X-UI 系）并装成只监听 <code>127.0.0.1</code>，装完本机 <code>curl</code> 确认出登录页</li>
+<li>nginx 加 <code>location /panel/</code>，补 WebSocket 升级头与真实 IP 头，配 <code>allow</code> / <code>deny</code> 白名单</li>
+<li>改后台路径与端口、上强密码 + 2FA，关掉面板自带的「一键签证书」</li>
+<li>面板里把三条入站纳管，逐条核对面板值与实际运行的配置文件一致</li>
+<li>日志脱敏、限流、关目录列表，确认根路径回正常页面而不是默认页</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>安装面板</td>
-<td>安装后台管理可视化面板</td>
+<td>安装与基础调优</td>
+<td><code>apt install nginx</code>；<code>worker_connections</code>、<code>keepalive_timeout</code>、<code>gzip on</code>、<code>server_tokens off</code>、<code>http2 on</code>；删掉 <code>default</code> 站点，避免 <code>/</code> 回 nginx 欢迎页</td>
+<td>10</td>
 </tr>
 <tr>
-<td>面板加固</td>
-<td>改端口、改路径、强密码、2FA、IP 白名单</td>
+<td>伪装站点</td>
+<td><code>/var/www/masq</code> 放静态页（index + 一点静态资源），风格与阶段 3 选的 <code>serverNames</code> 同源；<strong>nginx 只监听 <code>127.0.0.1:8443</code></strong>，把 <code>0.0.0.0:443</code> 留给 REALITY，两个进程抢 443 是最常见的翻车点</td>
+<td>10</td>
 </tr>
 <tr>
-<td>筛选伪装域名</td>
-<td>查找搭建节点需要借用流量特征的选伪装目标</td>
+<td>证书与 HTTP/2</td>
+<td><code>acme.sh --issue -d 域名</code> 或 Caddy 代签；<code>ssl_protocols TLSv1.3 TLSv1.2</code>、<code>ssl_prefer_server_ciphers on</code>、<code>add_header Strict-Transport-Security</code>；续期必须挂 <code>--reloadcmd "systemctl reload nginx"</code>，否则 90 天后证书链自己失效</td>
+<td>10</td>
+</tr>
+<tr>
+<td>面板选型与安装</td>
+<td>推荐 3x-ui 系列（自带 Xray，文档与生态快）或其他 sing-box / Xray 面板，<strong>装完只监听 <code>127.0.0.1</code></strong>；本机 <code>curl 127.0.0.1:端口</code> 确认出登录页，此刻外网应该连不上</td>
+<td>15</td>
+</tr>
+<tr>
+<td>反代与 WebSocket</td>
+<td><code>location /panel/ { proxy_pass http://127.0.0.1:PORT/; }</code>，带 <code>Host</code> / <code>X-Real-IP</code> / <code>X-Forwarded-For</code> / <code>Upgrade</code> / <code>Connection</code> 头，否则实时状态页与 WebSocket 直接断；<code>proxy_read_timeout</code> 调大；顺手把订阅路径 <code>/sub/</code> 一起反代</td>
+<td>15</td>
+</tr>
+<tr>
+<td>面板安全加固</td>
+<td>改后台路径、改端口、强密码、开 2FA、会话超时；<code>allow</code> / <code>deny</code> 白名单（只放自己常在的出口 IP 与内网段）；<strong>关掉面板自带的一键签证书</strong>，它会去抢 nginx 的 80/443</td>
+<td>12</td>
+</tr>
+<tr>
+<td>三入站纳管核对</td>
+<td>把 REALITY / Hysteria2 / TUIC 三条加进面板，逐字段核对面板里的值与 <code>config.json</code>、<code>config.yaml</code>、<code>sing-box.json</code> 一致；面板改完必须重启对应服务，改完再跑一次客户端连通性，确认「面板显示已生效」等于「客户端真连上」</td>
+<td>13</td>
+</tr>
+<tr>
+<td>日志脱敏与限流</td>
+<td><code>access_log</code> 里去掉带 uuid 的查询串、<code>limit_req_zone</code> 给 <code>/panel/</code> 上 5r/s、<code>autoindex off</code>，确认 404 不暴露目录结构</td>
+<td>5</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 90 分钟</strong>。门面和控制台本来就是一件事：nginx 是门面，面板是门后的控制台。三条红线——nginx 只准蹲 <code>127.0.0.1:8443</code>、<code>0.0.0.0:443</code> 永远归 REALITY、面板装完第一件事是关掉它自带的一键签证书。改完面板里的配置必须重启对应进程，<code>ss -tlnp</code> 上 443 只应该有一个主人。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-9-客户端部署">阶段 9　客户端部署</h2>
+
+<h2 id="阶段-7-分流规则与路由体系">阶段 7　分流规则与路由体系</h2>
+<blockquote>
+<p><strong>目标</strong>：把「3 条线路」变成「一套策略」——国内直连不绕路、国外走代理、AI 与流媒体固定走某条线路，并且规则可增量更新而不炸配置。</p>
+<p><strong>产出</strong>：服务端 <code>routing</code> 规则段 + DNS 分流策略 + 客户端同构规则、一份「什么流量走哪条线路」的对照表。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>定规则源：<code>geosite</code>/<code>geoip</code> 够用就用，特殊需求再自建清单</li>
+<li>设计 routing：按域名、IP、端口、进程四类条件落规则，顺序从具体到宽泛</li>
+<li>DNS 分流：国内域名走国内 DNS、国外走加密 DNS，防污染并控制解析延迟</li>
+<li>规则体积治理：拆成多个 <code>rule_set</code> 文件，支持单独热更新</li>
+<li>逐条验证：国内站直连、国外站代理、AI 服务走指定线路、局域网不走代理</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>规则源选定</td>
+<td>优先用 <code>geosite:cn</code> / <code>geoip:cn</code> 打底；再加自建清单补漏（公司内网、常见被墙域名、流媒体分区）</td>
+<td>15</td>
+</tr>
+<tr>
+<td>routing 设计</td>
+<td><code>rules</code> 按「具体 → 宽泛」排：私有网段直连 → 特定域名走指定 outbound → <code>geosite:cn</code> 直连 → 其余走代理；每条规则带 <code>outboundTag</code>，避免默认落到第一条</td>
+<td>25</td>
+</tr>
+<tr>
+<td>DNS 分流</td>
+<td>服务端 <code>dns.servers</code> 按域名分派（国内域名用 <code>223.5.5.5</code>、其余用 <code>https://1.1.1.1/dns-query</code>），<code>hosts</code> 兜底关键域名；注意 <code>queryStrategy</code> 与 IPv6 的关系</td>
+<td>20</td>
+</tr>
+<tr>
+<td>规则热更新与体积</td>
+<td>把大清单拆成独立 <code>rule_set</code> 文件，配定时 <code>curl</code> 更新脚本；单文件过大启动会慢，注意 <code>geoip.dat</code> 的加载时机</td>
+<td>10</td>
+</tr>
+<tr>
+<td>分流验证</td>
+<td>国内站看是否直连（<code>curl -v</code> 看出站）、国外站看是否代理、AI 服务确认走指定线路、局域网地址确认没被代理</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>本阶段小计 90 分钟</strong>。规则顺序错一位，整段策略就废：<code>geosite:cn</code> 的直连规则一旦排在代理规则前面，所有国内流量都会走代理。</p>
+</blockquote>
+<hr />
+
+<h2 id="阶段-8-多用户与订阅分发">阶段 8　多用户与订阅分发</h2>
+<blockquote>
+<p><strong>目标</strong>：从「单人自用」升级成「可交付给别人用」——每个使用者独立凭证、独立配额、一条订阅链接搞定三协议，随时可吊销。</p>
+<p><strong>产出</strong>：用户清单（UUID / 密码 / 配额 / 到期）、三协议合并的订阅链接与二维码、流量统计与到期策略、增删改吊销的操作流程。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>定用户模型：一条用户对应一组凭证（REALITY UUID + hy2 密码 + TUIC uuid/password），互不复用</li>
+<li>三协议同时下发：一个订阅里给 3 条线路，客户端自动选优</li>
+<li>生成订阅链接与二维码，注意订阅地址本身要能公网访问且不被猜</li>
+<li>配额与到期：按流量或按时间限制，超限自动停用而不是删号</li>
+<li>演练增删改：加一个新用户全流程走一遍，删一个看服务是否立即拒绝</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+<th>分钟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户模型</td>
+<td>一人一组独立凭证：REALITY 一个 UUID、Hysteria2 一个密码、TUIC 一组 uuid+password；<strong>不要多协议共用一个 UUID</strong>，否则单协议吊销会牵连其他</td>
+<td>15</td>
+</tr>
+<tr>
+<td>三协议同时下发</td>
+<td>一个订阅地址返回三条节点：<code>vless://</code>、<code>hysteria2://</code>、<code>tuic://</code>，客户端按延迟或手动排序</td>
+<td>20</td>
+</tr>
+<tr>
+<td>订阅链接与二维码</td>
+<td>订阅地址走面板或自建静态服务，路径加随机串；生成二维码方便手机扫；确认订阅内容不会被搜索引擎/目录扫描收录</td>
+<td>20</td>
+</tr>
+<tr>
+<td>流量统计与到期策略</td>
+<td>按用户统计流量（面板自带或 <code>xray</code> stats API），配额到 90% 提醒、到 100% 停用；到期时间提前三天提醒</td>
+<td>20</td>
+</tr>
+<tr>
+<td>增删改与吊销演练</td>
+<td>加一个新用户 → 客户端导入 → 能连；删掉该用户 → 服务重启 → 同链接必须连不上；改密码验证旧密码立即失效</td>
+<td>15</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>本阶段小计 90 分钟</strong>。订阅地址本身就是凭证：谁能访问谁就能拿到全部节点，别放进任何公开仓库或聊天记录。</p>
+</blockquote>
+<hr />
+
+<h2 id="阶段-9-监控告警与自动备份">阶段 9　监控告警与自动备份</h2>
+<blockquote>
+<p><strong>目标</strong>：节点挂了、流量超了、磁盘满了，能在用户报障之前知道；配置和证书能在误操作之后 5 分钟内恢复。</p>
+<p><strong>产出</strong>：服务状态与流量采集、一条可用的告警通道（Telegram Bot 或邮件 webhook）、每天自动备份配置与证书的脚本 + 恢复步骤。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>采集：服务是否 active、端口是否在听、当日流量、连接数、磁盘水位</li>
+<li>告警：写最小脚本 + cron，异常时推到 Telegram Bot 或邮件</li>
+<li>备份：配置、证书、面板数据打包，本地留 7 天 + 异地一份</li>
+<li>日志与磁盘治理：轮转、压缩、清理阈值</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+<th>分钟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>指标采集</td>
+<td><code>systemctl is-active</code> 三服务 + <code>ss</code> 端口检查 + <code>vnstat</code> 日流量 + <code>df -h</code> 水位，写成一个 <code>health.sh</code>，输出带时间戳的一行摘要</td>
+<td>20</td>
+</tr>
+<tr>
+<td>告警通道</td>
+<td>Telegram Bot <code>sendMessage</code> 或邮件 webhook；只在状态变化时推（避免刷屏），cron 每 5 分钟跑一次 <code>health.sh</code></td>
+<td>15</td>
+</tr>
+<tr>
+<td>配置与证书备份</td>
+<td><code>tar</code> 打包 <code>/usr/local/etc/xray</code>、<code>/etc/hysteria</code>、<code>/etc/sing-box</code>、面板数据目录；本地 <code>/root/backup</code> 留 7 天滚动，异地走对象存储或另一台机器</td>
+<td>15</td>
+</tr>
+<tr>
+<td>日志与磁盘治理</td>
+<td>写 <code>/etc/logrotate.d/</code> 规则（按天、保留 7 份、压缩），<code>journalctl --vacuum-size</code>，磁盘到 80% 也进告警</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>本阶段小计 60 分钟</strong>。小硬盘机型最容易被日志与 <code>geoip.dat</code> 更新撑爆，先把水位告警接上再谈备份。</p>
+</blockquote>
+<hr />
+
+<h2 id="阶段-10-客户端部署">阶段 10　客户端部署</h2>
+<blockquote>
+<p><strong>目标</strong>：四端都能一条订阅导入、自动选路、开机即用，且分流规则与服务端保持同构。</p>
+<p><strong>产出</strong>：Windows / macOS / Android / iOS 各一套可用配置、统一的分流规则、一份「换设备怎么恢复」的三行说明。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>Windows：v2rayN 或 Clash Verge Rev，导入订阅、开 TUN、设自启</li>
+<li>macOS：处理 Gatekeeper 首次放行与系统扩展</li>
+<li>Android：NekoBox / Hiddify，开 VPN 模式、加省电白名单</li>
+<li>iOS：Shadowrocket（非国区 ID），注意 TUIC 版本要求</li>
+<li>分流规则统一：国内直连、国外代理、AI 固定线路，四端一致</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>工作项</th>
+<th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Windows</td>
-<td>v2rayN 或 Clash Verge Rev，导入三条链接、开 TUN 模式、设开机自启、确认系统代理与 TUN 不冲突</td>
+<td>v2rayN 或 Clash Verge Rev，导入订阅、开 TUN 模式、设开机自启，确认系统代理与 TUN 不冲突</td>
+<td>8</td>
 </tr>
 <tr>
 <td>macOS</td>
-<td>处理 Gatekeeper 首次放行、开 TUN、四协议逐个验证，注意 Clash 系要装系统扩展</td>
+<td>处理 Gatekeeper 首次放行、开 TUN、三协议逐个验证，Clash 系要装系统扩展</td>
+<td>6</td>
 </tr>
 <tr>
 <td>Android</td>
-<td>NekoBox 或 Hiddify，导入链接、开 VPN 模式、省电白名单要加进去否则后台被杀</td>
+<td>NekoBox 或 Hiddify，导入订阅、开 VPN 模式、把 App 加进省电白名单否则后台被杀</td>
+<td>6</td>
 </tr>
 <tr>
 <td>iOS</td>
 <td>Shadowrocket（需非国区 Apple ID），配规则与全局两种模式，注意 TUIC 需要较新版本</td>
+<td>6</td>
 </tr>
 <tr>
-<td>分流规则</td>
-<td>定一套规则：国内直连、国外走代理、AI 服务固定走某一条线路，客户端和服务端各配一份并保持一致</td>
+<td>分流规则下发</td>
+<td>定一套规则：国内直连、国外走代理、AI 服务固定走某条线路；客户端与服务端各配一份并保持一致</td>
+<td>4</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 30 分钟</strong>。四端不必全做：先做自己常用的两端，剩下两端等阶段 11 验收时补一次即可。</p>
+</blockquote>
 <hr />
-<h2 id="阶段-10-测试与验收">阶段 10　测试与验收</h2>
+
+<h2 id="阶段-11-测试验收与交付">阶段 11　测试验收与交付</h2>
+<blockquote>
+<p><strong>目标</strong>：把机器从头到尾真跑一遍——服务在跑、端口通、出口 IP 变了、速度不掉、重启能自己回来，然后把密码、后台、面板入口交到用的人手上。</p>
+<p><strong>产出</strong>：一份打勾的验收单、3 条线路的横评记录（哪条最快、哪条晚高峰最稳），以及一份交付说明（root 密码或密钥、SSH 端口、面板地址与账号、订阅链接）。</p>
+</blockquote>
+<p><strong>流程</strong>：</p>
+<ol>
+<li>服务与端口：三个服务都 active，443/tcp、443/udp、4433/udp 都在听</li>
+<li>出口 IP 与分流：连上后出口变成 VPS 的 IP，国内直连、国外代理、AI 走指定线路</li>
+<li>速度：与裸连对比测一次，晚高峰再补一次</li>
+<li>3 条线路横评：REALITY / Hysteria2 / TUIC 各跑一轮</li>
+<li>重启自启：<code>reboot</code> 之后服务自己回来，客户端不改配置照样能连</li>
+<li>交付：机器密码与 SSH 端口、机器的管理后台、可视化管理面板的入口与账号，一次性交给使用的人</li>
+</ol>
 <table>
 <thead>
 <tr>
 <th>工作项</th>
 <th>做什么</th>
+<th>分钟</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>服务状态</td>
-<td><code>systemctl status xray hysteria-server sing-box --no-pager</code> 三个都 active</td>
+<td>服务与端口</td>
+<td><code>systemctl status xray hysteria-server sing-box --no-pager</code> 三个都 active；<code>ss -tlnp</code> 看 443/tcp、<code>ss -ulnp</code> 看 443/udp 与 4433/udp</td>
+<td>5</td>
 </tr>
 <tr>
-<td>端口监听</td>
-<td><code>ss -tlnp</code> 看 443/tcp、<code>ss -ulnp</code> 看 443/udp 与 4433/udp，三条都在</td>
-</tr>
-<tr>
-<td>出口 IP</td>
-<td>客户端连上后访问 <code>https://ip.sb</code>，确认变成 VPS 的 IP（唯一不能省的一步）</td>
-</tr>
-<tr>
-<td>分流正确</td>
-<td>访问国内站看是否直连、访问国外站看是否走代理，两条都验</td>
+<td>出口 IP 与分流</td>
+<td>客户端连上后访问 <code>https://ip.sb</code> 确认变成 VPS 的 IP（不能省的一步）；国内站直连、国外站代理、AI 服务走指定线路</td>
+<td>5</td>
 </tr>
 <tr>
 <td>速度</td>
-<td><code>fast.com</code> 与 <code>speedtest</code> 各测一次，记录与裸连的差距</td>
+<td><code>fast.com</code> 与 <code>speedtest</code> 各测一次，记录与裸连的差距；至少测一个晚高峰时段</td>
+<td>5</td>
 </tr>
 <tr>
-<td>三条腿对比</td>
-<td>REALITY、Hysteria2、TUIC 各测一轮，记下哪条最快、哪条在晚高峰最稳</td>
+<td>3 条线路横评</td>
+<td>REALITY、Hysteria2、TUIC 各测一轮，记下哪条最快、哪条晚高峰最稳、哪条在弱网最抗</td>
+<td>5</td>
 </tr>
 <tr>
-<td>切网与重启</td>
-<td>手机 WiFi 与 4G 互切；服务器 <code>reboot</code> 后确认三个服务都自启、客户端不用改配置就能连</td>
+<td>重启自启</td>
+<td>手机 WiFi 与 4G 互切；服务器 <code>reboot</code> 后确认三个服务都自启、客户端不改配置就能连</td>
+<td>5</td>
 </tr>
 <tr>
 <td>交付</td>
-<td>把配置、客户端链接、运维命令整理成一份文档，交接给别人也能维护</td>
+<td>写一份交付说明：root 密码或 SSH 密钥与 SSH 端口、<strong>机器的管理后台</strong>（商家控制台，能重启、重装、打快照）、<strong>可视化管理面板</strong>（<code>https://域名/panel/</code> 的账号与 2FA，能看三个节点、改配置）、订阅链接、三份文档位置。交付前用手机流量登一次面板，确认不是只在本机能用</td>
+<td>5</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>本阶段小计 30 分钟</strong>。<code>reboot</code> 这一项一定要做：手工 <code>systemctl start</code> 起来的服务，重启机器后不会自己回来。交付不是甩个 IP 就完事——机器密码、管理后台、可视化面板三样都得能让人自己登进去，看见三个节点在跑。</p>
+</blockquote>
 <hr />
+
   </div>
 </main>
 
